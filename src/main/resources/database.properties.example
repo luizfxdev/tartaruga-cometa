@@ -1,0 +1,22 @@
+# ================================================
+# Configuração do Banco de Dados - PostgreSQL
+# Copie este arquivo para database.properties
+# e preencha com suas credenciais reais
+# ================================================
+
+# URL de conexão do PostgreSQL
+db.url=jdbc:postgresql://localhost:5432/tartaruga_cometa
+
+# Usuário do banco de dados
+db.username=seu_usuario_aqui
+
+# Senha do banco de dados
+db.password=sua_senha_aqui
+
+# Driver JDBC
+db.driver=org.postgresql.Driver
+
+# Configurações do Pool de Conexões
+db.pool.minSize=5
+db.pool.maxSize=20
+db.pool.timeout=30000

@@ -1,0 +1,158 @@
+# ===================================
+# Projeto: Tartaruga Cometa
+# Java Web Application (Gradle + Tomcat)
+# ===================================
+
+# ============ GRADLE ============
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+gradle-app.setting
+.gradletasknamecache
+
+# ============ JAVA ============
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+replay_pid*
+
+# ============ IDE ============
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+.idea_modules/
+
+# Eclipse
+.classpath
+.project
+.settings/
+.metadata/
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.loadpath
+.recommenders
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# VS Code
+.vscode/
+*.code-workspace
+.history/
+
+# ============ TOMCAT ============
+# Diretórios de deploy do Tomcat
+/tomcat/
+/tomcat.*/
+RUNNING_PID
+*.log
+
+# ============ LOGS ============
+logs/
+*.log
+log/
+*.log.*
+/logs/
+
+# ============ DATABASE ============
+# Arquivos de configuração com senhas (manter template)
+database.properties
+!database.properties.example
+*.db
+*.sqlite
+
+# Backups de banco
+*.sql.backup
+*.dump
+backup/
+
+# ============ OS ============
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ============ ARQUIVOS TEMPORÁRIOS ============
+*.tmp
+*.temp
+temp/
+tmp/
+
+# ============ DEPENDÊNCIAS ============
+/node_modules/
+/lib/
+
+# ============ COMPILAÇÃO ============
+target/
+classes/
+out/
+
+# ============ TESTES ============
+test-output/
+*.test
+coverage/
+
+# ============ DOCUMENTAÇÃO ============
+# Manter docs/ mas ignorar arquivos gerados
+docs/generated/
+*.pdf.backup
+
+# ============ SEGURANÇA ============
+# Nunca commitar dados sensíveis
+*.key
+*.pem
+*.p12
+*.jks
+secrets/
+credentials/
+.env
+.env.local
+.env.*.local
+
+# ============ UPLOADS ============
+# Diretório de uploads de usuários
+uploads/
+files/
+attachments/
+
+# ============ BUILD ESPECÍFICO ============
+# Artefatos específicos do projeto
+*.war.original
+dependency-reduced-pom.xml
