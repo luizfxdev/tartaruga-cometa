@@ -1,0 +1,45 @@
+plugins {
+    id 'java'
+    id 'war'
+}
+
+group = 'com.tartarugacometasystem'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Servlet API (fornecido pelo Tomcat em runtime)
+    compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
+    compileOnly 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.3'
+    compileOnly 'javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1'
+
+    // PostgreSQL Driver
+    implementation 'org.postgresql:postgresql:42.5.1'
+
+    // Logging
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+    implementation 'org.slf4j:slf4j-simple:1.7.36'
+
+    // Testing
+    testImplementation 'junit:junit:4.13.2'
+}
+
+war {
+    archiveFileName = 'tartaruga-cometa.war'
+    duplicatesStrategy = 'exclude'
+}
+
+tasks.named('war') {
+    from('src/main/resources') {
+        into 'WEB-INF/classes'
+        duplicatesStrategy = 'exclude'
+    }
+}
