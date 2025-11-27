@@ -366,11 +366,12 @@ Este projeto está sob a licença MIT.
 
 
 <div align="center">
-🐢 Tartaruga Cometa
+🐢 Tartaruga Cometa - 
 Sistema de Gerenciamento de Entregas
-Desenvolvido com ☕ Java • 🗄️ PostgreSQL • 🚀 Tomcat
+
 </div>
 <div align="center">
 
 ⬆ Voltar ao topo
 </div>
+
