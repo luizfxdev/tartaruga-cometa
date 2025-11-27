@@ -330,9 +330,8 @@ O arquivo WAR está disponível em:
 ## 📚 Documentação Adicional
 
 - [API Endpoints](api-endpoints.md) - Documentação completa de endpoints
-- [Database Schema](database-schema.md) - Detalhes do banco de dados
 - [Requirements](requirements.md) - Requisitos funcionais e não-funcionais
-- [Use Cases](use-cases.md) - Casos de uso da aplicação
+
 
 ## 👨‍💻 Autor
 
@@ -353,4 +352,5 @@ Este projeto está sob a licença MIT.
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [Jakarta EE Documentation](https://jakarta.ee/specifications/)
 - [Apache Tomcat Documentation](https://tomcat.apache.org/tomcat-10.0-doc/)
+
 
