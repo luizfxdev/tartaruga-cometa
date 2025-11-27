@@ -6,11 +6,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+<<<<<<< HEAD
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+=======
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+>>>>>>> 5969be611d1e7ac7d5a3125a0b921338a13b354d
 
 import com.tartarugacometasystem.model.Client;
 import com.tartarugacometasystem.model.PersonType;
