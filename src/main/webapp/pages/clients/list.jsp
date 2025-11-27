@@ -1,13 +1,26 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@ page import="java.util.List" %>
-<%@ page import="com.tartarugacometasystem.model.Client" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <t:header title="Clientes">
     <div class="page-header">
         <h2>Clientes</h2>
-        <a href="${pageContext.request.contextPath}/clients/new" class="btn btn-success">+ Novo Cliente</a>
+        <a href="${pageContext.request.contextPath}/clients/new" class="btn btn-primary">+ Novo Cliente</a>
     </div>
+
+    <c:if test="${not empty sessionScope.success}">
+        <div class="alert alert-success">
+            ${sessionScope.success}
+        </div>
+        <c:remove var="success" scope="session"/>
+    </c:if>
+
+    <c:if test="${not empty sessionScope.error}">
+        <div class="alert alert-danger">
+            ${sessionScope.error}
+        </div>
+        <c:remove var="error" scope="session"/>
+    </c:if>
 
     <div class="search-box">
         <form method="GET" action="${pageContext.request.contextPath}/clients/search">
@@ -16,55 +29,49 @@
         </form>
     </div>
 
-    <%
-        List<Client> clients = (List<Client>) request.getAttribute("clients");
-        if (clients != null && !clients.isEmpty()) {
-    %>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nome</th>
-                    <th>Tipo</th>
-                    <th>Documento</th>
-                    <th>Email</th>
-                    <th>Telefone</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <%
-                    for (Client client : clients) {
-                %>
-                    <tr>
-                        <td><%= client.getId() %></td>
-                        <td><%= client.getName() %></td>
-                        <td><%= client.getPersonType().getLabel() %></td>
-                        <td><%= client.getDocument() %></td>
-                        <td><%= client.getEmail() != null ? client.getEmail() : "-" %></td>
-                        <td><%= client.getPhone() != null ? client.getPhone() : "-" %></td>
-                        <td>
-                            <a href="${pageContext.request.contextPath}/clients/view/<%= client.getId() %>" class="btn btn-sm btn-info">Ver</a>
-                            <a href="${pageContext.request.contextPath}/clients/edit/<%= client.getId() %>" class="btn btn-sm btn-warning">Editar</a>
-                            <form method="POST" action="${pageContext.request.contextPath}/clients/delete/<%= client.getId() %>" style="display:inline;">
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza?')">Deletar</button>
-                            </form>
-                        </td>
-                    </tr>
-                <%
-                    }
-                %>
-            </tbody>
-        </table>
-    <%
-        } else {
-    %>
-        <div class="alert alert-info">
-            Nenhum cliente encontrado. <a href="${pageContext.request.contextPath}/clients/new">Criar novo cliente</a>
-        </div>
-    <%
-        }
-    %>
+    <c:choose>
+        <c:when test="${not empty clients}">
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Documento</th>
+                            <th>Email</th>
+                            <th>Telefone</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:forEach var="client" items="${clients}">
+                            <tr>
+                                <td>${client.id}</td>
+                                <td>${client.name}</td>
+                                <td>${client.document}</td>
+                                <td>${client.email}</td>
+                                <td>${client.phone}</td>
+                                <td>
+                                    <div class="actions">
+                                        <a href="${pageContext.request.contextPath}/clients/view/${client.id}" class="btn btn-info btn-sm">Ver</a>
+                                        <a href="${pageContext.request.contextPath}/clients/edit/${client.id}" class="btn btn-warning btn-sm">Editar</a>
+                                        <form method="POST" action="${pageContext.request.contextPath}/clients/delete/${client.id}" style="display:inline;">
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza?')">Deletar</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+        </c:when>
+        <c:otherwise>
+            <div class="alert alert-info">
+                Nenhum cliente encontrado.
+            </div>
+        </c:otherwise>
+    </c:choose>
 </t:header>
 
 <t:footer />

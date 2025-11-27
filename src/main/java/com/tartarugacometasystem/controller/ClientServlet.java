@@ -29,6 +29,7 @@ public class ClientServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
+
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
                 listClients(request, response);
@@ -53,6 +54,7 @@ public class ClientServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
+
         try {
             if (pathInfo.equals("/save")) {
                 saveClient(request, response);
@@ -71,13 +73,13 @@ public class ClientServlet extends HttpServlet {
             throws SQLException, ServletException, IOException {
         List<Client> clients = clientService.getAllClients();
         request.setAttribute("clients", clients);
-        request.getRequestDispatcher("/pages/clients/list.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/clients/list.jsp").forward(request, response);
     }
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setAttribute("personTypes", PersonType.values());
-        request.getRequestDispatcher("/pages/clients/new.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/clients/new.jsp").forward(request, response);
     }
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response, String pathInfo)
@@ -85,9 +87,10 @@ public class ClientServlet extends HttpServlet {
         Integer id = extractId(pathInfo);
         Optional<Client> clientOptional = clientService.getClientById(id);
         Client client = clientOptional.orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado"));
+
         request.setAttribute("client", client);
         request.setAttribute("personTypes", PersonType.values());
-        request.getRequestDispatcher("/pages/clients/new.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/clients/new.jsp").forward(request, response);
     }
 
     private void viewClient(HttpServletRequest request, HttpServletResponse response, String pathInfo)
@@ -95,8 +98,9 @@ public class ClientServlet extends HttpServlet {
         Integer id = extractId(pathInfo);
         Optional<Client> clientOptional = clientService.getClientById(id);
         Client client = clientOptional.orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado"));
+
         request.setAttribute("client", client);
-        request.getRequestDispatcher("/pages/clients/view.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/clients/view.jsp").forward(request, response);
     }
 
     private void searchClients(HttpServletRequest request, HttpServletResponse response)
@@ -106,10 +110,11 @@ public class ClientServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/clients/");
             return;
         }
+
         List<Client> clients = clientService.searchClientsByName(searchTerm);
         request.setAttribute("clients", clients);
         request.setAttribute("searchTerm", searchTerm);
-        request.getRequestDispatcher("/pages/clients/list.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/clients/list.jsp").forward(request, response);
     }
 
     private void saveClient(HttpServletRequest request, HttpServletResponse response)
@@ -122,7 +127,9 @@ public class ClientServlet extends HttpServlet {
             params.put("name", request.getParameter("name"));
             params.put("email", request.getParameter("email"));
             params.put("phone", request.getParameter("phone"));
+
             Client client = Mapper.mapToClient(params);
+
             if (client.getId() != null && client.getId() > 0) {
                 clientService.updateClient(client);
                 request.getSession().setAttribute("success", "Cliente atualizado com sucesso");
@@ -130,6 +137,7 @@ public class ClientServlet extends HttpServlet {
                 clientService.createClient(client);
                 request.getSession().setAttribute("success", "Cliente criado com sucesso");
             }
+
             response.sendRedirect(request.getContextPath() + "/clients/");
         } catch (IllegalArgumentException e) {
             request.getSession().setAttribute("error", e.getMessage());

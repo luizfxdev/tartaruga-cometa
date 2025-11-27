@@ -1,94 +1,89 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@ page import="java.util.List" %>
-<%@ page import="com.tartarugacometasystem.model.Address" %>
-<%@ page import="com.tartarugacometasystem.model.Client" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <t:header title="Endereços">
-    <%
-        Client client = (Client) request.getAttribute("client");
-        List<Address> addresses = (List<Address>) request.getAttribute("addresses");
-    %>
-
     <div class="page-header">
-        <h2>
-            Endereços
-            <% if (client != null) { %>
-                de <%= client.getName() %>
-            <% } %>
-        </h2>
-        <% if (client != null) { %>
-            <a href="${pageContext.request.contextPath}/addresses/new?clientId=<%= client.getId() %>" class="btn btn-success">+ Novo Endereço</a>
-        <% } %>
+        <h2>Endereços</h2>
+        <a href="${pageContext.request.contextPath}/addresses/new" class="btn btn-primary">+ Novo Endereço</a>
     </div>
 
-    <%
-        if (addresses != null && !addresses.isEmpty()) {
-    %>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Tipo</th>
-                    <th>Logradouro</th>
-                    <th>Número</th>
-                    <th>Bairro</th>
-                    <th>Cidade</th>
-                    <th>Estado</th>
-                    <th>CEP</th>
-                    <th>Principal</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <%
-                    for (Address address : addresses) {
-                %>
-                    <tr>
-                        <td><%= address.getId() %></td>
-                        <td><%= address.getAddressType().getLabel() %></td>
-                        <td><%= address.getStreet() %></td>
-                        <td><%= address.getNumber() %></td>
-                        <td><%= address.getNeighborhood() %></td>
-                        <td><%= address.getCity() %></td>
-                        <td><%= address.getState() %></td>
-                        <td><%= address.getZipCode() %></td>
-                        <td>
-                            <% if (address.getIsPrincipal()) { %>
-                                <span class="badge badge-success">Sim</span>
-                            <% } else { %>
-                                <span class="badge badge-secondary">Não</span>
-                            <% } %>
-                        </td>
-                        <td>
-                            <a href="${pageContext.request.contextPath}/addresses/edit/<%= address.getId() %>" class="btn btn-sm btn-warning">Editar</a>
-                            <% if (!address.getIsPrincipal()) { %>
-                                <form method="POST" action="${pageContext.request.contextPath}/addresses/set-principal/<%= address.getId() %>" style="display:inline;">
-                                    <button type="submit" class="btn btn-sm btn-info">Principal</button>
-                                </form>
-                            <% } %>
-                            <form method="POST" action="${pageContext.request.contextPath}/addresses/delete/<%= address.getId() %>" style="display:inline;">
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza?')">Deletar</button>
-                            </form>
-                        </td>
-                    </tr>
-                <%
-                    }
-                %>
-            </tbody>
-        </table>
-    <%
-        } else {
-    %>
-        <div class="alert alert-info">
-            Nenhum endereço encontrado.
-            <% if (client != null) { %>
-                <a href="${pageContext.request.contextPath}/addresses/new?clientId=<%= client.getId() %>">Criar novo endereço</a>
-            <% } %>
+    <c:if test="${not empty sessionScope.success}">
+        <div class="alert alert-success">
+            ${sessionScope.success}
         </div>
-    <%
-        }
-    %>
+        <c:remove var="success" scope="session"/>
+    </c:if>
+
+    <c:if test="${not empty sessionScope.error}">
+        <div class="alert alert-danger">
+            ${sessionScope.error}
+        </div>
+        <c:remove var="error" scope="session"/>
+    </c:if>
+
+    <c:choose>
+        <c:when test="${not empty addresses}">
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tipo</th>
+                            <th>Logradouro</th>
+                            <th>Número</th>
+                            <th>Bairro</th>
+                            <th>Cidade</th>
+                            <th>Estado</th>
+                            <th>CEP</th>
+                            <th>Principal</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:forEach var="address" items="${addresses}">
+                            <tr>
+                                <td>${address.id}</td>
+                                <td>${address.addressType.label}</td>
+                                <td>${address.street}</td>
+                                <td>${address.number}</td>
+                                <td>${address.neighborhood}</td>
+                                <td>${address.city}</td>
+                                <td>${address.state}</td>
+                                <td>${address.zipCode}</td>
+                                <td>
+                                    <c:if test="${address.isPrincipal}">
+                                        <span class="badge badge-success">Sim</span>
+                                    </c:if>
+                                    <c:if test="${not address.isPrincipal}">
+                                        <span class="badge badge-secondary">Não</span>
+                                    </c:if>
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <a href="${pageContext.request.contextPath}/addresses/edit/${address.id}" class="btn btn-warning btn-sm">Editar</a>
+                                        <c:if test="${not address.isPrincipal}">
+                                            <form method="POST" action="${pageContext.request.contextPath}/addresses/set-principal/${address.id}" style="display:inline;">
+                                                <button type="submit" class="btn btn-info btn-sm">Principal</button>
+                                            </form>
+                                        </c:if>
+                                        <form method="POST" action="${pageContext.request.contextPath}/addresses/delete/${address.id}" style="display:inline;">
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza?')">Deletar</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+        </c:when>
+        <c:otherwise>
+            <div class="alert alert-info">
+                Nenhum endereço encontrado. <a href="${pageContext.request.contextPath}/addresses/new">Criar novo endereço</a>
+            </div>
+        </c:otherwise>
+    </c:choose>
 </t:header>
 
 <t:footer />

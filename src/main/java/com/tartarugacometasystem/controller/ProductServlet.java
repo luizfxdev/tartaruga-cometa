@@ -28,6 +28,7 @@ public class ProductServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
+
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
                 listProducts(request, response);
@@ -52,6 +53,7 @@ public class ProductServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
+
         try {
             if (pathInfo.equals("/save")) {
                 saveProduct(request, response);
@@ -70,12 +72,12 @@ public class ProductServlet extends HttpServlet {
             throws SQLException, ServletException, IOException {
         List<Product> products = productService.getAllProducts();
         request.setAttribute("products", products);
-        request.getRequestDispatcher("/pages/products/list.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/products/list.jsp").forward(request, response);
     }
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("/pages/products/new.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/products/new.jsp").forward(request, response);
     }
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response, String pathInfo)
@@ -83,8 +85,9 @@ public class ProductServlet extends HttpServlet {
         Integer id = extractId(pathInfo);
         Optional<Product> productOptional = productService.getProductById(id);
         Product product = productOptional.orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
+
         request.setAttribute("product", product);
-        request.getRequestDispatcher("/pages/products/new.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/products/new.jsp").forward(request, response);
     }
 
     private void viewProduct(HttpServletRequest request, HttpServletResponse response, String pathInfo)
@@ -92,8 +95,9 @@ public class ProductServlet extends HttpServlet {
         Integer id = extractId(pathInfo);
         Optional<Product> productOptional = productService.getProductById(id);
         Product product = productOptional.orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
+
         request.setAttribute("product", product);
-        request.getRequestDispatcher("/pages/products/view.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/products/view.jsp").forward(request, response);
     }
 
     private void searchProducts(HttpServletRequest request, HttpServletResponse response)
@@ -103,10 +107,11 @@ public class ProductServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/products/");
             return;
         }
+
         List<Product> products = productService.searchProductsByName(searchTerm);
         request.setAttribute("products", products);
         request.setAttribute("searchTerm", searchTerm);
-        request.getRequestDispatcher("/pages/products/list.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/products/list.jsp").forward(request, response);
     }
 
     private void saveProduct(HttpServletRequest request, HttpServletResponse response)
@@ -121,7 +126,9 @@ public class ProductServlet extends HttpServlet {
             params.put("declaredValue", request.getParameter("declaredValue"));
             params.put("category", request.getParameter("category"));
             params.put("active", request.getParameter("active"));
+
             Product product = Mapper.mapToProduct(params);
+
             if (product.getId() != null && product.getId() > 0) {
                 productService.updateProduct(product);
                 request.getSession().setAttribute("success", "Produto atualizado com sucesso");
@@ -129,6 +136,7 @@ public class ProductServlet extends HttpServlet {
                 productService.createProduct(product);
                 request.getSession().setAttribute("success", "Produto criado com sucesso");
             }
+
             response.sendRedirect(request.getContextPath() + "/products/");
         } catch (IllegalArgumentException e) {
             request.getSession().setAttribute("error", e.getMessage());

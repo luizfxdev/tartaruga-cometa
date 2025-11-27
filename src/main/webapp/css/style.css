@@ -27,7 +27,6 @@ body {
 /* ========================================
    CONTAINER E LAYOUT GERAL
    ======================================== */
-
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -37,7 +36,6 @@ body {
 /* ========================================
    NAVBAR
    ======================================== */
-
 .navbar {
     background: linear-gradient(135deg, #56b896 0%, #7ec8a3 100%);
     color: white;
@@ -58,6 +56,23 @@ body {
     font-size: 1.8rem;
     font-weight: 700;
     letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logo-turtle {
+    font-size: 2rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 .navbar-brand a {
@@ -93,7 +108,6 @@ body {
 /* ========================================
    ALERTAS
    ======================================== */
-
 .alert {
     padding: 1rem 1.5rem;
     margin: 1.5rem 0;
@@ -140,7 +154,6 @@ body {
 /* ========================================
    PÁGINA HEADER
    ======================================== */
-
 .page-header {
     display: flex;
     justify-content: space-between;
@@ -159,7 +172,6 @@ body {
 /* ========================================
    BOTÕES
    ======================================== */
-
 .btn {
     display: inline-block;
     padding: 0.75rem 1.5rem;
@@ -245,7 +257,6 @@ body {
 /* ========================================
    BADGES
    ======================================== */
-
 .badge {
     display: inline-block;
     padding: 0.35rem 0.75rem;
@@ -282,7 +293,6 @@ body {
 /* ========================================
    FORMULÁRIOS
    ======================================== */
-
 .form {
     background-color: white;
     padding: 2rem;
@@ -362,7 +372,6 @@ legend {
 /* ========================================
    SEARCH BOX
    ======================================== */
-
 .search-box {
     background-color: white;
     padding: 1.5rem;
@@ -394,7 +403,6 @@ legend {
 /* ========================================
    TABELAS
    ======================================== */
-
 .table {
     width: 100%;
     border-collapse: collapse;
@@ -432,7 +440,6 @@ legend {
 /* ========================================
    CARDS
    ======================================== */
-
 .card {
     background-color: white;
     border-radius: 8px;
@@ -461,7 +468,6 @@ legend {
 /* ========================================
    DASHBOARD
    ======================================== */
-
 .dashboard {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -472,7 +478,6 @@ legend {
 /* ========================================
    HOME
    ======================================== */
-
 .home-container {
     padding: 2rem 0;
 }
@@ -488,18 +493,61 @@ legend {
 
 .hero h2 {
     font-size: 2.5rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
 }
 
-.hero p {
-    font-size: 1.2rem;
+.hero-subtitle {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
     opacity: 0.95;
+}
+
+.hero-description {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.feature-card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border-top: 4px solid #dbead5;
+    text-align: center;
+}
+
+.feature-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-4px);
+}
+
+.feature-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.feature-card h3 {
+    color: #56b896;
+    margin-bottom: 0.75rem;
+    font-size: 1.3rem;
+}
+
+.feature-card p {
+    color: #666666;
 }
 
 /* ========================================
    DETALHES
    ======================================== */
-
 .details-card {
     background-color: white;
     border-radius: 8px;
@@ -541,7 +589,6 @@ legend {
 /* ========================================
    RASTREAMENTO
    ======================================== */
-
 .tracking-container {
     background-color: white;
     border-radius: 8px;
@@ -631,7 +678,6 @@ legend {
 /* ========================================
    ERRO
    ======================================== */
-
 .error-container {
     text-align: center;
     padding: 3rem 2rem;
@@ -658,7 +704,6 @@ legend {
 /* ========================================
    FOOTER
    ======================================== */
-
 .footer {
     background-color: #f5f5f5;
     color: #666666;
@@ -675,7 +720,6 @@ legend {
 /* ========================================
    RESPONSIVIDADE
    ======================================== */
-
 @media (max-width: 768px) {
     .navbar .container {
         flex-direction: column;
@@ -744,8 +788,8 @@ legend {
         font-size: 1.8rem;
     }
 
-    .hero p {
-        font-size: 1rem;
+    .hero-subtitle {
+        font-size: 1.1rem;
     }
 }
 
@@ -770,7 +814,8 @@ legend {
         padding: 1rem;
     }
 
-    .dashboard {
+    .dashboard,
+    .features {
         grid-template-columns: 1fr;
         gap: 1rem;
     }

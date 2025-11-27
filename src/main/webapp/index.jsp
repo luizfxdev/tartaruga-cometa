@@ -2,38 +2,44 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
 <t:header title="Home">
-    <div class="home-container">
-        <div class="hero">
-            <h2>Bem-vindo ao Sistema Tartaruga Cometa</h2>
-            <p>Sistema de Gerenciamento de Entregas para Transportadoras</p>
+    <main class="container">
+        <div class="home-container">
+            <div class="hero">
+                <h2>🐢 Bem-vindo ao Sistema Tartaruga Cometa</h2>
+                <p class="hero-subtitle">Sistema de Gerenciamento de Entregas para Transportadoras</p>
+                <p class="hero-description">
+                    Gerencie clientes, produtos, endereços e entregas de forma eficiente e organizada. 
+                    Use o menu acima para navegar pelas funcionalidades do sistema.
+                </p>
+            </div>
+
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3>Clientes</h3>
+                    <p>Cadastre e gerencie todos os clientes da transportadora.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📦</div>
+                    <h3>Produtos</h3>
+                    <p>Controle de produtos transportados e itens associados às entregas.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📍</div>
+                    <h3>Endereços</h3>
+                    <p>Organize endereços de retirada e entrega de forma centralizada.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🚚</div>
+                    <h3>Entregas</h3>
+                    <p>Acompanhe o status de todas as entregas realizadas.</p>
+                </div>
+            </div>
         </div>
-
-        <div class="dashboard">
-            <div class="card">
-                <h3>📦 Clientes</h3>
-                <p>Gerencie seus clientes e suas informações</p>
-                <a href="${pageContext.request.contextPath}/clients/" class="btn btn-primary">Acessar</a>
-            </div>
-
-            <div class="card">
-                <h3>🛍️ Produtos</h3>
-                <p>Cadastre e controle seus produtos</p>
-                <a href="${pageContext.request.contextPath}/products/" class="btn btn-primary">Acessar</a>
-            </div>
-
-            <div class="card">
-                <h3>📍 Endereços</h3>
-                <p>Gerencie endereços de origem e destino</p>
-                <a href="${pageContext.request.contextPath}/addresses/" class="btn btn-primary">Acessar</a>
-            </div>
-
-            <div class="card">
-                <h3>🚚 Entregas</h3>
-                <p>Controle todas as suas entregas</p>
-                <a href="${pageContext.request.contextPath}/deliveries/" class="btn btn-primary">Acessar</a>
-            </div>
-        </div>
-    </div>
+    </main>
 </t:header>
 
 <t:footer />

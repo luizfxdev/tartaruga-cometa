@@ -1,13 +1,26 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@ page import="java.util.List" %>
-<%@ page import="com.tartarugacometasystem.model.Product" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <t:header title="Produtos">
     <div class="page-header">
         <h2>Produtos</h2>
-        <a href="${pageContext.request.contextPath}/products/new" class="btn btn-success">+ Novo Produto</a>
+        <a href="${pageContext.request.contextPath}/products/new" class="btn btn-primary">+ Novo Produto</a>
     </div>
+
+    <c:if test="${not empty sessionScope.success}">
+        <div class="alert alert-success">
+            ${sessionScope.success}
+        </div>
+        <c:remove var="success" scope="session"/>
+    </c:if>
+
+    <c:if test="${not empty sessionScope.error}">
+        <div class="alert alert-danger">
+            ${sessionScope.error}
+        </div>
+        <c:remove var="error" scope="session"/>
+    </c:if>
 
     <div class="search-box">
         <form method="GET" action="${pageContext.request.contextPath}/products/search">
@@ -16,61 +29,51 @@
         </form>
     </div>
 
-    <%
-        List<Product> products = (List<Product>) request.getAttribute("products");
-        if (products != null && !products.isEmpty()) {
-    %>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nome</th>
-                    <th>Categoria</th>
-                    <th>Peso (kg)</th>
-                    <th>Volume (m³)</th>
-                    <th>Valor Declarado</th>
-                    <th>Status</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <%
-                    for (Product product : products) {
-                %>
-                    <tr>
-                        <td><%= product.getId() %></td>
-                        <td><%= product.getName() %></td>
-                        <td><%= product.getCategory() != null ? product.getCategory() : "-" %></td>
-                        <td><%= product.getWeightKg() %></td>
-                        <td><%= product.getVolumeM3() %></td>
-                        <td>R$ <%= String.format("%.2f", product.getDeclaredValue()) %></td>
-                        <td>
-                            <span class="badge <%= product.getActive() ? "badge-success" : "badge-danger" %>">
-                                <%= product.getActive() ? "Ativo" : "Inativo" %>
-                            </span>
-                        </td>
-                        <td>
-                            <a href="${pageContext.request.contextPath}/products/view/<%= product.getId() %>" class="btn btn-sm btn-info">Ver</a>
-                            <a href="${pageContext.request.contextPath}/products/edit/<%= product.getId() %>" class="btn btn-sm btn-warning">Editar</a>
-                            <form method="POST" action="${pageContext.request.contextPath}/products/delete/<%= product.getId() %>" style="display:inline;">
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza?')">Deletar</button>
-                            </form>
-                        </td>
-                    </tr>
-                <%
-                    }
-                %>
-            </tbody>
-        </table>
-    <%
-        } else {
-    %>
-        <div class="alert alert-info">
-            Nenhum produto encontrado. <a href="${pageContext.request.contextPath}/products/new">Criar novo produto</a>
-        </div>
-    <%
-        }
-    %>
+    <c:choose>
+        <c:when test="${not empty products}">
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Categoria</th>
+                            <th>Peso (kg)</th>
+                            <th>Volume (m³)</th>
+                            <th>Valor Declarado</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:forEach var="product" items="${products}">
+                            <tr>
+                                <td>${product.id}</td>
+                                <td>${product.name}</td>
+                                <td>${product.category}</td>
+                                <td>${product.weightKg}</td>
+                                <td>${product.volumeM3}</td>
+                                <td>R$ ${product.declaredValue}</td>
+                                <td>
+                                    <div class="actions">
+                                        <a href="${pageContext.request.contextPath}/products/view/${product.id}" class="btn btn-info btn-sm">Ver</a>
+                                        <a href="${pageContext.request.contextPath}/products/edit/${product.id}" class="btn btn-warning btn-sm">Editar</a>
+                                        <form method="POST" action="${pageContext.request.contextPath}/products/delete/${product.id}" style="display:inline;">
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza?')">Deletar</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+        </c:when>
+        <c:otherwise>
+            <div class="alert alert-info">
+                Nenhum produto encontrado.
+            </div>
+        </c:otherwise>
+    </c:choose>
 </t:header>
 
 <t:footer />
