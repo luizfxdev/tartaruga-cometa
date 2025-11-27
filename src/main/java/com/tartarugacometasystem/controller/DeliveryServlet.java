@@ -5,21 +5,11 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-
-<<<<<<< HEAD
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-=======
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
->>>>>>> 5969be611d1e7ac7d5a3125a0b921338a13b354d
-
 import com.tartarugacometasystem.model.Address;
 import com.tartarugacometasystem.model.Client;
 import com.tartarugacometasystem.model.Delivery;
@@ -49,10 +39,9 @@ public class DeliveryServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
-
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
                 listDeliveries(request, response);
@@ -76,10 +65,9 @@ public class DeliveryServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
-
         try {
             if (pathInfo.equals("/save")) {
                 saveDelivery(request, response);
@@ -102,47 +90,42 @@ public class DeliveryServlet extends HttpServlet {
         }
     }
 
-    private void listDeliveries(HttpServletRequest request, HttpServletResponse response) 
+    private void listDeliveries(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
         String statusParam = request.getParameter("status");
         List<Delivery> deliveries;
-
         if (statusParam != null && !statusParam.isEmpty()) {
             deliveries = deliveryService.getDeliveriesByStatus(DeliveryStatus.fromValue(statusParam));
         } else {
             deliveries = deliveryService.getAllDeliveries();
         }
-
         request.setAttribute("deliveries", deliveries);
         request.setAttribute("statuses", DeliveryStatus.values());
         request.setAttribute("selectedStatus", statusParam);
         request.getRequestDispatcher("/pages/deliveries/list.jsp").forward(request, response);
     }
 
-    private void showNewForm(HttpServletRequest request, HttpServletResponse response) 
+    private void showNewForm(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
         List<Client> clients = clientService.getAllClients();
         List<Product> products = productService.getAllActiveProducts();
-
         request.setAttribute("clients", clients);
         request.setAttribute("products", products);
         request.setAttribute("statuses", DeliveryStatus.values());
         request.getRequestDispatcher("/pages/deliveries/new.jsp").forward(request, response);
     }
 
-    private void showEditForm(HttpServletRequest request, HttpServletResponse response, String pathInfo) 
+    private void showEditForm(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, ServletException, IOException {
         Integer id = extractId(pathInfo);
         Optional<Delivery> deliveryOptional = deliveryService.getDeliveryById(id);
         Delivery delivery = deliveryOptional.orElseThrow(() -> new IllegalArgumentException("Entrega não encontrada"));
-
         Optional<Client> shipper = clientService.getClientById(delivery.getShipperId());
         Optional<Client> recipient = clientService.getClientById(delivery.getRecipientId());
         Optional<Address> originAddress = addressService.getAddressById(delivery.getOriginAddressId());
         Optional<Address> destinationAddress = addressService.getAddressById(delivery.getDestinationAddressId());
         List<Client> clients = clientService.getAllClients();
         List<Product> products = productService.getAllActiveProducts();
-
         request.setAttribute("delivery", delivery);
         request.setAttribute("shipper", shipper.orElse(null));
         request.setAttribute("recipient", recipient.orElse(null));
@@ -154,18 +137,16 @@ public class DeliveryServlet extends HttpServlet {
         request.getRequestDispatcher("/pages/deliveries/new.jsp").forward(request, response);
     }
 
-    private void viewDelivery(HttpServletRequest request, HttpServletResponse response, String pathInfo) 
+    private void viewDelivery(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, ServletException, IOException {
         Integer id = extractId(pathInfo);
         Optional<Delivery> deliveryOptional = deliveryService.getDeliveryById(id);
         Delivery delivery = deliveryOptional.orElseThrow(() -> new IllegalArgumentException("Entrega não encontrada"));
-
         Optional<Client> shipper = clientService.getClientById(delivery.getShipperId());
         Optional<Client> recipient = clientService.getClientById(delivery.getRecipientId());
         Optional<Address> originAddress = addressService.getAddressById(delivery.getOriginAddressId());
         Optional<Address> destinationAddress = addressService.getAddressById(delivery.getDestinationAddressId());
         List<DeliveryHistory> history = deliveryService.getDeliveryHistory(id);
-
         request.setAttribute("delivery", delivery);
         request.setAttribute("shipper", shipper.orElse(null));
         request.setAttribute("recipient", recipient.orElse(null));
@@ -175,16 +156,14 @@ public class DeliveryServlet extends HttpServlet {
         request.getRequestDispatcher("/pages/deliveries/details.jsp").forward(request, response);
     }
 
-    private void trackDelivery(HttpServletRequest request, HttpServletResponse response, String pathInfo) 
+    private void trackDelivery(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, ServletException, IOException {
         String trackingCode = extractTrackingCode(pathInfo);
         Optional<Delivery> deliveryOptional = deliveryService.getDeliveryByTrackingCode(trackingCode);
         Delivery delivery = deliveryOptional.orElseThrow(() -> new IllegalArgumentException("Entrega não encontrada"));
-
         Optional<Client> shipper = clientService.getClientById(delivery.getShipperId());
         Optional<Client> recipient = clientService.getClientById(delivery.getRecipientId());
         List<DeliveryHistory> history = deliveryService.getDeliveryHistory(delivery.getId());
-
         request.setAttribute("delivery", delivery);
         request.setAttribute("shipper", shipper.orElse(null));
         request.setAttribute("recipient", recipient.orElse(null));
@@ -192,23 +171,19 @@ public class DeliveryServlet extends HttpServlet {
         request.getRequestDispatcher("/pages/deliveries/track.jsp").forward(request, response);
     }
 
-    private void searchDeliveries(HttpServletRequest request, HttpServletResponse response) 
+    private void searchDeliveries(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
         String searchTerm = request.getParameter("q");
-
         if (searchTerm == null || searchTerm.trim().isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/deliveries/");
             return;
         }
-
         Optional<Delivery> deliveryOptional = deliveryService.getDeliveryByTrackingCode(searchTerm.trim());
-
         if (deliveryOptional.isPresent()) {
             Delivery delivery = deliveryOptional.get();
             Optional<Client> shipper = clientService.getClientById(delivery.getShipperId());
             Optional<Client> recipient = clientService.getClientById(delivery.getRecipientId());
             List<DeliveryHistory> history = deliveryService.getDeliveryHistory(delivery.getId());
-
             request.setAttribute("delivery", delivery);
             request.setAttribute("shipper", shipper.orElse(null));
             request.setAttribute("recipient", recipient.orElse(null));
@@ -221,7 +196,7 @@ public class DeliveryServlet extends HttpServlet {
         }
     }
 
-    private void saveDelivery(HttpServletRequest request, HttpServletResponse response) 
+    private void saveDelivery(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException {
         try {
             HashMap<String, String> params = new HashMap<>();
@@ -234,9 +209,7 @@ public class DeliveryServlet extends HttpServlet {
             params.put("status", request.getParameter("status"));
             params.put("freightValue", request.getParameter("freightValue"));
             params.put("observations", request.getParameter("observations"));
-
             Delivery delivery = Mapper.mapToDelivery(params);
-
             if (delivery.getId() != null && delivery.getId() > 0) {
                 deliveryService.updateDelivery(delivery);
                 request.getSession().setAttribute("success", "Entrega atualizada com sucesso");
@@ -244,7 +217,6 @@ public class DeliveryServlet extends HttpServlet {
                 deliveryService.createDelivery(delivery);
                 request.getSession().setAttribute("success", "Entrega criada com sucesso");
             }
-
             response.sendRedirect(request.getContextPath() + "/deliveries/");
         } catch (IllegalArgumentException e) {
             request.getSession().setAttribute("error", e.getMessage());
@@ -252,7 +224,7 @@ public class DeliveryServlet extends HttpServlet {
         }
     }
 
-    private void deleteDelivery(HttpServletRequest request, HttpServletResponse response, String pathInfo) 
+    private void deleteDelivery(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, IOException {
         try {
             Integer id = extractId(pathInfo);
@@ -265,18 +237,16 @@ public class DeliveryServlet extends HttpServlet {
         }
     }
 
-    private void updateDeliveryStatus(HttpServletRequest request, HttpServletResponse response, String pathInfo) 
+    private void updateDeliveryStatus(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, IOException {
         try {
             Integer id = extractId(pathInfo);
             DeliveryStatus newStatus = DeliveryStatus.fromValue(request.getParameter("status"));
             String observations = request.getParameter("observations");
             String user = request.getParameter("user");
-
             if (user == null || user.trim().isEmpty()) {
                 user = "SYSTEM";
             }
-
             deliveryService.updateDeliveryStatus(id, newStatus, observations, user);
             request.getSession().setAttribute("success", "Status da entrega atualizado com sucesso");
             response.sendRedirect(request.getContextPath() + "/deliveries/view/" + id);
@@ -286,17 +256,15 @@ public class DeliveryServlet extends HttpServlet {
         }
     }
 
-    private void cancelDelivery(HttpServletRequest request, HttpServletResponse response, String pathInfo) 
+    private void cancelDelivery(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, IOException {
         try {
             Integer id = extractId(pathInfo);
             String reason = request.getParameter("reason");
             String user = request.getParameter("user");
-
             if (user == null || user.trim().isEmpty()) {
                 user = "SYSTEM";
             }
-
             deliveryService.cancelDelivery(id, reason, user);
             request.getSession().setAttribute("success", "Entrega cancelada com sucesso");
             response.sendRedirect(request.getContextPath() + "/deliveries/view/" + id);
@@ -306,16 +274,14 @@ public class DeliveryServlet extends HttpServlet {
         }
     }
 
-    private void markAsDelivered(HttpServletRequest request, HttpServletResponse response, String pathInfo) 
+    private void markAsDelivered(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, IOException {
         try {
             Integer id = extractId(pathInfo);
             String user = request.getParameter("user");
-
             if (user == null || user.trim().isEmpty()) {
                 user = "SYSTEM";
             }
-
             deliveryService.markAsDelivered(id, user);
             request.getSession().setAttribute("success", "Entrega marcada como entregue com sucesso");
             response.sendRedirect(request.getContextPath() + "/deliveries/view/" + id);
@@ -325,17 +291,15 @@ public class DeliveryServlet extends HttpServlet {
         }
     }
 
-    private void markAsNotDelivered(HttpServletRequest request, HttpServletResponse response, String pathInfo) 
+    private void markAsNotDelivered(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, IOException {
         try {
             Integer id = extractId(pathInfo);
             String reason = request.getParameter("reason");
             String user = request.getParameter("user");
-
             if (user == null || user.trim().isEmpty()) {
                 user = "SYSTEM";
             }
-
             deliveryService.markAsNotDelivered(id, reason, user);
             request.getSession().setAttribute("success", "Entrega marcada como não realizada com sucesso");
             response.sendRedirect(request.getContextPath() + "/deliveries/view/" + id);

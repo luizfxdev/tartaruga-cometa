@@ -5,21 +5,11 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-
-<<<<<<< HEAD
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-=======
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
->>>>>>> 5969be611d1e7ac7d5a3125a0b921338a13b354d
-
 import com.tartarugacometasystem.model.Client;
 import com.tartarugacometasystem.model.PersonType;
 import com.tartarugacometasystem.service.ClientService;
@@ -36,10 +26,9 @@ public class ClientServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
-
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
                 listClients(request, response);
@@ -61,10 +50,9 @@ public class ClientServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
-
         try {
             if (pathInfo.equals("/save")) {
                 saveClient(request, response);
@@ -79,56 +67,52 @@ public class ClientServlet extends HttpServlet {
         }
     }
 
-    private void listClients(HttpServletRequest request, HttpServletResponse response) 
+    private void listClients(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
         List<Client> clients = clientService.getAllClients();
         request.setAttribute("clients", clients);
         request.getRequestDispatcher("/pages/clients/list.jsp").forward(request, response);
     }
 
-    private void showNewForm(HttpServletRequest request, HttpServletResponse response) 
+    private void showNewForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setAttribute("personTypes", PersonType.values());
         request.getRequestDispatcher("/pages/clients/new.jsp").forward(request, response);
     }
 
-    private void showEditForm(HttpServletRequest request, HttpServletResponse response, String pathInfo) 
+    private void showEditForm(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, ServletException, IOException {
         Integer id = extractId(pathInfo);
         Optional<Client> clientOptional = clientService.getClientById(id);
         Client client = clientOptional.orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado"));
-
         request.setAttribute("client", client);
         request.setAttribute("personTypes", PersonType.values());
         request.getRequestDispatcher("/pages/clients/new.jsp").forward(request, response);
     }
 
-    private void viewClient(HttpServletRequest request, HttpServletResponse response, String pathInfo) 
+    private void viewClient(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, ServletException, IOException {
         Integer id = extractId(pathInfo);
         Optional<Client> clientOptional = clientService.getClientById(id);
         Client client = clientOptional.orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado"));
-
         request.setAttribute("client", client);
         request.getRequestDispatcher("/pages/clients/view.jsp").forward(request, response);
     }
 
-    private void searchClients(HttpServletRequest request, HttpServletResponse response) 
+    private void searchClients(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
         String searchTerm = request.getParameter("q");
-
         if (searchTerm == null || searchTerm.trim().isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/clients/");
             return;
         }
-
         List<Client> clients = clientService.searchClientsByName(searchTerm);
         request.setAttribute("clients", clients);
         request.setAttribute("searchTerm", searchTerm);
         request.getRequestDispatcher("/pages/clients/list.jsp").forward(request, response);
     }
 
-    private void saveClient(HttpServletRequest request, HttpServletResponse response) 
+    private void saveClient(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException {
         try {
             HashMap<String, String> params = new HashMap<>();
@@ -138,9 +122,7 @@ public class ClientServlet extends HttpServlet {
             params.put("name", request.getParameter("name"));
             params.put("email", request.getParameter("email"));
             params.put("phone", request.getParameter("phone"));
-
             Client client = Mapper.mapToClient(params);
-
             if (client.getId() != null && client.getId() > 0) {
                 clientService.updateClient(client);
                 request.getSession().setAttribute("success", "Cliente atualizado com sucesso");
@@ -148,7 +130,6 @@ public class ClientServlet extends HttpServlet {
                 clientService.createClient(client);
                 request.getSession().setAttribute("success", "Cliente criado com sucesso");
             }
-
             response.sendRedirect(request.getContextPath() + "/clients/");
         } catch (IllegalArgumentException e) {
             request.getSession().setAttribute("error", e.getMessage());
@@ -156,7 +137,7 @@ public class ClientServlet extends HttpServlet {
         }
     }
 
-    private void deleteClient(HttpServletRequest request, HttpServletResponse response, String pathInfo) 
+    private void deleteClient(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, IOException {
         try {
             Integer id = extractId(pathInfo);
