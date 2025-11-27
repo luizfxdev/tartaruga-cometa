@@ -40,3 +40,7 @@
                 <% request.getSession().removeAttribute("error"); %>
             </div>
         <% } %>
+
+        <!-- ESTA LINHA ESTAVA FALTANDO! -->
+        <jsp:doBody/>
+    </div>

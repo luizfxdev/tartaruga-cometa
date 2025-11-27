@@ -1,109 +1,109 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@ page import="java.util.List" %>
-<%@ page import="com.tartarugacometasystem.model.Delivery" %>
-<%@ page import="com.tartarugacometasystem.model.DeliveryStatus" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <t:header title="Entregas">
     <div class="page-header">
         <h2>Entregas</h2>
-        <a href="${pageContext.request.contextPath}/deliveries/new" class="btn btn-success">+ Nova Entrega</a>
+        <a href="${pageContext.request.contextPath}/deliveries/new" class="btn btn-primary">+ Nova Entrega</a>
     </div>
+
+    <c:if test="${not empty sessionScope.success}">
+        <div class="alert alert-success">
+            ${sessionScope.success}
+        </div>
+        <c:remove var="success" scope="session"/>
+    </c:if>
+
+    <c:if test="${not empty sessionScope.error}">
+        <div class="alert alert-danger">
+            ${sessionScope.error}
+        </div>
+        <c:remove var="error" scope="session"/>
+    </c:if>
 
     <div class="search-box">
         <form method="GET" action="${pageContext.request.contextPath}/deliveries/">
-            <select name="status" onchange="this.form.submit()">
+            <select name="status" onchange="this.form.submit()" class="form-control">
                 <option value="">Todos os Status</option>
-                <%
-                    DeliveryStatus[] statuses = (DeliveryStatus[]) request.getAttribute("statuses");
-                    String selectedStatus = (String) request.getAttribute("selectedStatus");
-                    for (DeliveryStatus status : statuses) {
-                %>
-                    <option value="<%= status.getValue() %>" 
-                        <%= status.getValue().equals(selectedStatus) ? "selected" : "" %>>
-                        <%= status.getLabel() %>
-                    </option>
-                <%
-                    }
-                %>
+                <option value="PENDENTE" ${param.status == 'PENDENTE' ? 'selected' : ''}>Pendente</option>
+                <option value="EM_TRANSITO" ${param.status == 'EM_TRANSITO' ? 'selected' : ''}>Em Trânsito</option>
+                <option value="ENTREGUE" ${param.status == 'ENTREGUE' ? 'selected' : ''}>Entregue</option>
+                <option value="NAO_REALIZADA" ${param.status == 'NAO_REALIZADA' ? 'selected' : ''}>Não Realizada</option>
+                <option value="CANCELADA" ${param.status == 'CANCELADA' ? 'selected' : ''}>Cancelada</option>
             </select>
         </form>
     </div>
 
-    <%
-        List<Delivery> deliveries = (List<Delivery>) request.getAttribute("deliveries");
-        if (deliveries != null && !deliveries.isEmpty()) {
-    %>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Código de Rastreio</th>
-                    <th>Remetente</th>
-                    <th>Destinatário</th>
-                    <th>Status</th>
-                    <th>Valor Total</th>
-                    <th>Data de Criação</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <%
-                    for (Delivery delivery : deliveries) {
-                %>
-                    <tr>
-                        <td><%= delivery.getId() %></td>
-                        <td><strong><%= delivery.getTrackingCode() %></strong></td>
-                        <td><%= delivery.getShipperId() %></td>
-                        <td><%= delivery.getRecipientId() %></td>
-                        <td>
-                            <span class="badge <%= getStatusBadgeClass(delivery.getStatus()) %>">
-                                <%= delivery.getStatus().getLabel() %>
-                            </span>
-                        </td>
-                        <td>R$ <%= String.format("%.2f", delivery.getTotalValue()) %></td>
-                        <td><%= delivery.getCreatedAt() %></td>
-                        <td>
-                            <a href="${pageContext.request.contextPath}/deliveries/view/<%= delivery.getId() %>" class="btn btn-sm btn-info">Ver</a>
-                            <a href="${pageContext.request.contextPath}/deliveries/edit/<%= delivery.getId() %>" class="btn btn-sm btn-warning">Editar</a>
-                            <form method="POST" action="${pageContext.request.contextPath}/deliveries/delete/<%= delivery.getId() %>" style="display:inline;">
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza?')">Deletar</button>
-                            </form>
-                        </td>
-                    </tr>
-                <%
-                    }
-                %>
-            </tbody>
-        </table>
-    <%
-        } else {
-    %>
-        <div class="alert alert-info">
-            Nenhuma entrega encontrada. <a href="${pageContext.request.contextPath}/deliveries/new">Criar nova entrega</a>
-        </div>
-    <%
-        }
-    %>
-
-    <%!
-        private String getStatusBadgeClass(com.tartarugacometasystem.model.DeliveryStatus status) {
-            switch(status) {
-                case PENDENTE:
-                    return "badge-warning";
-                case EM_TRANSITO:
-                    return "badge-info";
-                case ENTREGUE:
-                    return "badge-success";
-                case NAO_REALIZADA:
-                    return "badge-secondary";
-                case CANCELADA:
-                    return "badge-danger";
-                default:
-                    return "badge-secondary";
-            }
-        }
-    %>
+    <c:choose>
+        <c:when test="${not empty deliveries}">
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Código de Rastreio</th>
+                            <th>Remetente</th>
+                            <th>Destinatário</th>
+                            <th>Status</th>
+                            <th>Valor Total</th>
+                            <th>Data de Criação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:forEach var="delivery" items="${deliveries}">
+                            <tr>
+                                <td>${delivery.id}</td>
+                                <td><strong>${delivery.trackingCode}</strong></td>
+                                <td>${delivery.shipperId}</td>
+                                <td>${delivery.recipientId}</td>
+                                <td>
+                                    <c:choose>
+                                        <c:when test="${delivery.status.value == 'PENDENTE'}">
+                                            <span class="badge badge-warning">Pendente</span>
+                                        </c:when>
+                                        <c:when test="${delivery.status.value == 'EM_TRANSITO'}">
+                                            <span class="badge badge-info">Em Trânsito</span>
+                                        </c:when>
+                                        <c:when test="${delivery.status.value == 'ENTREGUE'}">
+                                            <span class="badge badge-success">Entregue</span>
+                                        </c:when>
+                                        <c:when test="${delivery.status.value == 'NAO_REALIZADA'}">
+                                            <span class="badge badge-secondary">Não Realizada</span>
+                                        </c:when>
+                                        <c:when test="${delivery.status.value == 'CANCELADA'}">
+                                            <span class="badge badge-danger">Cancelada</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="badge badge-secondary">${delivery.status.label}</span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td><fmt:formatNumber value="${delivery.totalValue}" type="currency" currencySymbol="R$ "/></td>
+                                <td><fmt:formatDate value="${delivery.createdAt}" pattern="dd/MM/yyyy HH:mm"/></td>
+                                <td>
+                                    <div class="actions">
+                                        <a href="${pageContext.request.contextPath}/deliveries/view/${delivery.id}" class="btn btn-info btn-sm">Ver</a>
+                                        <a href="${pageContext.request.contextPath}/deliveries/edit/${delivery.id}" class="btn btn-warning btn-sm">Editar</a>
+                                        <form method="POST" action="${pageContext.request.contextPath}/deliveries/delete/${delivery.id}" style="display:inline;">
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza?')">Deletar</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+        </c:when>
+        <c:otherwise>
+            <div class="alert alert-info">
+                Nenhuma entrega encontrada. <a href="${pageContext.request.contextPath}/deliveries/new">Criar nova entrega</a>
+            </div>
+        </c:otherwise>
+    </c:choose>
 </t:header>
 
 <t:footer />

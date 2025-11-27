@@ -1,23 +1,15 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@ page import="java.util.List" %>
-<%@ page import="com.tartarugacometasystem.model.Delivery" %>
-<%@ page import="com.tartarugacometasystem.model.DeliveryHistory" %>
-<%@ page import="com.tartarugacometasystem.model.Client" %>
-<%@ page import="com.tartarugacometasystem.model.Address" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <t:header title="Detalhes da Entrega">
-    <%
-        Delivery delivery = (Delivery) request.getAttribute("delivery");
-        Client shipper = (Client) request.getAttribute("shipper");
-        Client recipient = (Client) request.getAttribute("recipient");
-        Address originAddress = (Address) request.getAttribute("originAddress");
-        Address destinationAddress = (Address) request.getAttribute("destinationAddress");
-        List<DeliveryHistory> history = (List<DeliveryHistory>) request.getAttribute("history");
-    %>
-
     <div class="page-header">
         <h2>Detalhes da Entrega</h2>
+        <div>
+            <a href="${pageContext.request.contextPath}/deliveries/edit/${delivery.id}" class="btn btn-warning">Editar</a>
+            <a href="${pageContext.request.contextPath}/deliveries/" class="btn btn-secondary">Voltar</a>
+        </div>
     </div>
 
     <div class="details-card">
@@ -25,24 +17,40 @@
 
         <div class="detail-row">
             <label>ID:</label>
-            <span><%= delivery.getId() %></span>
+            <span>${delivery.id}</span>
         </div>
 
         <div class="detail-row">
             <label>Código de Rastreio:</label>
-            <span><strong><%= delivery.getTrackingCode() %></strong></span>
+            <span><strong>${delivery.trackingCode}</strong></span>
         </div>
 
         <div class="detail-row">
             <label>Status:</label>
-            <span class="badge <%= getStatusBadgeClass(delivery.getStatus()) %>">
-                <%= delivery.getStatus().getLabel() %>
+            <span>
+                <c:choose>
+                    <c:when test="${delivery.status.value == 'PENDENTE'}">
+                        <span class="badge badge-warning">Pendente</span>
+                    </c:when>
+                    <c:when test="${delivery.status.value == 'EM_TRANSITO'}">
+                        <span class="badge badge-info">Em Trânsito</span>
+                    </c:when>
+                    <c:when test="${delivery.status.value == 'ENTREGUE'}">
+                        <span class="badge badge-success">Entregue</span>
+                    </c:when>
+                    <c:when test="${delivery.status.value == 'NAO_REALIZADA'}">
+                        <span class="badge badge-secondary">Não Realizada</span>
+                    </c:when>
+                    <c:when test="${delivery.status.value == 'CANCELADA'}">
+                        <span class="badge badge-danger">Cancelada</span>
+                    </c:when>
+                </c:choose>
             </span>
         </div>
 
         <div class="detail-row">
             <label>Data de Criação:</label>
-            <span><%= delivery.getCreatedAt() %></span>
+            <span><fmt:formatDate value="${delivery.createdAt}" pattern="dd/MM/yyyy HH:mm"/></span>
         </div>
     </div>
 
@@ -51,12 +59,12 @@
 
         <div class="detail-row">
             <label>Remetente:</label>
-            <span><%= shipper != null ? shipper.getName() : "N/A" %></span>
+            <span>${shipper != null ? shipper.name : 'N/A'}</span>
         </div>
 
         <div class="detail-row">
             <label>Destinatário:</label>
-            <span><%= recipient != null ? recipient.getName() : "N/A" %></span>
+            <span>${recipient != null ? recipient.name : 'N/A'}</span>
         </div>
     </div>
 
@@ -66,24 +74,24 @@
         <div class="detail-row">
             <label>Origem:</label>
             <span>
-                <% if (originAddress != null) { %>
-                    <%= originAddress.getStreet() %>, <%= originAddress.getNumber() %> - 
-                    <%= originAddress.getCity() %>, <%= originAddress.getState() %>
-                <% } else { %>
+                <c:if test="${originAddress != null}">
+                    ${originAddress.street}, ${originAddress.number} - ${originAddress.city}, ${originAddress.state}
+                </c:if>
+                <c:if test="${originAddress == null}">
                     N/A
-                <% } %>
+                </c:if>
             </span>
         </div>
 
         <div class="detail-row">
             <label>Destino:</label>
             <span>
-                <% if (destinationAddress != null) { %>
-                    <%= destinationAddress.getStreet() %>, <%= destinationAddress.getNumber() %> - 
-                    <%= destinationAddress.getCity() %>, <%= destinationAddress.getState() %>
-                <% } else { %>
+                <c:if test="${destinationAddress != null}">
+                    ${destinationAddress.street}, ${destinationAddress.number} - ${destinationAddress.city}, ${destinationAddress.state}
+                </c:if>
+                <c:if test="${destinationAddress == null}">
                     N/A
-                <% } %>
+                </c:if>
             </span>
         </div>
     </div>
@@ -93,87 +101,66 @@
 
         <div class="detail-row">
             <label>Valor Total:</label>
-            <span>R$ <%= String.format("%.2f", delivery.getTotalValue()) %></span>
+            <span><fmt:formatNumber value="${delivery.totalValue}" type="currency" currencySymbol="R$ "/></span>
         </div>
 
         <div class="detail-row">
             <label>Peso Total:</label>
-            <span><%= delivery.getTotalWeightKg() %> kg</span>
+            <span>${delivery.totalWeightKg} kg</span>
         </div>
 
         <div class="detail-row">
             <label>Volume Total:</label>
-            <span><%= delivery.getTotalVolumeM3() %> m³</span>
+            <span>${delivery.totalVolumeM3} m³</span>
         </div>
 
         <div class="detail-row">
             <label>Valor do Frete:</label>
-            <span>R$ <%= String.format("%.2f", delivery.getFreightValue()) %></span>
+            <span><fmt:formatNumber value="${delivery.freightValue}" type="currency" currencySymbol="R$ "/></span>
         </div>
     </div>
 
-    <% if (delivery.getObservations() != null && !delivery.getObservations().isEmpty()) { %>
+    <c:if test="${not empty delivery.observations}">
         <div class="details-card">
             <h3>Observações</h3>
-            <p><%= delivery.getObservations() %></p>
+            <p>${delivery.observations}</p>
         </div>
-    <% } %>
+    </c:if>
 
-    <% if (history != null && !history.isEmpty()) { %>
+    <c:if test="${not empty history}">
         <div class="details-card">
             <h3>Histórico</h3>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Status Anterior</th>
-                        <th>Novo Status</th>
-                        <th>Usuário</th>
-                        <th>Observações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <%
-                        for (DeliveryHistory h : history) {
-                    %>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td><%= h.getChangeDate() %></td>
-                            <td><%= h.getPreviousStatus() != null ? h.getPreviousStatus().getLabel() : "-" %></td>
-                            <td><%= h.getNewStatus().getLabel() %></td>
-                            <td><%= h.getUser() %></td>
-                            <td><%= h.getObservations() != null ? h.getObservations() : "-" %></td>
+                            <th>Data</th>
+                            <th>Status Anterior</th>
+                            <th>Novo Status</th>
+                            <th>Usuário</th>
+                            <th>Observações</th>
                         </tr>
-                    <%
-                        }
-                    %>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <c:forEach var="h" items="${history}">
+                            <tr>
+                                <td><fmt:formatDate value="${h.changeDate}" pattern="dd/MM/yyyy HH:mm"/></td>
+                                <td>${h.previousStatus != null ? h.previousStatus.label : '-'}</td>
+                                <td>${h.newStatus.label}</td>
+                                <td>${h.user}</td>
+                                <td>${h.observations != null ? h.observations : '-'}</td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    <% } %>
+    </c:if>
 
     <div class="form-actions">
-        <a href="${pageContext.request.contextPath}/deliveries/edit/<%= delivery.getId() %>" class="btn btn-warning">Editar</a>
+        <a href="${pageContext.request.contextPath}/deliveries/edit/${delivery.id}" class="btn btn-warning">Editar</a>
         <a href="${pageContext.request.contextPath}/deliveries/" class="btn btn-secondary">Voltar</a>
     </div>
-
-    <%!
-        private String getStatusBadgeClass(com.tartarugacometasystem.model.DeliveryStatus status) {
-            switch(status) {
-                case PENDENTE:
-                    return "badge-warning";
-                case EM_TRANSITO:
-                    return "badge-info";
-                case ENTREGUE:
-                    return "badge-success";
-                case NAO_REALIZADA:
-                    return "badge-secondary";
-                case CANCELADA:
-                    return "badge-danger";
-                default:
-                    return "badge-secondary";
-            }
-        }
-    %>
 </t:header>
 
 <t:footer />

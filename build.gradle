@@ -1,14 +1,15 @@
 plugins {
     id 'java'
     id 'war'
+    id 'org.gretty' version '4.1.2'
 }
 
 group = 'com.tartarugacometasystem'
 version = '1.0.0'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 repositories {
@@ -16,30 +17,35 @@ repositories {
 }
 
 dependencies {
-    // Servlet API (fornecido pelo Tomcat em runtime)
-    compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
-    compileOnly 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.3'
-    compileOnly 'javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1'
+    // Jakarta Servlet API 6.0 (Tomcat 10+)
+    providedCompile 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+    providedCompile 'jakarta.servlet.jsp:jakarta.servlet.jsp-api:3.1.1'
+
+    // JSTL para Jakarta
+    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1'
 
     // PostgreSQL Driver
-    implementation 'org.postgresql:postgresql:42.5.1'
+    implementation 'org.postgresql:postgresql:42.7.1'
 
-    // Logging
-    implementation 'org.slf4j:slf4j-api:1.7.36'
-    implementation 'org.slf4j:slf4j-simple:1.7.36'
-
-    // Testing
-    testImplementation 'junit:junit:4.13.2'
+    // JUnit para testes
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-war {
-    archiveFileName = 'tartaruga-cometa.war'
-    duplicatesStrategy = 'exclude'
+gretty {
+    servletContainer = 'tomcat10'
+    httpPort = 8080
+    contextPath = '/tartaruga-cometa'
 }
 
-tasks.named('war') {
-    from('src/main/resources') {
-        into 'WEB-INF/classes'
-        duplicatesStrategy = 'exclude'
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = true
     }
 }

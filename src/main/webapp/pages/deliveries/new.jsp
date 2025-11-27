@@ -1,132 +1,100 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@ page import="java.util.List" %>
-<%@ page import="com.tartarugacometasystem.model.Delivery" %>
-<%@ page import="com.tartarugacometasystem.model.Client" %>
-<%@ page import="com.tartarugacometasystem.model.Product" %>
-<%@ page import="com.tartarugacometasystem.model.DeliveryStatus" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<t:header title="Nova Entrega">
-    <%
-        Delivery delivery = (Delivery) request.getAttribute("delivery");
-        List<Client> clients = (List<Client>) request.getAttribute("clients");
-        List<Product> products = (List<Product>) request.getAttribute("products");
-        DeliveryStatus[] statuses = (DeliveryStatus[]) request.getAttribute("statuses");
-        String title = delivery != null && delivery.getId() != null ? "Editar Entrega" : "Nova Entrega";
-    %>
-
+<t:header title="${delivery != null ? 'Editar Entrega' : 'Nova Entrega'}">
     <div class="page-header">
-        <h2><%= title %></h2>
+        <h2>${delivery != null ? 'Editar Entrega' : 'Nova Entrega'}</h2>
     </div>
 
+    <c:if test="${not empty sessionScope.error}">
+        <div class="alert alert-danger">
+            ${sessionScope.error}
+        </div>
+        <c:remove var="error" scope="session"/>
+    </c:if>
+
     <form method="POST" action="${pageContext.request.contextPath}/deliveries/save" class="form">
-        <% if (delivery != null && delivery.getId() != null) { %>
-            <input type="hidden" name="id" value="<%= delivery.getId() %>">
-        <% } %>
+        <input type="hidden" name="id" value="${delivery != null ? delivery.id : ''}">
 
-        <fieldset>
-            <legend>Informações Básicas</legend>
+        <div class="form-group">
+            <label for="trackingCode">Código de Rastreio *</label>
+            <input type="text" id="trackingCode" name="trackingCode" 
+                   value="${delivery != null ? delivery.trackingCode : ''}" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="shipperId">Remetente (ID) *</label>
+                <input type="number" id="shipperId" name="shipperId" 
+                       value="${delivery != null ? delivery.shipperId : ''}" required>
+            </div>
 
             <div class="form-group">
-                <label for="trackingCode">Código de Rastreio</label>
-                <input type="text" id="trackingCode" name="trackingCode" 
-                    value="<%= delivery != null && delivery.getTrackingCode() != null ? delivery.getTrackingCode() : "" %>" 
-                    placeholder="Deixe em branco para gerar automaticamente" readonly>
+                <label for="recipientId">Destinatário (ID) *</label>
+                <input type="number" id="recipientId" name="recipientId" 
+                       value="${delivery != null ? delivery.recipientId : ''}" required>
             </div>
+        </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="shipperId">Remetente *</label>
-                    <select id="shipperId" name="shipperId" required>
-                        <option value="">Selecione...</option>
-                        <%
-                            for (Client client : clients) {
-                        %>
-                            <option value="<%= client.getId() %>" 
-                                <%= delivery != null && delivery.getShipperId() != null && delivery.getShipperId().equals(client.getId()) ? "selected" : "" %>>
-                                <%= client.getName() %>
-                            </option>
-                        <%
-                            }
-                        %>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="recipientId">Destinatário *</label>
-                    <select id="recipientId" name="recipientId" required>
-                        <option value="">Selecione...</option>
-                        <%
-                            for (Client client : clients) {
-                        %>
-                            <option value="<%= client.getId() %>" 
-                                <%= delivery != null && delivery.getRecipientId() != null && delivery.getRecipientId().equals(client.getId()) ? "selected" : "" %>>
-                                <%= client.getName() %>
-                            </option>
-                        <%
-                            }
-                        %>
-                    </select>
-                </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="originAddressId">Endereço de Origem (ID) *</label>
+                <input type="number" id="originAddressId" name="originAddressId" 
+                       value="${delivery != null ? delivery.originAddressId : ''}" required>
             </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="originAddressId">Endereço de Origem *</label>
-                    <input type="number" id="originAddressId" name="originAddressId" 
-                        value="<%= delivery != null && delivery.getOriginAddressId() != null ? delivery.getOriginAddressId() : "" %>" 
-                        required placeholder="ID do endereço">
-                </div>
-
-                <div class="form-group">
-                    <label for="destinationAddressId">Endereço de Destino *</label>
-                    <input type="number" id="destinationAddressId" name="destinationAddressId" 
-                        value="<%= delivery != null && delivery.getDestinationAddressId() != null ? delivery.getDestinationAddressId() : "" %>" 
-                        required placeholder="ID do endereço">
-                </div>
-            </div>
-        </fieldset>
-
-        <fieldset>
-            <legend>Valores</legend>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="freightValue">Valor do Frete (R$) *</label>
-                    <input type="number" id="freightValue" name="freightValue" 
-                        value="<%= delivery != null && delivery.getFreightValue() != null ? delivery.getFreightValue() : "" %>" 
-                        required step="0.01" placeholder="0.00">
-                </div>
-
-                <div class="form-group">
-                    <label for="status">Status *</label>
-                    <select id="status" name="status" required>
-                        <option value="">Selecione...</option>
-                        <%
-                            for (DeliveryStatus status : statuses) {
-                        %>
-                            <option value="<%= status.getValue() %>" 
-                                <%= delivery != null && delivery.getStatus() == status ? "selected" : "" %>>
-                                <%= status.getLabel() %>
-                            </option>
-                        <%
-                            }
-                        %>
-                    </select>
-                </div>
-            </div>
-        </fieldset>
-
-        <fieldset>
-            <legend>Observações</legend>
 
             <div class="form-group">
-                <label for="observations">Observações</label>
-                <textarea id="observations" name="observations" placeholder="Observações adicionais" rows="4"><%=
-                    delivery != null && delivery.getObservations() != null ? delivery.getObservations() : ""
-                %></textarea>
+                <label for="destinationAddressId">Endereço de Destino (ID) *</label>
+                <input type="number" id="destinationAddressId" name="destinationAddressId" 
+                       value="${delivery != null ? delivery.destinationAddressId : ''}" required>
             </div>
-        </fieldset>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="totalValue">Valor Total (R$) *</label>
+                <input type="number" id="totalValue" name="totalValue" step="0.01"
+                       value="${delivery != null ? delivery.totalValue : ''}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="freightValue">Valor do Frete (R$) *</label>
+                <input type="number" id="freightValue" name="freightValue" step="0.01"
+                       value="${delivery != null ? delivery.freightValue : ''}" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="totalWeightKg">Peso Total (kg) *</label>
+                <input type="number" id="totalWeightKg" name="totalWeightKg" step="0.01"
+                       value="${delivery != null ? delivery.totalWeightKg : ''}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="totalVolumeM3">Volume Total (m³) *</label>
+                <input type="number" id="totalVolumeM3" name="totalVolumeM3" step="0.01"
+                       value="${delivery != null ? delivery.totalVolumeM3 : ''}" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status *</label>
+            <select id="status" name="status" required>
+                <option value="">Selecione...</option>
+                <option value="PENDENTE" ${delivery != null && delivery.status.value == 'PENDENTE' ? 'selected' : ''}>Pendente</option>
+                <option value="EM_TRANSITO" ${delivery != null && delivery.status.value == 'EM_TRANSITO' ? 'selected' : ''}>Em Trânsito</option>
+                <option value="ENTREGUE" ${delivery != null && delivery.status.value == 'ENTREGUE' ? 'selected' : ''}>Entregue</option>
+                <option value="NAO_REALIZADA" ${delivery != null && delivery.status.value == 'NAO_REALIZADA' ? 'selected' : ''}>Não Realizada</option>
+                <option value="CANCELADA" ${delivery != null && delivery.status.value == 'CANCELADA' ? 'selected' : ''}>Cancelada</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="observations">Observações</label>
+            <textarea id="observations" name="observations" rows="4">${delivery != null && delivery.observations != null ? delivery.observations : ''}</textarea>
+        </div>
 
         <div class="form-actions">
             <button type="submit" class="btn btn-success">Salvar</button>

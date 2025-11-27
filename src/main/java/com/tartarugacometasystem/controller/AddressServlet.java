@@ -6,18 +6,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.tartarugacometasystem.model.Address;
 import com.tartarugacometasystem.model.AddressType;
 import com.tartarugacometasystem.model.Client;
 import com.tartarugacometasystem.service.AddressService;
 import com.tartarugacometasystem.service.ClientService;
 import com.tartarugacometasystem.util.Mapper;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet("/addresses/*")
 public class AddressServlet extends HttpServlet {
