@@ -327,11 +327,14 @@ O arquivo WAR está disponível em:
 **Versão:** 1.0.0
 **Data:** 27 de Novembro de 2025
 
+---
+
 ## 📚 Documentação Adicional
 
 - [API Endpoints](api-endpoints.md) - Documentação completa de endpoints
 - [Requirements](requirements.md) - Requisitos funcionais e não-funcionais
 
+---
 
 ## 👨‍💻 Autor
 
@@ -340,7 +343,11 @@ O arquivo WAR está disponível em:
 - LinkedIn: [in/luizfxdev](https://www.linkedin.com/in/luizfxdev)
 - Portfólio: [luizfxdev.com.br](https://luizfxdev.com.br)
 
+---
+
 > Projeto desenvolvido como parte da Trilha de Aceleração proposta pela **GW Sistemas**.
+
+---
 
 ## 📄 Licença
 
@@ -354,3 +361,16 @@ Este projeto está sob a licença MIT.
 - [Apache Tomcat Documentation](https://tomcat.apache.org/tomcat-10.0-doc/)
 
 
+
+---
+
+
+<div align="center">
+🐢 Tartaruga Cometa
+Sistema de Gerenciamento de Entregas
+Desenvolvido com ☕ Java • 🗄️ PostgreSQL • 🚀 Tomcat
+</div>
+<div align="center">
+
+⬆ Voltar ao topo
+</div>
