@@ -314,28 +314,18 @@ SELECT * FROM clients;
 \q
 ```
 
-## 🐛 Troubleshooting
+## 📥 Download
 
-### Erro: UnsupportedClassVersionError
-**Solução:** Altere `build.gradle` para compilar com Java 1.8:
+### Arquivo WAR Executável
 
-```gradle
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-```
+O arquivo WAR está disponível em:
 
-### Erro: Connection refused (PostgreSQL)
-**Solução:** Verifique se PostgreSQL está rodando:
+- **[Releases do GitHub](https://github.com/seu-usuario/tartaruga-cometa/releases)** - Versão mais recente
+- **Build Local**: `build/libs/tartaruga-cometa.war` (após executar `./gradlew build`)
 
-```bash
-sudo service postgresql status
-sudo service postgresql start
-```
-
-### Erro: 404 Not Found
-**Solução:** Aguarde 15 segundos após iniciar Tomcat para o WAR ser extraído.
+**Tamanho:** ~5MB
+**Versão:** 1.0.0
+**Data:** 27 de Novembro de 2025
 
 ## 📚 Documentação Adicional
 
@@ -363,3 +353,4 @@ Este projeto está sob a licença MIT.
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [Jakarta EE Documentation](https://jakarta.ee/specifications/)
 - [Apache Tomcat Documentation](https://tomcat.apache.org/tomcat-10.0-doc/)
+
