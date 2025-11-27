@@ -3,67 +3,48 @@ plugins {
     id 'war'
 }
 
-<<<<<<< HEAD
-group = 'com.tartarugacometa'
-version = '1.0-SNAPSHOT'
-=======
 group = 'com.tartarugacometasystem'
 version = '1.0.0'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
->>>>>>> 5969be611d1e7ac7d5a3125a0b921338a13b354d
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-<<<<<<< HEAD
+    // Jakarta EE (Tomcat 10+)
     compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+
+    // PostgreSQL Driver
     implementation 'org.postgresql:postgresql:42.7.1'
 
     // JSTL para Jakarta EE
     implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.0'
     implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1'
 
+    // Logging
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+    implementation 'org.slf4j:slf4j-simple:1.7.36'
+
+    // Testing
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
-=======
-    // Servlet API (fornecido pelo Tomcat em runtime)
-    compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
-    compileOnly 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.3'
-    compileOnly 'javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1'
-
-    // PostgreSQL Driver
-    implementation 'org.postgresql:postgresql:42.5.1'
-
-    // Logging
-    implementation 'org.slf4j:slf4j-api:1.7.36'
-    implementation 'org.slf4j:slf4j-simple:1.7.36'
-
-    // Testing
-    testImplementation 'junit:junit:4.13.2'
->>>>>>> 5969be611d1e7ac7d5a3125a0b921338a13b354d
 }
 
 war {
     archiveFileName = 'tartaruga-cometa.war'
-<<<<<<< HEAD
-=======
     duplicatesStrategy = 'exclude'
-}
 
-tasks.named('war') {
     from('src/main/resources') {
         into 'WEB-INF/classes'
         duplicatesStrategy = 'exclude'
     }
->>>>>>> 5969be611d1e7ac7d5a3125a0b921338a13b354d
 }
