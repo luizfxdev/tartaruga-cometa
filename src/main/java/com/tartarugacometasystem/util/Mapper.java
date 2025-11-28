@@ -1,329 +1,240 @@
 package com.tartarugacometasystem.util;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.tartarugacometasystem.model.Address;
-import com.tartarugacometasystem.model.AddressType;
 import com.tartarugacometasystem.model.Client;
 import com.tartarugacometasystem.model.Delivery;
-import com.tartarugacometasystem.model.DeliveryProduct;
 import com.tartarugacometasystem.model.DeliveryStatus;
 import com.tartarugacometasystem.model.PersonType;
 import com.tartarugacometasystem.model.Product;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Optional;
+
 public class Mapper {
 
-    public static Client mapToClient(Map<String, String> params) {
+    /**
+     * Mapeia um HashMap de parâmetros para um objeto Client.
+     */
+    public static Client mapToClient(HashMap<String, String> params) {
         Client client = new Client();
 
-        if (params.containsKey("personType")) {
-            client.setPersonType(PersonType.fromValue(params.get("personType")));
-        }
+        Optional.ofNullable(params.get("id"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(Integer::parseInt)
+                .ifPresent(client::setId);
 
-        if (params.containsKey("document")) {
-            client.setDocument(params.get("document"));
-        }
+        client.setName(params.get("name"));
+        client.setDocument(params.get("document"));
+        client.setEmail(params.get("email"));
+        client.setPhone(params.get("phone"));
 
-        if (params.containsKey("name")) {
-            client.setName(params.get("name"));
-        }
+        Optional.ofNullable(params.get("personType"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(PersonType::fromValue)
+                .ifPresent(client::setPersonType);
 
-        if (params.containsKey("email")) {
-            client.setEmail(params.get("email"));
-        }
+        Optional.ofNullable(params.get("createdAt"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(DateFormatter::parseLocalDateTime)
+                .ifPresent(client::setCreatedAt);
 
-        if (params.containsKey("phone")) {
-            client.setPhone(params.get("phone"));
-        }
-
-        if (params.containsKey("id")) {
-            try {
-                client.setId(Integer.parseInt(params.get("id")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
+        Optional.ofNullable(params.get("updatedAt"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(DateFormatter::parseLocalDateTime)
+                .ifPresent(client::setUpdatedAt);
 
         return client;
     }
 
-    public static Address mapToAddress(Map<String, String> params) {
+    /**
+     * Mapeia um HashMap de parâmetros para um objeto Address.
+     */
+    public static Address mapToAddress(HashMap<String, String> params) {
         Address address = new Address();
 
-        if (params.containsKey("clientId")) {
-            try {
-                address.setClientId(Integer.parseInt(params.get("clientId")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
+        Optional.ofNullable(params.get("id"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(Integer::parseInt)
+                .ifPresent(address::setId);
 
-        if (params.containsKey("addressType")) {
-            address.setAddressType(AddressType.fromValue(params.get("addressType")));
-        }
+        Optional.ofNullable(params.get("clientId"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(Integer::parseInt)
+                .ifPresent(address::setClientId);
 
-        if (params.containsKey("street")) {
-            address.setStreet(params.get("street"));
-        }
+        address.setStreet(params.get("street"));
+        address.setNumber(params.get("number"));
+        address.setComplement(params.get("complement"));
+        address.setNeighborhood(params.get("neighborhood"));
+        address.setCity(params.get("city"));
+        address.setState(params.get("state"));
+        address.setZipCode(params.get("zipCode"));
+        address.setCountry(params.get("country"));
 
-        if (params.containsKey("number")) {
-            address.setNumber(params.get("number"));
-        }
+        Optional.ofNullable(params.get("isPrincipal"))
+                .map(s -> s.equalsIgnoreCase("on") || s.equalsIgnoreCase("true"))
+                .ifPresent(address::setIsPrincipal);
 
-        if (params.containsKey("complement")) {
-            address.setComplement(params.get("complement"));
-        }
+        Optional.ofNullable(params.get("createdAt"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(DateFormatter::parseLocalDateTime)
+                .ifPresent(address::setCreatedAt);
 
-        if (params.containsKey("neighborhood")) {
-            address.setNeighborhood(params.get("neighborhood"));
-        }
-
-        if (params.containsKey("city")) {
-            address.setCity(params.get("city"));
-        }
-
-        if (params.containsKey("state")) {
-            address.setState(params.get("state"));
-        }
-
-        if (params.containsKey("zipCode")) {
-            address.setZipCode(params.get("zipCode"));
-        }
-
-        if (params.containsKey("reference")) {
-            address.setReference(params.get("reference"));
-        }
-
-        if (params.containsKey("isPrincipal")) {
-            address.setIsPrincipal(Boolean.parseBoolean(params.get("isPrincipal")));
-        }
-
-        if (params.containsKey("id")) {
-            try {
-                address.setId(Integer.parseInt(params.get("id")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
+        Optional.ofNullable(params.get("updatedAt"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(DateFormatter::parseLocalDateTime)
+                .ifPresent(address::setUpdatedAt);
 
         return address;
     }
 
-    public static Product mapToProduct(Map<String, String> params) {
-        Product product = new Product();
-
-        if (params.containsKey("name")) {
-            product.setName(params.get("name"));
-        }
-
-        if (params.containsKey("description")) {
-            product.setDescription(params.get("description"));
-        }
-
-        if (params.containsKey("weightKg")) {
-            try {
-                product.setWeightKg(new BigDecimal(params.get("weightKg")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
-
-        if (params.containsKey("volumeM3")) {
-            try {
-                product.setVolumeM3(new BigDecimal(params.get("volumeM3")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
-
-        if (params.containsKey("declaredValue")) {
-            try {
-                product.setDeclaredValue(new BigDecimal(params.get("declaredValue")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
-
-        if (params.containsKey("category")) {
-            product.setCategory(params.get("category"));
-        }
-
-        if (params.containsKey("active")) {
-            product.setActive(Boolean.parseBoolean(params.get("active")));
-        }
-
-        if (params.containsKey("id")) {
-            try {
-                product.setId(Integer.parseInt(params.get("id")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
-
-        return product;
-    }
-
-    public static Delivery mapToDelivery(Map<String, String> params) {
+    /**
+     * Mapeia um HashMap de parâmetros para um objeto Delivery.
+     */
+    public static Delivery mapToDelivery(HashMap<String, String> params) {
         Delivery delivery = new Delivery();
 
-        if (params.containsKey("trackingCode")) {
-            delivery.setTrackingCode(params.get("trackingCode"));
-        }
+        Optional.ofNullable(params.get("id"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(Integer::parseInt)
+                .ifPresent(delivery::setId);
 
-        if (params.containsKey("shipperId")) {
-            try {
-                delivery.setShipperId(Integer.parseInt(params.get("shipperId")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
+        delivery.setTrackingCode(params.get("trackingCode"));
 
-        if (params.containsKey("recipientId")) {
-            try {
-                delivery.setRecipientId(Integer.parseInt(params.get("recipientId")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
+        Optional.ofNullable(params.get("shipperId"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(Integer::parseInt)
+                .ifPresent(delivery::setShipperId);
 
-        if (params.containsKey("originAddressId")) {
-            try {
-                delivery.setOriginAddressId(Integer.parseInt(params.get("originAddressId")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
+        Optional.ofNullable(params.get("recipientId"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(Integer::parseInt)
+                .ifPresent(delivery::setRecipientId);
 
-        if (params.containsKey("destinationAddressId")) {
-            try {
-                delivery.setDestinationAddressId(Integer.parseInt(params.get("destinationAddressId")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
+        Optional.ofNullable(params.get("originAddressId"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(Integer::parseInt)
+                .ifPresent(delivery::setOriginAddressId);
 
-        if (params.containsKey("status")) {
-            delivery.setStatus(DeliveryStatus.fromValue(params.get("status")));
-        }
+        Optional.ofNullable(params.get("destinationAddressId"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(Integer::parseInt)
+                .ifPresent(delivery::setDestinationAddressId);
 
-        if (params.containsKey("freightValue")) {
-            try {
-                delivery.setFreightValue(new BigDecimal(params.get("freightValue")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
+        Optional.ofNullable(params.get("totalValue"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(BigDecimal::new)
+                .ifPresent(delivery::setTotalValue);
 
-        if (params.containsKey("observations")) {
-            delivery.setObservations(params.get("observations"));
-        }
+        Optional.ofNullable(params.get("freightValue"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(BigDecimal::new)
+                .ifPresent(delivery::setFreightValue);
 
-        if (params.containsKey("id")) {
-            try {
-                delivery.setId(Integer.parseInt(params.get("id")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
+        Optional.ofNullable(params.get("totalWeightKg"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(BigDecimal::new)
+                .ifPresent(delivery::setTotalWeightKg);
+
+        Optional.ofNullable(params.get("totalVolumeM3"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(BigDecimal::new)
+                .ifPresent(delivery::setTotalVolumeM3);
+
+        Optional.ofNullable(params.get("status"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(DeliveryStatus::fromValue)
+                .ifPresent(delivery::setStatus);
+
+        delivery.setObservations(params.get("observations"));
+
+        // Campos novos
+        Optional.ofNullable(params.get("deliveredAt"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(DateFormatter::parseLocalDateTime)
+                .ifPresent(delivery::setDeliveredAt);
+
+        Optional.ofNullable(params.get("deliveryDate"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(DateFormatter::parseLocalDateTime)
+                .ifPresent(delivery::setDeliveryDate);
+
+        delivery.setReasonNotDelivered(params.get("reasonNotDelivered"));
+
+        Optional.ofNullable(params.get("createdAt"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(DateFormatter::parseLocalDateTime)
+                .ifPresent(delivery::setCreatedAt);
+
+        Optional.ofNullable(params.get("updatedAt"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(DateFormatter::parseLocalDateTime)
+                .ifPresent(delivery::setUpdatedAt);
 
         return delivery;
     }
 
-    public static DeliveryProduct mapToDeliveryProduct(Map<String, String> params) {
-        DeliveryProduct deliveryProduct = new DeliveryProduct();
+    /**
+     * Mapeia um HashMap de parâmetros para um objeto Product.
+     */
+    public static Product mapToProduct(HashMap<String, String> params) {
+        Product product = new Product();
 
-        if (params.containsKey("deliveryId")) {
-            try {
-                deliveryProduct.setDeliveryId(Integer.parseInt(params.get("deliveryId")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
+        Optional.ofNullable(params.get("id"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(Integer::parseInt)
+                .ifPresent(product::setId);
 
-        if (params.containsKey("productId")) {
-            try {
-                deliveryProduct.setProductId(Integer.parseInt(params.get("productId")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
+        product.setName(params.get("name"));
+        product.setDescription(params.get("description"));
 
-        if (params.containsKey("quantity")) {
-            try {
-                deliveryProduct.setQuantity(Integer.parseInt(params.get("quantity")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
+        Optional.ofNullable(params.get("price"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(BigDecimal::new)
+                .ifPresent(product::setPrice);
 
-        if (params.containsKey("unitWeightKg")) {
-            try {
-                deliveryProduct.setUnitWeightKg(new BigDecimal(params.get("unitWeightKg")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
+        Optional.ofNullable(params.get("stockQuantity"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(Integer::parseInt)
+                .ifPresent(product::setStockQuantity);
 
-        if (params.containsKey("unitVolumeM3")) {
-            try {
-                deliveryProduct.setUnitVolumeM3(new BigDecimal(params.get("unitVolumeM3")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
+        Optional.ofNullable(params.get("createdAt"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(DateFormatter::parseLocalDateTime)
+                .ifPresent(product::setCreatedAt);
 
-        if (params.containsKey("unitValue")) {
-            try {
-                deliveryProduct.setUnitValue(new BigDecimal(params.get("unitValue")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
+        Optional.ofNullable(params.get("updatedAt"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(DateFormatter::parseLocalDateTime)
+                .ifPresent(product::setUpdatedAt);
 
-        if (params.containsKey("observations")) {
-            deliveryProduct.setObservations(params.get("observations"));
-        }
-
-        if (params.containsKey("id")) {
-            try {
-                deliveryProduct.setId(Integer.parseInt(params.get("id")));
-            } catch (NumberFormatException e) {
-                // Ignora erro de conversão
-            }
-        }
-
-        return deliveryProduct;
+        return product;
     }
 
-    public static Map<String, String> clientToMap(Client client) {
-        Map<String, String> map = new HashMap<>();
-
-        if (client.getId() != null) {
-            map.put("id", client.getId().toString());
-        }
-
-        if (client.getPersonType() != null) {
-            map.put("personType", client.getPersonType().getValue());
-        }
-
-        if (client.getDocument() != null) {
-            map.put("document", client.getDocument());
-        }
-
-        if (client.getName() != null) {
-            map.put("name", client.getName());
-        }
-
-        if (client.getEmail() != null) {
-            map.put("email", client.getEmail());
-        }
-
-        if (client.getPhone() != null) {
-            map.put("phone", client.getPhone());
-        }
-
+    /**
+     * Converte um objeto Delivery para um Map.
+     */
+    public static HashMap<String, Object> deliveryToMap(Delivery delivery) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("id", delivery.getId());
+        map.put("trackingCode", delivery.getTrackingCode());
+        map.put("shipperId", delivery.getShipperId());
+        map.put("recipientId", delivery.getRecipientId());
+        map.put("originAddressId", delivery.getOriginAddressId());
+        map.put("destinationAddressId", delivery.getDestinationAddressId());
+        map.put("totalValue", delivery.getTotalValue());
+        map.put("freightValue", delivery.getFreightValue());
+        map.put("totalWeightKg", delivery.getTotalWeightKg());
+        map.put("totalVolumeM3", delivery.getTotalVolumeM3());
+        map.put("status", delivery.getStatus().name());
+        map.put("observations", delivery.getObservations());
+        map.put("deliveryDate", delivery.getDeliveryDate());
+        map.put("deliveredAt", delivery.getDeliveredAt());
+        map.put("reasonNotDelivered", delivery.getReasonNotDelivered());
+        map.put("createdAt", delivery.getCreatedAt());
+        map.put("updatedAt", delivery.getUpdatedAt());
         return map;
     }
 }

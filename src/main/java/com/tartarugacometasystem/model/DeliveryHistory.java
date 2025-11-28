@@ -5,24 +5,28 @@ import java.time.LocalDateTime;
 public class DeliveryHistory {
     private Integer id;
     private Integer deliveryId;
-    private DeliveryStatus previousStatus;
-    private DeliveryStatus newStatus;
-    private LocalDateTime changeDate;
-    private String user;
+    private DeliveryStatus status; // Agora é um enum
     private String observations;
-    private String location;
+    private String user; // Usuário que realizou a alteração
+    private LocalDateTime createdAt;
 
-    public DeliveryHistory() {}
+    // Campos formatados para exibição no JSP
+    private String formattedCreatedAt;
 
-    public DeliveryHistory(Integer deliveryId, DeliveryStatus previousStatus,
-                          DeliveryStatus newStatus, String user) {
-        this.deliveryId = deliveryId;
-        this.previousStatus = previousStatus;
-        this.newStatus = newStatus;
-        this.user = user;
-        this.changeDate = LocalDateTime.now();
+    // Construtor padrão
+    public DeliveryHistory() {
     }
 
+    // Construtor completo
+    public DeliveryHistory(Integer deliveryId, DeliveryStatus status, String observations, String user) {
+        this.deliveryId = deliveryId;
+        this.status = status;
+        this.observations = observations;
+        this.user = user;
+        this.createdAt = LocalDateTime.now(); // Define a data de criação automaticamente
+    }
+
+    // Getters e Setters
     public Integer getId() {
         return id;
     }
@@ -39,36 +43,12 @@ public class DeliveryHistory {
         this.deliveryId = deliveryId;
     }
 
-    public DeliveryStatus getPreviousStatus() {
-        return previousStatus;
+    public DeliveryStatus getStatus() {
+        return status;
     }
 
-    public void setPreviousStatus(DeliveryStatus previousStatus) {
-        this.previousStatus = previousStatus;
-    }
-
-    public DeliveryStatus getNewStatus() {
-        return newStatus;
-    }
-
-    public void setNewStatus(DeliveryStatus newStatus) {
-        this.newStatus = newStatus;
-    }
-
-    public LocalDateTime getChangeDate() {
-        return changeDate;
-    }
-
-    public void setChangeDate(LocalDateTime changeDate) {
-        this.changeDate = changeDate;
-    }
-
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
+    public void setStatus(DeliveryStatus status) {
+        this.status = status;
     }
 
     public String getObservations() {
@@ -79,22 +59,39 @@ public class DeliveryHistory {
         this.observations = observations;
     }
 
-    public String getLocation() {
-        return location;
+    public String getUser() {
+        return user;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getFormattedCreatedAt() {
+        return formattedCreatedAt;
+    }
+
+    public void setFormattedCreatedAt(String formattedCreatedAt) {
+        this.formattedCreatedAt = formattedCreatedAt;
     }
 
     @Override
     public String toString() {
         return "DeliveryHistory{" +
-                "id=" + id +
-                ", deliveryId=" + deliveryId +
-                ", previousStatus=" + previousStatus +
-                ", newStatus=" + newStatus +
-                ", changeDate=" + changeDate +
-                '}';
+               "id=" + id +
+               ", deliveryId=" + deliveryId +
+               ", status=" + status +
+               ", observations='" + observations + '\'' +
+               ", user='" + user + '\'' +
+               ", createdAt=" + createdAt +
+               '}';
     }
 }

@@ -14,7 +14,7 @@
         <c:remove var="error" scope="session"/>
     </c:if>
 
-    <form method="POST" action="${pageContext.request.contextPath}/clients/save" class="form">
+    <form method="POST" action="${pageContext.request.contextPath}/clients/save">
         <input type="hidden" name="id" value="${client.id}">
 
         <div class="form-group">
@@ -29,13 +29,15 @@
         <div class="form-group">
             <label for="document">Documento (CPF/CNPJ) *</label>
             <input type="text" id="document" name="document" 
-                   value="${client.document}" required placeholder="000.000.000-00">
+                   value="${client.document}" 
+                   placeholder="000.000.000-00" required>
         </div>
 
         <div class="form-group">
             <label for="name">Nome/Razão Social *</label>
             <input type="text" id="name" name="name" 
-                   value="${client.name}" required placeholder="Nome completo">
+                   value="${client.name}" 
+                   placeholder="Nome completo ou razão social" required>
         </div>
 
         <div class="form-group">
@@ -57,6 +59,14 @@
             <a href="${pageContext.request.contextPath}/clients/view/${client.id}" class="btn btn-secondary">Cancelar</a>
         </div>
     </form>
+
+    <script>
+        // Remove formatação do documento antes de enviar
+        document.querySelector('form').addEventListener('submit', function() {
+            const documentInput = document.getElementById('document');
+            documentInput.value = documentInput.value.replace(/\D/g, '');
+        });
+    </script>
 </t:header>
 
 <t:footer />

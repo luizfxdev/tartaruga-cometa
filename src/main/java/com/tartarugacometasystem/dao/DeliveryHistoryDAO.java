@@ -5,132 +5,111 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import com.tartarugacometasystem.config.DatabaseConfig;
 import com.tartarugacometasystem.model.DeliveryHistory;
 import com.tartarugacometasystem.model.DeliveryStatus;
+import com.tartarugacometasystem.util.ConnectionFactory;
 
 public class DeliveryHistoryDAO {
 
-    public void save(DeliveryHistory history) throws SQLException {
-        String sql = "INSERT INTO historico_entrega (id_entrega, status_anterior, status_novo, " +
-                     "usuario, observacoes, localizacao) VALUES (?, ?, ?, ?, ?, ?)";
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
+    /**
+     * Cria um novo registro de histórico de entrega no banco de dados.
+     *
+     * @param history O objeto DeliveryHistory a ser criado.
+     * @return O objeto DeliveryHistory com o ID gerado.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public DeliveryHistory save(DeliveryHistory history) throws SQLException {
+        String sql = "INSERT INTO delivery_history (delivery_id, status, observations, user, created_at) VALUES (?, ?, ?, ?, ?)";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = ConnectionFactory.getConnection();
+            stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             stmt.setInt(1, history.getDeliveryId());
-            stmt.setString(2, history.getPreviousStatus() != null ? 
-                history.getPreviousStatus().getValue() : null);
-            stmt.setString(3, history.getNewStatus().getValue());
+            stmt.setString(2, history.getStatus().name()); // Salva o nome do enum
+            stmt.setString(3, history.getObservations());
             stmt.setString(4, history.getUser());
-            stmt.setString(5, history.getObservations());
-            stmt.setString(6, history.getLocation());
-
+            stmt.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
             stmt.executeUpdate();
 
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    history.setId(rs.getInt(1));
-                }
+            rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                history.setId(rs.getInt(1));
             }
+            return history;
+        } finally {
+            ConnectionFactory.close(conn, stmt, rs);
         }
     }
 
-    public Optional<DeliveryHistory> findById(Integer id) throws SQLException {
-        String sql = "SELECT id, id_entrega, status_anterior, status_novo, data_mudanca, " +
-                     "usuario, observacoes, localizacao FROM historico_entrega WHERE id = ?";
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, id);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapResultSetToDeliveryHistory(rs));
-                }
-            }
-        }
-        return Optional.empty();
-    }
-
-    public List<DeliveryHistory> findByDeliveryId(Integer deliveryId) throws SQLException {
-        String sql = "SELECT id, id_entrega, status_anterior, status_novo, data_mudanca, " +
-                     "usuario, observacoes, localizacao FROM historico_entrega " +
-                     "WHERE id_entrega = ? ORDER BY data_mudanca DESC";
-        List<DeliveryHistory> histories = new ArrayList<>();
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+    /**
+     * Busca registros de histórico de entrega pelo ID da entrega.
+     *
+     * @param deliveryId O ID da entrega.
+     * @return Uma lista de registros de histórico para a entrega.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public List<DeliveryHistory> getHistoryByDeliveryId(Integer deliveryId) throws SQLException {
+        List<DeliveryHistory> historyList = new ArrayList<>();
+        String sql = "SELECT * FROM delivery_history WHERE delivery_id = ? ORDER BY created_at ASC";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = ConnectionFactory.getConnection();
+            stmt = conn.prepareStatement(sql);
             stmt.setInt(1, deliveryId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    histories.add(mapResultSetToDeliveryHistory(rs));
-                }
-            }
-        }
-        return histories;
-    }
-
-    public List<DeliveryHistory> findByStatus(DeliveryStatus status) throws SQLException {
-        String sql = "SELECT id, id_entrega, status_anterior, status_novo, data_mudanca, " +
-                     "usuario, observacoes, localizacao FROM historico_entrega " +
-                     "WHERE status_novo = ? ORDER BY data_mudanca DESC";
-        List<DeliveryHistory> histories = new ArrayList<>();
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, status.getValue());
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    histories.add(mapResultSetToDeliveryHistory(rs));
-                }
-            }
-        }
-        return histories;
-    }
-
-    public List<DeliveryHistory> findAll() throws SQLException {
-        String sql = "SELECT id, id_entrega, status_anterior, status_novo, data_mudanca, " +
-                     "usuario, observacoes, localizacao FROM historico_entrega " +
-                     "ORDER BY data_mudanca DESC";
-        List<DeliveryHistory> histories = new ArrayList<>();
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
+            rs = stmt.executeQuery();
             while (rs.next()) {
-                histories.add(mapResultSetToDeliveryHistory(rs));
+                historyList.add(mapResultSetToDeliveryHistory(rs));
             }
+        } finally {
+            ConnectionFactory.close(conn, stmt, rs);
         }
-        return histories;
+        return historyList;
     }
 
+    /**
+     * Deleta todos os registros de histórico para uma dada entrega.
+     *
+     * @param deliveryId O ID da entrega.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public void deleteByDeliveryId(Integer deliveryId) throws SQLException {
+        String sql = "DELETE FROM delivery_history WHERE delivery_id = ?";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        try {
+            conn = ConnectionFactory.getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, deliveryId);
+            stmt.executeUpdate();
+        } finally {
+            ConnectionFactory.close(conn, stmt);
+        }
+    }
+
+    /**
+     * Mapeia um ResultSet para um objeto DeliveryHistory.
+     *
+     * @param rs O ResultSet.
+     * @return Um objeto DeliveryHistory.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
     private DeliveryHistory mapResultSetToDeliveryHistory(ResultSet rs) throws SQLException {
         DeliveryHistory history = new DeliveryHistory();
         history.setId(rs.getInt("id"));
-        history.setDeliveryId(rs.getInt("id_entrega"));
-
-        String previousStatus = rs.getString("status_anterior");
-        if (previousStatus != null) {
-            history.setPreviousStatus(DeliveryStatus.fromValue(previousStatus));
-        }
-
-        history.setNewStatus(DeliveryStatus.fromValue(rs.getString("status_novo")));
-        history.setChangeDate(rs.getTimestamp("data_mudanca").toLocalDateTime());
-        history.setUser(rs.getString("usuario"));
-        history.setObservations(rs.getString("observacoes"));
-        history.setLocation(rs.getString("localizacao"));
-
+        history.setDeliveryId(rs.getInt("delivery_id"));
+        history.setStatus(DeliveryStatus.fromValue(rs.getString("status"))); // Converte String para enum
+        history.setObservations(rs.getString("observations"));
+        history.setUser(rs.getString("user"));
+        history.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
         return history;
     }
 }

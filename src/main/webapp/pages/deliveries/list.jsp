@@ -57,8 +57,8 @@
                             <tr>
                                 <td>${delivery.id}</td>
                                 <td><strong>${delivery.trackingCode}</strong></td>
-                                <td>${delivery.shipperId}</td>
-                                <td>${delivery.recipientId}</td>
+                                <td>${delivery.shipper.name}</td> <%-- Alterado para nome do remetente --%>
+                                <td>${delivery.recipient.name}</td> <%-- Alterado para nome do destinatário --%>
                                 <td>
                                     <c:choose>
                                         <c:when test="${delivery.status.value == 'PENDENTE'}">
@@ -77,18 +77,18 @@
                                             <span class="badge badge-danger">Cancelada</span>
                                         </c:when>
                                         <c:otherwise>
-                                            <span class="badge badge-secondary">${delivery.status.label}</span>
+                                            <span class="badge badge-light">${delivery.status.label}</span>
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
-                                <td><fmt:formatNumber value="${delivery.totalValue}" type="currency" currencySymbol="R$ "/></td>
-                                <td><fmt:formatDate value="${delivery.createdAt}" pattern="dd/MM/yyyy HH:mm"/></td>
+                                <td><fmt:formatNumber value="${delivery.totalValue}" type="currency" currencySymbol="R$ " minFractionDigits="2" maxFractionDigits="2"/></td>
+                                <td>${delivery.formattedCreatedAt}</td> <%-- Usando campo formatado --%>
                                 <td>
-                                    <div class="actions">
+                                    <div class="action-buttons">
                                         <a href="${pageContext.request.contextPath}/deliveries/view/${delivery.id}" class="btn btn-info btn-sm">Ver</a>
                                         <a href="${pageContext.request.contextPath}/deliveries/edit/${delivery.id}" class="btn btn-warning btn-sm">Editar</a>
                                         <form method="POST" action="${pageContext.request.contextPath}/deliveries/delete/${delivery.id}" style="display:inline;">
-                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza?')">Deletar</button>
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja deletar esta entrega?')">Deletar</button>
                                         </form>
                                     </div>
                                 </td>

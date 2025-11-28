@@ -1,7 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <t:header title="Clientes">
     <div class="page-header">
@@ -33,16 +32,17 @@
     <c:choose>
         <c:when test="${not empty clients}">
             <div class="table-container">
-                <table class="table">
+                <table>
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Nome</th>
                             <th>Tipo</th>
                             <th>Documento</th>
+                            <th>Nome</th>
                             <th>Email</th>
                             <th>Telefone</th>
-                            <th>Data de Criação</th>
+                            <th>Cadastro</th>
+                            <th>Última Atualização</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
@@ -50,15 +50,15 @@
                         <c:forEach var="client" items="${clients}">
                             <tr>
                                 <td>${client.id}</td>
-                                <td><strong>${client.name}</strong></td>
-                                <td>${client.personType.label}</td>
+                                <td>${client.personType.value}</td>
                                 <td>${client.document}</td>
-                                <td>${client.email != null ? client.email : '-'}</td>
-                                <td>${client.phone != null ? client.phone : '-'}</td>
-                                <td><fmt:formatDate value="${client.createdAt}" pattern="dd/MM/yyyy"/></td>
+                                <td>${client.name}</td>
+                                <td>${client.email}</td>
+                                <td>${client.phone}</td>
+                                <td>${client.formattedCreatedAt}</td>
+                                <td>${client.formattedUpdatedAt != null ? client.formattedUpdatedAt : '-'}</td>
                                 <td>
-                                    <div class="actions">
-                                        <a href="${pageContext.request.contextPath}/clients/view/${client.id}" class="btn btn-info btn-sm">Ver</a>
+                                    <div class="action-buttons">
                                         <a href="${pageContext.request.contextPath}/clients/edit/${client.id}" class="btn btn-warning btn-sm">Editar</a>
                                         <form method="POST" action="${pageContext.request.contextPath}/clients/delete/${client.id}" style="display:inline;">
                                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza?')">Deletar</button>

@@ -19,35 +19,59 @@
 
         <div class="form-group">
             <label for="trackingCode">Código de Rastreio *</label>
-            <input type="text" id="trackingCode" name="trackingCode" 
+            <input type="text" id="trackingCode" name="trackingCode"
                    value="${delivery != null ? delivery.trackingCode : ''}" required>
         </div>
 
         <div class="form-row">
             <div class="form-group">
-                <label for="shipperId">Remetente (ID) *</label>
-                <input type="number" id="shipperId" name="shipperId" 
-                       value="${delivery != null ? delivery.shipperId : ''}" required>
+                <label for="shipperId">Remetente (Nome) *</label>
+                <select id="shipperId" name="shipperId" required>
+                    <option value="">Selecione o Remetente</option>
+                    <c:forEach var="client" items="${allClients}">
+                        <option value="${client.id}" ${delivery != null && delivery.shipperId == client.id ? 'selected' : ''}>
+                            ${client.name} (${client.document})
+                        </option>
+                    </c:forEach>
+                </select>
             </div>
 
             <div class="form-group">
-                <label for="recipientId">Destinatário (ID) *</label>
-                <input type="number" id="recipientId" name="recipientId" 
-                       value="${delivery != null ? delivery.recipientId : ''}" required>
+                <label for="recipientId">Destinatário (Nome) *</label>
+                <select id="recipientId" name="recipientId" required>
+                    <option value="">Selecione o Destinatário</option>
+                    <c:forEach var="client" items="${allClients}">
+                        <option value="${client.id}" ${delivery != null && delivery.recipientId == client.id ? 'selected' : ''}>
+                            ${client.name} (${client.document})
+                        </option>
+                    </c:forEach>
+                </select>
             </div>
         </div>
 
         <div class="form-row">
             <div class="form-group">
-                <label for="originAddressId">Endereço de Origem (ID) *</label>
-                <input type="number" id="originAddressId" name="originAddressId" 
-                       value="${delivery != null ? delivery.originAddressId : ''}" required>
+                <label for="originAddressId">Endereço de Origem *</label>
+                <select id="originAddressId" name="originAddressId" required>
+                    <option value="">Selecione o Endereço de Origem</option>
+                    <c:forEach var="address" items="${allAddresses}">
+                        <option value="${address.id}" ${delivery != null && delivery.originAddressId == address.id ? 'selected' : ''}>
+                            ${address.street}, ${address.number} - ${address.city}/${address.state} (Cliente ID: ${address.clientId})
+                        </option>
+                    </c:forEach>
+                </select>
             </div>
 
             <div class="form-group">
-                <label for="destinationAddressId">Endereço de Destino (ID) *</label>
-                <input type="number" id="destinationAddressId" name="destinationAddressId" 
-                       value="${delivery != null ? delivery.destinationAddressId : ''}" required>
+                <label for="destinationAddressId">Endereço de Destino *</label>
+                <select id="destinationAddressId" name="destinationAddressId" required>
+                    <option value="">Selecione o Endereço de Destino</option>
+                    <c:forEach var="address" items="${allAddresses}">
+                        <option value="${address.id}" ${delivery != null && delivery.destinationAddressId == address.id ? 'selected' : ''}>
+                            ${address.street}, ${address.number} - ${address.city}/${address.state} (Cliente ID: ${address.clientId})
+                        </option>
+                    </c:forEach>
+                </select>
             </div>
         </div>
 
@@ -83,11 +107,11 @@
             <label for="status">Status *</label>
             <select id="status" name="status" required>
                 <option value="">Selecione...</option>
-                <option value="PENDENTE" ${delivery != null && delivery.status.value == 'PENDENTE' ? 'selected' : ''}>Pendente</option>
-                <option value="EM_TRANSITO" ${delivery != null && delivery.status.value == 'EM_TRANSITO' ? 'selected' : ''}>Em Trânsito</option>
-                <option value="ENTREGUE" ${delivery != null && delivery.status.value == 'ENTREGUE' ? 'selected' : ''}>Entregue</option>
-                <option value="NAO_REALIZADA" ${delivery != null && delivery.status.value == 'NAO_REALIZADA' ? 'selected' : ''}>Não Realizada</option>
-                <option value="CANCELADA" ${delivery != null && delivery.status.value == 'CANCELADA' ? 'selected' : ''}>Cancelada</option>
+                <c:forEach var="deliveryStatus" items="${deliveryStatuses}">
+                    <option value="${deliveryStatus.value}" ${delivery != null && delivery.status.value == deliveryStatus.value ? 'selected' : ''}>
+                        ${deliveryStatus.label}
+                    </option>
+                </c:forEach>
             </select>
         </div>
 

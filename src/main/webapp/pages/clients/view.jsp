@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <t:header title="Detalhes do Cliente">
     <div class="page-header">
@@ -21,7 +21,14 @@
 
         <div class="detail-row">
             <label>Tipo de Pessoa:</label>
-            <span>${client.personType.label}</span>
+            <span>
+                <c:if test="${client.personType.value == 'FISICA'}">
+                    Pessoa Física
+                </c:if>
+                <c:if test="${client.personType.value == 'JURIDICA'}">
+                    Pessoa Jurídica
+                </c:if>
+            </span>
         </div>
 
         <div class="detail-row">
@@ -46,7 +53,12 @@
 
         <div class="detail-row">
             <label>Data de Criação:</label>
-            <span><fmt:formatDate value="${client.createdAt}" pattern="dd/MM/yyyy HH:mm"/></span>
+            <span>${client.formattedCreatedAt}</span>
+        </div>
+
+        <div class="detail-row">
+            <label>Última Atualização:</label>
+            <span>${client.formattedUpdatedAt != null ? client.formattedUpdatedAt : 'Nunca atualizado'}</span>
         </div>
     </div>
 

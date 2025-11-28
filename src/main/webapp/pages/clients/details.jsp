@@ -1,7 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <t:header title="Detalhes Completos do Cliente">
     <div class="page-header">
@@ -62,29 +61,17 @@
 
         <div class="detail-row">
             <label>Data de Criação:</label>
-            <span><fmt:formatDate value="${client.createdAt}" pattern="dd/MM/yyyy HH:mm:ss"/></span>
+            <span>${client.formattedCreatedAt}</span>
         </div>
 
         <div class="detail-row">
             <label>Última Atualização:</label>
             <span>
-                <c:if test="${client.updatedAt != null}">
-                    <fmt:formatDate value="${client.updatedAt}" pattern="dd/MM/yyyy HH:mm:ss"/>
+                <c:if test="${client.formattedUpdatedAt != null}">
+                    ${client.formattedUpdatedAt}
                 </c:if>
-                <c:if test="${client.updatedAt == null}">
+                <c:if test="${client.formattedUpdatedAt == null}">
                     Nunca atualizado
-                </c:if>
-            </span>
-        </div>
-
-        <div class="detail-row">
-            <label>Status:</label>
-            <span>
-                <c:if test="${client.active}">
-                    <span class="badge badge-success">Ativo</span>
-                </c:if>
-                <c:if test="${not client.active}">
-                    <span class="badge badge-danger">Inativo</span>
                 </c:if>
             </span>
         </div>

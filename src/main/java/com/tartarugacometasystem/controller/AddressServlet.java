@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Optional; // Importar Mapper
 
 import com.tartarugacometasystem.model.Address;
-import com.tartarugacometasystem.model.AddressType;
 import com.tartarugacometasystem.model.Client;
 import com.tartarugacometasystem.service.AddressService;
 import com.tartarugacometasystem.service.ClientService;
@@ -22,7 +21,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @WebServlet("/addresses/*")
 public class AddressServlet extends HttpServlet {
     private AddressService addressService;
-    private ClientService clientService;
+    private ClientService clientService; // Para buscar clientes para o formulário
 
     @Override
     public void init() throws ServletException {
@@ -32,7 +31,7 @@ public class AddressServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
 
@@ -43,7 +42,9 @@ public class AddressServlet extends HttpServlet {
                 showNewForm(request, response);
             } else if (pathInfo.startsWith("/edit/")) {
                 showEditForm(request, response, pathInfo);
-            } else if (pathInfo.startsWith("/client/")) {
+            } else if (pathInfo.startsWith("/view/")) {
+                viewAddress(request, response, pathInfo);
+            } else if (pathInfo.startsWith("/byClient/")) { // Novo endpoint para listar endereços de um cliente
                 listAddressesByClient(request, response, pathInfo);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -55,16 +56,16 @@ public class AddressServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
 
         try {
-            if (pathInfo.equals("/save")) {
+            if (pathInfo == null || pathInfo.equals("/") || pathInfo.equals("/save")) {
                 saveAddress(request, response);
             } else if (pathInfo.startsWith("/delete/")) {
                 deleteAddress(request, response, pathInfo);
-            } else if (pathInfo.startsWith("/set-principal/")) {
+            } else if (pathInfo.startsWith("/setPrincipal/")) { // Novo endpoint para definir endereço principal
                 setPrincipalAddress(request, response, pathInfo);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -75,129 +76,121 @@ public class AddressServlet extends HttpServlet {
         }
     }
 
-    private void listAddresses(HttpServletRequest request, HttpServletResponse response) 
+    private void listAddresses(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
-        String clientId = request.getParameter("clientId");
-
-        if (clientId != null && !clientId.isEmpty()) {
-            Integer id = Integer.parseInt(clientId);
-            List<Address> addresses = addressService.getAddressesByClientId(id);
-            Optional<Client> client = clientService.getClientById(id);
-
-            request.setAttribute("addresses", addresses);
-            request.setAttribute("client", client.orElse(null));
-        }
-
+        List<Address> addresses = addressService.getAllAddresses();
+        request.setAttribute("addresses", addresses);
         request.getRequestDispatcher("/pages/addresses/list.jsp").forward(request, response);
     }
 
-    private void showNewForm(HttpServletRequest request, HttpServletResponse response) 
-            throws SQLException, ServletException, IOException {
-        String clientId = request.getParameter("clientId");
-
-        if (clientId != null && !clientId.isEmpty()) {
-            Integer id = Integer.parseInt(clientId);
-            Optional<Client> clientOptional = clientService.getClientById(id);
-            Client client = clientOptional.orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado"));
-
-            request.setAttribute("client", client);
-            request.setAttribute("addressTypes", AddressType.values());
-        }
-
-        request.getRequestDispatcher("/pages/addresses/new.jsp").forward(request, response);
-    }
-
-    private void showEditForm(HttpServletRequest request, HttpServletResponse response, String pathInfo) 
-            throws SQLException, ServletException, IOException {
-        Integer id = extractId(pathInfo);
-        Optional<Address> addressOptional = addressService.getAddressById(id);
-        Address address = addressOptional.orElseThrow(() -> new IllegalArgumentException("Endereço não encontrado"));
-
-        Optional<Client> client = clientService.getClientById(address.getClientId());
-
-        request.setAttribute("address", address);
-        request.setAttribute("client", client.orElse(null));
-        request.setAttribute("addressTypes", AddressType.values());
-        request.getRequestDispatcher("/pages/addresses/new.jsp").forward(request, response);
-    }
-
-    private void listAddressesByClient(HttpServletRequest request, HttpServletResponse response, String pathInfo) 
+    private void listAddressesByClient(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, ServletException, IOException {
         Integer clientId = extractId(pathInfo);
         List<Address> addresses = addressService.getAddressesByClientId(clientId);
         Optional<Client> client = clientService.getClientById(clientId);
 
-        request.setAttribute("addresses", addresses);
-        request.setAttribute("client", client.orElse(null));
-        request.getRequestDispatcher("/pages/addresses/list.jsp").forward(request, response);
+        if (client.isPresent()) {
+            request.setAttribute("client", client.get());
+            request.setAttribute("addresses", addresses);
+            request.getRequestDispatcher("/pages/addresses/listByClient.jsp").forward(request, response);
+        } else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Cliente não encontrado.");
+        }
     }
 
-    private void saveAddress(HttpServletRequest request, HttpServletResponse response) 
-            throws SQLException, IOException {
+    private void showNewForm(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, ServletException, IOException {
+        List<Client> clients = clientService.getAllClients(); // Para popular o dropdown de clientes
+        request.setAttribute("clients", clients);
+        request.getRequestDispatcher("/pages/addresses/new.jsp").forward(request, response);
+    }
+
+    private void showEditForm(HttpServletRequest request, HttpServletResponse response, String pathInfo)
+            throws SQLException, ServletException, IOException {
+        Integer id = extractId(pathInfo);
+        Optional<Address> address = addressService.getAddressById(id);
+
+        if (address.isPresent()) {
+            List<Client> clients = clientService.getAllClients(); // Para popular o dropdown de clientes
+            request.setAttribute("address", address.get());
+            request.setAttribute("clients", clients);
+            request.getRequestDispatcher("/pages/addresses/new.jsp").forward(request, response);
+        } else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+
+    private void viewAddress(HttpServletRequest request, HttpServletResponse response, String pathInfo)
+            throws SQLException, ServletException, IOException {
+        Integer id = extractId(pathInfo);
+        Optional<Address> address = addressService.getAddressById(id);
+
+        if (address.isPresent()) {
+            request.setAttribute("address", address.get());
+            request.getRequestDispatcher("/pages/addresses/view.jsp").forward(request, response);
+        } else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+
+    private void saveAddress(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, IOException, ServletException {
+        HashMap<String, String> params = new HashMap<>();
+        request.getParameterMap().forEach((key, value) -> params.put(key, value[0]));
+        Address address = Mapper.mapToAddress(params); // Usar Mapper
+
         try {
-            HashMap<String, String> params = new HashMap<>();
-            params.put("id", request.getParameter("id"));
-            params.put("clientId", request.getParameter("clientId"));
-            params.put("addressType", request.getParameter("addressType"));
-            params.put("street", request.getParameter("street"));
-            params.put("number", request.getParameter("number"));
-            params.put("complement", request.getParameter("complement"));
-            params.put("neighborhood", request.getParameter("neighborhood"));
-            params.put("city", request.getParameter("city"));
-            params.put("state", request.getParameter("state"));
-            params.put("zipCode", request.getParameter("zipCode"));
-            params.put("reference", request.getParameter("reference"));
-            params.put("isPrincipal", request.getParameter("isPrincipal"));
-
-            Address address = Mapper.mapToAddress(params);
-
-            if (address.getId() != null && address.getId() > 0) {
-                addressService.updateAddress(address);
-                request.getSession().setAttribute("success", "Endereço atualizado com sucesso");
-            } else {
+            if (address.getId() == null) {
                 addressService.createAddress(address);
-                request.getSession().setAttribute("success", "Endereço criado com sucesso");
+                request.getSession().setAttribute("success", "Endereço criado com sucesso!");
+            } else {
+                addressService.updateAddress(address);
+                request.getSession().setAttribute("success", "Endereço atualizado com sucesso!");
             }
-
-            response.sendRedirect(request.getContextPath() + "/addresses/client/" + address.getClientId());
+            response.sendRedirect(request.getContextPath() + "/addresses/byClient/" + address.getClientId());
         } catch (IllegalArgumentException e) {
             request.getSession().setAttribute("error", e.getMessage());
-            response.sendRedirect(request.getContextPath() + "/addresses/new?clientId=" + request.getParameter("clientId"));
+            List<Client> clients = clientService.getAllClients(); // Recarrega clientes para o formulário
+            request.setAttribute("address", address); // Mantém os dados preenchidos
+            request.setAttribute("clients", clients);
+            request.getRequestDispatcher("/pages/addresses/new.jsp").forward(request, response);
         }
     }
 
-    private void deleteAddress(HttpServletRequest request, HttpServletResponse response, String pathInfo) 
+    private void deleteAddress(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, IOException {
-        try {
-            Integer id = extractId(pathInfo);
-            Optional<Address> addressOptional = addressService.getAddressById(id);
-            Address address = addressOptional.orElseThrow(() -> new IllegalArgumentException("Endereço não encontrado"));
-
-            Integer clientId = address.getClientId();
-            addressService.deleteAddress(id);
-            request.getSession().setAttribute("success", "Endereço deletado com sucesso");
-            response.sendRedirect(request.getContextPath() + "/addresses/client/" + clientId);
-        } catch (IllegalArgumentException e) {
-            request.getSession().setAttribute("error", e.getMessage());
-            response.sendRedirect(request.getContextPath() + "/addresses/");
+        Integer id = extractId(pathInfo);
+        Optional<Address> addressToDelete = addressService.getAddressById(id);
+        if (addressToDelete.isEmpty()) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Endereço não encontrado para exclusão.");
+            return;
         }
+        Integer clientId = addressToDelete.get().getClientId();
+        addressService.deleteAddress(id);
+        request.getSession().setAttribute("success", "Endereço deletado com sucesso!");
+        response.sendRedirect(request.getContextPath() + "/addresses/byClient/" + clientId);
     }
 
-    private void setPrincipalAddress(HttpServletRequest request, HttpServletResponse response, String pathInfo) 
+    private void setPrincipalAddress(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, IOException {
-        try {
-            Integer addressId = extractId(pathInfo);
-            Optional<Address> addressOptional = addressService.getAddressById(addressId);
-            Address address = addressOptional.orElseThrow(() -> new IllegalArgumentException("Endereço não encontrado"));
+        Integer addressId = extractId(pathInfo);
+        Integer clientId = Integer.parseInt(request.getParameter("clientId")); // Precisa vir do formulário ou URL
 
-            Integer clientId = address.getClientId();
+        try {
             addressService.setPrincipalAddress(clientId, addressId);
-            request.getSession().setAttribute("success", "Endereço principal atualizado com sucesso");
-            response.sendRedirect(request.getContextPath() + "/addresses/client/" + clientId);
+            request.getSession().setAttribute("success", "Endereço principal definido com sucesso!");
+            response.sendRedirect(request.getContextPath() + "/addresses/byClient/" + clientId);
         } catch (IllegalArgumentException e) {
             request.getSession().setAttribute("error", e.getMessage());
-            response.sendRedirect(request.getContextPath() + "/addresses/");
+            response.sendRedirect(request.getContextPath() + "/addresses/byClient/" + clientId);
         }
+    }
+
+    // Método auxiliar para construir um objeto Address a partir dos parâmetros da requisição (usando Mapper)
+    private Address buildAddressFromRequest(HttpServletRequest request) {
+        HashMap<String, String> params = new HashMap<>();
+        request.getParameterMap().forEach((key, value) -> params.put(key, value[0]));
+        return Mapper.mapToAddress(params);
     }
 
     private Integer extractId(String pathInfo) {

@@ -21,11 +21,15 @@ dependencies {
     providedCompile 'jakarta.servlet:jakarta.servlet-api:6.0.0'
     providedCompile 'jakarta.servlet.jsp:jakarta.servlet.jsp-api:3.1.1'
 
-    // JSTL para Jakarta
+    // JSTL para Jakarta (CORRIGIDO - adicionado API também)
     implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1'
+    implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.0'
 
-    // PostgreSQL Driver
+    // PostgreSQL Driver (CORRETO - já estava aqui)
     implementation 'org.postgresql:postgresql:42.7.1'
+
+    // >>> REMOVIDO: A dependência do MySQL não é necessária, pois você usa PostgreSQL <<<
+    // runtimeOnly 'mysql:mysql-connector-java:8.0.33' 
 
     // JUnit para testes
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'

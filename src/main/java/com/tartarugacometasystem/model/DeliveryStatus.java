@@ -1,28 +1,29 @@
 package com.tartarugacometasystem.model;
 
 public enum DeliveryStatus {
-    PENDENTE("PENDENTE"),
-    EM_TRANSITO("EM_TRANSITO"),
-    ENTREGUE("ENTREGUE"),
-    CANCELADA("CANCELADA"),
-    NAO_REALIZADA("NAO_REALIZADA");
+    PENDENTE("Pendente"),
+    EM_TRANSPORTE("Em Transporte"),
+    ENTREGUE("Entregue"),
+    NAO_REALIZADA("Não Realizada"),
+    CANCELADA("Cancelada");
 
-    private final String value;
+    private final String label;
 
-    DeliveryStatus(String value) {
-        this.value = value;
+    DeliveryStatus(String label) {
+        this.label = label;
     }
 
-    public String getValue() {
-        return value;
+    public String getLabel() {
+        return label;
     }
 
+    // Método para converter String para DeliveryStatus (útil para DAO)
     public static DeliveryStatus fromValue(String value) {
         for (DeliveryStatus status : DeliveryStatus.values()) {
-            if (status.value.equals(value)) {
+            if (status.name().equalsIgnoreCase(value)) {
                 return status;
             }
         }
-        throw new IllegalArgumentException("Status inválido: " + value);
+        throw new IllegalArgumentException("Status de entrega inválido: " + value);
     }
 }

@@ -1,60 +1,92 @@
 package com.tartarugacometasystem.service;
 
-import java.math.BigDecimal;
-import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import com.tartarugacometasystem.dao.DeliveryDAO;
 import com.tartarugacometasystem.dao.DeliveryHistoryDAO;
-import com.tartarugacometasystem.dao.DeliveryProductDAO;
+import com.tartarugacometasystem.model.Address;
+import com.tartarugacometasystem.model.Client;
 import com.tartarugacometasystem.model.Delivery;
 import com.tartarugacometasystem.model.DeliveryHistory;
-import com.tartarugacometasystem.model.DeliveryProduct;
 import com.tartarugacometasystem.model.DeliveryStatus;
+import com.tartarugacometasystem.util.DateFormatter;
+
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class DeliveryService {
-    private final DeliveryDAO deliveryDAO;
-    private final DeliveryProductDAO deliveryProductDAO;
-    private final DeliveryHistoryDAO deliveryHistoryDAO;
+    private DeliveryDAO deliveryDAO;
+    private DeliveryHistoryDAO deliveryHistoryDAO;
+    private ClientService clientService; // Para buscar dados do remetente/destinatário
+    private AddressService addressService; // Para buscar dados dos endereços
 
     public DeliveryService() {
         this.deliveryDAO = new DeliveryDAO();
-        this.deliveryProductDAO = new DeliveryProductDAO();
         this.deliveryHistoryDAO = new DeliveryHistoryDAO();
+        this.clientService = new ClientService();
+        this.addressService = new AddressService();
     }
 
-    public void createDelivery(Delivery delivery) throws SQLException, IllegalArgumentException {
+    /**
+     * Cria uma nova entrega e registra o histórico inicial.
+     *
+     * @param delivery O objeto Delivery a ser criado.
+     * @return O objeto Delivery criado com o ID.
+     * @throws SQLException           Se ocorrer um erro de SQL.
+     * @throws IllegalArgumentException Se a entrega for inválida.
+     */
+    public Delivery createDelivery(Delivery delivery) throws SQLException {
         validateDelivery(delivery);
+        delivery.setStatus(DeliveryStatus.PENDENTE); // Define o status inicial
+        Delivery savedDelivery = deliveryDAO.save(delivery);
 
-        if (delivery.getTrackingCode() == null || delivery.getTrackingCode().trim().isEmpty()) {
-            delivery.setTrackingCode(generateTrackingCode());
-        }
-
-        deliveryDAO.save(delivery);
-
-        DeliveryHistory history = new DeliveryHistory(delivery.getId(), null, DeliveryStatus.PENDENTE, "SYSTEM");
-        history.setObservations("Entrega criada no sistema");
+        // Registra o histórico de criação
+        DeliveryHistory history = new DeliveryHistory(savedDelivery.getId(), DeliveryStatus.PENDENTE, "Entrega criada", "SYSTEM");
         deliveryHistoryDAO.save(history);
+
+        return savedDelivery;
     }
 
-    public void updateDelivery(Delivery delivery) throws SQLException, IllegalArgumentException {
+    /**
+     * Busca uma entrega pelo ID.
+     *
+     * @param id O ID da entrega.
+     * @return Um Optional contendo o Delivery se encontrado, ou Optional.empty().
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public Optional<Delivery> getDeliveryById(Integer id) throws SQLException {
+        Optional<Delivery> delivery = deliveryDAO.findById(id);
+        delivery.ifPresent(this::enrichDelivery); // Enriquecer se presente
+        return delivery;
+    }
+
+    /**
+     * Atualiza uma entrega existente e registra a alteração no histórico.
+     *
+     * @param delivery O objeto Delivery a ser atualizado.
+     * @throws SQLException           Se ocorrer um erro de SQL.
+     * @throws IllegalArgumentException Se a entrega for inválida ou não existir.
+     */
+    public void updateDelivery(Delivery delivery) throws SQLException {
         if (delivery.getId() == null) {
-            throw new IllegalArgumentException("ID da entrega é obrigatório para atualização");
+            throw new IllegalArgumentException("ID da entrega é obrigatório para atualização.");
+        }
+        validateDelivery(delivery);
+        Optional<Delivery> existingOptional = deliveryDAO.findById(delivery.getId());
+        if (existingOptional.isEmpty()) {
+            throw new IllegalArgumentException("Entrega com ID " + delivery.getId() + " não encontrada.");
         }
 
-        Optional<Delivery> existingOptional = deliveryDAO.findById(delivery.getId());
-        Delivery existingDelivery = existingOptional.orElseThrow(() -> new IllegalArgumentException("Entrega não encontrada"));
+        Delivery existingDelivery = existingOptional.get();
 
+        // Se o status mudou, registra no histórico
         if (!existingDelivery.getStatus().equals(delivery.getStatus())) {
             DeliveryHistory history = new DeliveryHistory(
-                delivery.getId(),
-                existingDelivery.getStatus(),
-                delivery.getStatus(),
-                "SYSTEM"
+                    delivery.getId(),
+                    delivery.getStatus(), // Novo status
+                    "Status alterado de " + existingDelivery.getStatus().getLabel() + " para " + delivery.getStatus().getLabel(),
+                    "SYSTEM" // Ou o usuário logado
             );
             deliveryHistoryDAO.save(history);
         }
@@ -62,366 +94,198 @@ public class DeliveryService {
         deliveryDAO.update(delivery);
     }
 
-    public void deleteDelivery(Integer deliveryId) throws SQLException {
-        if (deliveryId == null || deliveryId <= 0) {
-            throw new IllegalArgumentException("ID da entrega inválido");
-        }
-
-        deliveryProductDAO.deleteByDeliveryId(deliveryId);
-        deliveryDAO.delete(deliveryId);
+    /**
+     * Deleta uma entrega pelo ID e seu histórico associado.
+     *
+     * @param id O ID da entrega a ser deletada.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public void deleteDelivery(Integer id) throws SQLException {
+        // Primeiro, deleta o histórico associado à entrega
+        deliveryHistoryDAO.deleteByDeliveryId(id);
+        // Depois, deleta a entrega
+        deliveryDAO.delete(id);
     }
 
-    public Optional<Delivery> getDeliveryById(Integer deliveryId) throws SQLException {
-        if (deliveryId == null || deliveryId <= 0) {
-            throw new IllegalArgumentException("ID da entrega inválido");
+    /**
+     * Marca uma entrega como "ENTREGUE" e registra no histórico.
+     *
+     * @param id   ID da entrega.
+     * @param user Usuário que realizou a ação.
+     * @throws SQLException           Se ocorrer um erro de SQL.
+     * @throws IllegalArgumentException Se a entrega não for encontrada ou já estiver entregue/cancelada.
+     */
+    public void markAsDelivered(Integer id, String user) throws SQLException {
+        Optional<Delivery> deliveryOptional = deliveryDAO.findById(id);
+        if (deliveryOptional.isEmpty()) {
+            throw new IllegalArgumentException("Entrega com ID " + id + " não encontrada.");
+        }
+        Delivery delivery = deliveryOptional.get();
+
+        if (delivery.getStatus().equals(DeliveryStatus.ENTREGUE) || delivery.getStatus().equals(DeliveryStatus.CANCELADA)) {
+            throw new IllegalArgumentException("Entrega já está " + delivery.getStatus().getLabel() + " e não pode ser marcada como entregue.");
         }
 
-        Optional<Delivery> delivery = deliveryDAO.findById(deliveryId);
-        if (delivery.isPresent()) {
-            List<DeliveryProduct> products = deliveryProductDAO.findByDeliveryId(deliveryId);
-            delivery.get().setProducts(products);
-        }
-        return delivery;
-    }
+        // Atualiza o status e a data de entrega
+        deliveryDAO.updateStatus(id, DeliveryStatus.ENTREGUE, "Entrega realizada", LocalDateTime.now(), null);
 
-    public Optional<Delivery> getDeliveryByTrackingCode(String trackingCode) throws SQLException {
-        if (trackingCode == null || trackingCode.trim().isEmpty()) {
-            throw new IllegalArgumentException("Código de rastreamento não pode estar vazio");
-        }
-
-        Optional<Delivery> delivery = deliveryDAO.findByTrackingCode(trackingCode.trim());
-        if (delivery.isPresent()) {
-            List<DeliveryProduct> products = deliveryProductDAO.findByDeliveryId(delivery.get().getId());
-            delivery.get().setProducts(products);
-        }
-        return delivery;
-    }
-
-    public List<Delivery> getAllDeliveries() throws SQLException {
-        return deliveryDAO.findAll();
-    }
-
-    public List<Delivery> getDeliveriesByStatus(DeliveryStatus status) throws SQLException {
-        if (status == null) {
-            throw new IllegalArgumentException("Status não pode ser nulo");
-        }
-
-        return deliveryDAO.findByStatus(status);
-    }
-
-    public List<Delivery> getDeliveriesByShipperId(Integer shipperId) throws SQLException {
-        if (shipperId == null || shipperId <= 0) {
-            throw new IllegalArgumentException("ID do remetente inválido");
-        }
-
-        return deliveryDAO.findByShipperId(shipperId);
-    }
-
-    public List<Delivery> getDeliveriesByRecipientId(Integer recipientId) throws SQLException {
-        if (recipientId == null || recipientId <= 0) {
-            throw new IllegalArgumentException("ID do destinatário inválido");
-        }
-
-        return deliveryDAO.findByRecipientId(recipientId);
-    }
-
-    public List<Delivery> getDeliveriesByDateRange(LocalDateTime startDate, LocalDateTime endDate) throws SQLException {
-        if (startDate == null || endDate == null) {
-            throw new IllegalArgumentException("Datas de início e fim são obrigatórias");
-        }
-
-        if (startDate.isAfter(endDate)) {
-            throw new IllegalArgumentException("Data de início não pode ser posterior à data de fim");
-        }
-
-        return deliveryDAO.findByDateRange(startDate, endDate);
-    }
-
-    public void addProductToDelivery(Integer deliveryId, DeliveryProduct deliveryProduct) 
-            throws SQLException, IllegalArgumentException {
-        if (deliveryId == null || deliveryId <= 0) {
-            throw new IllegalArgumentException("ID da entrega inválido");
-        }
-
-        Optional<Delivery> deliveryOptional = deliveryDAO.findById(deliveryId);
-        Delivery delivery = deliveryOptional.orElseThrow(() -> new IllegalArgumentException("Entrega não encontrada"));
-
-        validateDeliveryProduct(deliveryProduct);
-
-        Optional<DeliveryProduct> existing = deliveryProductDAO.findByDeliveryAndProduct(deliveryId, deliveryProduct.getProductId());
-
-        if (existing.isPresent()) {
-            throw new IllegalArgumentException("Produto já adicionado a esta entrega");
-        }
-
-        deliveryProduct.setDeliveryId(deliveryId);
-        deliveryProductDAO.save(deliveryProduct);
-
-        List<DeliveryProduct> products = deliveryProductDAO.findByDeliveryId(deliveryId);
-        delivery.setProducts(products);
-        delivery.updateTotals();
-        deliveryDAO.update(delivery);
-    }
-
-    public void removeProductFromDelivery(Integer deliveryProductId) throws SQLException {
-        if (deliveryProductId == null || deliveryProductId <= 0) {
-            throw new IllegalArgumentException("ID do produto da entrega inválido");
-        }
-
-        Optional<DeliveryProduct> deliveryProductOptional = deliveryProductDAO.findById(deliveryProductId);
-        DeliveryProduct deliveryProduct = deliveryProductOptional.orElseThrow(() -> new IllegalArgumentException("Produto da entrega não encontrado"));
-
-        Optional<Delivery> deliveryOptional = deliveryDAO.findById(deliveryProduct.getDeliveryId());
-        Delivery delivery = deliveryOptional.orElseThrow(() -> new IllegalArgumentException("Entrega não encontrada"));
-
-        deliveryProductDAO.delete(deliveryProductId);
-
-        List<DeliveryProduct> products = deliveryProductDAO.findByDeliveryId(delivery.getId());
-        delivery.setProducts(products);
-        delivery.updateTotals();
-        deliveryDAO.update(delivery);
-    }
-
-    public void updateDeliveryProduct(DeliveryProduct deliveryProduct) throws SQLException, IllegalArgumentException {
-        if (deliveryProduct.getId() == null) {
-            throw new IllegalArgumentException("ID do produto da entrega é obrigatório");
-        }
-
-        validateDeliveryProduct(deliveryProduct);
-
-        Optional<DeliveryProduct> existingOptional = deliveryProductDAO.findById(deliveryProduct.getId());
-        DeliveryProduct existing = existingOptional.orElseThrow(() -> new IllegalArgumentException("Produto da entrega não encontrado"));
-
-        deliveryProductDAO.update(deliveryProduct);
-
-        Optional<Delivery> deliveryOptional = deliveryDAO.findById(existing.getDeliveryId());
-        Delivery delivery = deliveryOptional.orElseThrow(() -> new IllegalArgumentException("Entrega não encontrada"));
-
-        List<DeliveryProduct> products = deliveryProductDAO.findByDeliveryId(delivery.getId());
-        delivery.setProducts(products);
-        delivery.updateTotals();
-        deliveryDAO.update(delivery);
-    }
-
-    public List<DeliveryProduct> getDeliveryProducts(Integer deliveryId) throws SQLException {
-        if (deliveryId == null || deliveryId <= 0) {
-            throw new IllegalArgumentException("ID da entrega inválido");
-        }
-
-        return deliveryProductDAO.findByDeliveryId(deliveryId);
-    }
-
-    public void updateDeliveryStatus(Integer deliveryId, DeliveryStatus newStatus, String observations, String user) 
-            throws SQLException, IllegalArgumentException {
-        if (deliveryId == null || deliveryId <= 0) {
-            throw new IllegalArgumentException("ID da entrega inválido");
-        }
-
-        if (newStatus == null) {
-            throw new IllegalArgumentException("Novo status não pode ser nulo");
-        }
-
-        Optional<Delivery> deliveryOptional = deliveryDAO.findById(deliveryId);
-        Delivery delivery = deliveryOptional.orElseThrow(() -> new IllegalArgumentException("Entrega não encontrada"));
-
-        DeliveryStatus previousStatus = delivery.getStatus();
-
-        if (previousStatus.equals(newStatus)) {
-            throw new IllegalArgumentException("Novo status é igual ao status atual");
-        }
-
-        validateStatusTransition(previousStatus, newStatus);
-
-        delivery.setStatus(newStatus);
-
-        switch (newStatus) {
-            case EM_TRANSITO:
-                delivery.setShipmentDate(LocalDateTime.now());
-                break;
-            case ENTREGUE:
-                delivery.setDeliveryDate(LocalDateTime.now());
-                break;
-            case CANCELADA:
-                delivery.setCancellationDate(LocalDateTime.now());
-                break;
-            case PENDENTE:
-                delivery.setPickupDate(null);
-                delivery.setShipmentDate(null);
-                break;
-            default:
-                break;
-        }
-
-        deliveryDAO.update(delivery);
-
-        DeliveryHistory history = new DeliveryHistory(deliveryId, previousStatus, newStatus, user);
-        history.setObservations(observations);
+        // Registra no histórico
+        DeliveryHistory history = new DeliveryHistory(id, DeliveryStatus.ENTREGUE, "Entrega realizada", user);
         deliveryHistoryDAO.save(history);
     }
 
-    public List<DeliveryHistory> getDeliveryHistory(Integer deliveryId) throws SQLException {
-        if (deliveryId == null || deliveryId <= 0) {
-            throw new IllegalArgumentException("ID da entrega inválido");
+    /**
+     * Marca uma entrega como "NÃO REALIZADA" e registra no histórico.
+     *
+     * @param id     ID da entrega.
+     * @param reason Motivo da não realização.
+     * @param user   Usuário que realizou a ação.
+     * @throws SQLException           Se ocorrer um erro de SQL.
+     * @throws IllegalArgumentException Se a entrega não for encontrada ou já estiver entregue/cancelada.
+     */
+    public void markAsNotDelivered(Integer id, String reason, String user) throws SQLException {
+        Optional<Delivery> deliveryOptional = deliveryDAO.findById(id);
+        if (deliveryOptional.isEmpty()) {
+            throw new IllegalArgumentException("Entrega com ID " + id + " não encontrada.");
         }
+        Delivery delivery = deliveryOptional.get();
 
-        return deliveryHistoryDAO.findByDeliveryId(deliveryId);
-    }
-
-    public void cancelDelivery(Integer deliveryId, String reason, String user) 
-            throws SQLException, IllegalArgumentException {
-        if (deliveryId == null || deliveryId <= 0) {
-            throw new IllegalArgumentException("ID da entrega inválido");
+        if (delivery.getStatus().equals(DeliveryStatus.ENTREGUE) || delivery.getStatus().equals(DeliveryStatus.CANCELADA)) {
+            throw new IllegalArgumentException("Entrega já está " + delivery.getStatus().getLabel() + " e não pode ser marcada como não realizada.");
         }
-
         if (reason == null || reason.trim().isEmpty()) {
-            throw new IllegalArgumentException("Motivo do cancelamento é obrigatório");
+            throw new IllegalArgumentException("O motivo da não realização é obrigatório.");
         }
 
-        Optional<Delivery> deliveryOptional = deliveryDAO.findById(deliveryId);
-        Delivery delivery = deliveryOptional.orElseThrow(() -> new IllegalArgumentException("Entrega não encontrada"));
+        // Atualiza o status e o motivo da não entrega
+        deliveryDAO.updateStatus(id, DeliveryStatus.NAO_REALIZADA, "Entrega não realizada: " + reason, null, reason);
 
-        if (delivery.getStatus().equals(DeliveryStatus.ENTREGUE)) {
-            throw new IllegalArgumentException("Não é possível cancelar uma entrega já realizada");
-        }
-
-        delivery.setStatus(DeliveryStatus.CANCELADA);
-        delivery.setCancellationDate(LocalDateTime.now());
-        delivery.setCancellationReason(reason);
-
-        deliveryDAO.update(delivery);
-
-        DeliveryHistory history = new DeliveryHistory(deliveryId, delivery.getStatus(), DeliveryStatus.CANCELADA, user);
-        history.setObservations("Cancelamento: " + reason);
+        // Registra no histórico
+        DeliveryHistory history = new DeliveryHistory(id, DeliveryStatus.NAO_REALIZADA, reason, user);
         deliveryHistoryDAO.save(history);
     }
 
-    public void markAsDelivered(Integer deliveryId, String user) throws SQLException, IllegalArgumentException {
-        if (deliveryId == null || deliveryId <= 0) {
-            throw new IllegalArgumentException("ID da entrega inválido");
-        }
-
-        Optional<Delivery> deliveryOptional = deliveryDAO.findById(deliveryId);
-        Delivery delivery = deliveryOptional.orElseThrow(() -> new IllegalArgumentException("Entrega não encontrada"));
-
-        if (!delivery.getStatus().equals(DeliveryStatus.EM_TRANSITO)) {
-            throw new IllegalArgumentException("Apenas entregas em trânsito podem ser marcadas como entregues");
-        }
-
-        delivery.setStatus(DeliveryStatus.ENTREGUE);
-        delivery.setDeliveryDate(LocalDateTime.now());
-
-        deliveryDAO.update(delivery);
-
-        DeliveryHistory history = new DeliveryHistory(deliveryId, DeliveryStatus.EM_TRANSITO, DeliveryStatus.ENTREGUE, user);
-        history.setObservations("Entrega realizada");
-        deliveryHistoryDAO.save(history);
+    /**
+     * Busca todas as entregas, enriquecendo-as com dados relacionados.
+     *
+     * @return Uma lista de todas as entregas.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public List<Delivery> getAllDeliveries() throws SQLException {
+        List<Delivery> deliveries = deliveryDAO.getAll();
+        deliveries.forEach(this::enrichDelivery);
+        return deliveries;
     }
 
-    public void markAsNotDelivered(Integer deliveryId, String reason, String user) 
-            throws SQLException, IllegalArgumentException {
-        if (deliveryId == null || deliveryId <= 0) {
-            throw new IllegalArgumentException("ID da entrega inválido");
-        }
-
-        Optional<Delivery> deliveryOptional = deliveryDAO.findById(deliveryId);
-        Delivery delivery = deliveryOptional.orElseThrow(() -> new IllegalArgumentException("Entrega não encontrada"));
-
-        if (!delivery.getStatus().equals(DeliveryStatus.EM_TRANSITO)) {
-            throw new IllegalArgumentException("Apenas entregas em trânsito podem ser marcadas como não entregues");
-        }
-
-        delivery.setStatus(DeliveryStatus.NAO_REALIZADA);
-
-        deliveryDAO.update(delivery);
-
-        DeliveryHistory history = new DeliveryHistory(deliveryId, DeliveryStatus.EM_TRANSITO, DeliveryStatus.NAO_REALIZADA, user);
-        history.setObservations("Não realizada: " + (reason != null ? reason : ""));
-        deliveryHistoryDAO.save(history);
+    /**
+     * Busca entregas por termo de busca (código de rastreio, observações, etc.), enriquecendo-as.
+     *
+     * @param query O termo de busca.
+     * @return Uma lista de entregas que correspondem à busca.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public List<Delivery> searchDeliveries(String query) throws SQLException {
+        List<Delivery> deliveries = deliveryDAO.search(query);
+        deliveries.forEach(this::enrichDelivery);
+        return deliveries;
     }
 
+    /**
+     * Busca entregas por status, enriquecendo-as.
+     *
+     * @param status O status da entrega.
+     * @return Uma lista de entregas com o status especificado.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public List<Delivery> getDeliveriesByStatus(DeliveryStatus status) throws SQLException {
+        List<Delivery> deliveries = deliveryDAO.getDeliveriesByStatus(status);
+        deliveries.forEach(this::enrichDelivery);
+        return deliveries;
+    }
+
+    /**
+     * Valida os campos de uma entrega.
+     *
+     * @param delivery O objeto Delivery a ser validado.
+     * @throws IllegalArgumentException Se algum campo for inválido.
+     */
     private void validateDelivery(Delivery delivery) {
-        if (delivery.getShipperId() == null || delivery.getShipperId() <= 0) {
-            throw new IllegalArgumentException("ID do remetente é obrigatório");
+        if (delivery.getTrackingCode() == null || delivery.getTrackingCode().trim().isEmpty()) {
+            throw new IllegalArgumentException("Código de rastreio é obrigatório.");
         }
-
-        if (delivery.getRecipientId() == null || delivery.getRecipientId() <= 0) {
-            throw new IllegalArgumentException("ID do destinatário é obrigatório");
+        if (delivery.getShipperId() == null) {
+            throw new IllegalArgumentException("Remetente é obrigatório.");
         }
-
-        if (delivery.getShipperId().equals(delivery.getRecipientId())) {
-            throw new IllegalArgumentException("Remetente e destinatário não podem ser a mesma pessoa");
+        if (delivery.getRecipientId() == null) {
+            throw new IllegalArgumentException("Destinatário é obrigatório.");
         }
-
-        if (delivery.getOriginAddressId() == null || delivery.getOriginAddressId() <= 0) {
-            throw new IllegalArgumentException("ID do endereço de origem é obrigatório");
+        if (delivery.getOriginAddressId() == null) {
+            throw new IllegalArgumentException("Endereço de origem é obrigatório.");
         }
-
-        if (delivery.getDestinationAddressId() == null || delivery.getDestinationAddressId() <= 0) {
-            throw new IllegalArgumentException("ID do endereço de destino é obrigatório");
+        if (delivery.getDestinationAddressId() == null) {
+            throw new IllegalArgumentException("Endereço de destino é obrigatório.");
         }
-
-        if (delivery.getOriginAddressId().equals(delivery.getDestinationAddressId())) {
-            throw new IllegalArgumentException("Endereço de origem e destino não podem ser iguais");
+        if (delivery.getTotalValue() == null || delivery.getTotalValue().compareTo(java.math.BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Valor total deve ser um número positivo.");
         }
-    }
-
-    private void validateDeliveryProduct(DeliveryProduct deliveryProduct) {
-        if (deliveryProduct.getProductId() == null || deliveryProduct.getProductId() <= 0) {
-            throw new IllegalArgumentException("ID do produto é obrigatório");
+        if (delivery.getFreightValue() == null || delivery.getFreightValue().compareTo(java.math.BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Valor do frete deve ser um número positivo.");
         }
-
-        if (deliveryProduct.getQuantity() == null || deliveryProduct.getQuantity() <= 0) {
-            throw new IllegalArgumentException("Quantidade deve ser maior que zero");
+        if (delivery.getTotalWeightKg() == null || delivery.getTotalWeightKg().compareTo(java.math.BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Peso total deve ser um número positivo.");
         }
-
-        if (deliveryProduct.getUnitWeightKg() == null || deliveryProduct.getUnitWeightKg().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Peso unitário deve ser maior que zero");
+        if (delivery.getTotalVolumeM3() == null || delivery.getTotalVolumeM3().compareTo(java.math.BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Volume total deve ser um número positivo.");
         }
-
-        if (deliveryProduct.getUnitVolumeM3() == null || deliveryProduct.getUnitVolumeM3().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Volume unitário deve ser maior que zero");
-        }
-
-        if (deliveryProduct.getUnitValue() == null || deliveryProduct.getUnitValue().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Valor unitário deve ser maior que zero");
+        if (delivery.getStatus() == null) {
+            throw new IllegalArgumentException("Status da entrega é obrigatório.");
         }
     }
 
-    private void validateStatusTransition(DeliveryStatus currentStatus, DeliveryStatus newStatus) {
-        List<DeliveryStatus> validTransitions = new ArrayList<>();
+    /**
+     * Enriquecer um objeto Delivery com dados formatados e objetos relacionados.
+     *
+     * @param delivery O objeto Delivery a ser enriquecido.
+     */
+    private void enrichDelivery(Delivery delivery) {
+        if (delivery == null) return;
 
-        switch (currentStatus) {
-            case PENDENTE:
-                validTransitions.add(DeliveryStatus.EM_TRANSITO);
-                validTransitions.add(DeliveryStatus.CANCELADA);
-                break;
-            case EM_TRANSITO:
-                validTransitions.add(DeliveryStatus.ENTREGUE);
-                validTransitions.add(DeliveryStatus.NAO_REALIZADA);
-                validTransitions.add(DeliveryStatus.CANCELADA);
-                break;
-            case ENTREGUE:
-                // Nenhuma transição permitida
-                break;
-            case CANCELADA:
-                // Nenhuma transição permitida
-                break;
-            case NAO_REALIZADA:
-                validTransitions.add(DeliveryStatus.EM_TRANSITO);
-                validTransitions.add(DeliveryStatus.CANCELADA);
-                break;
-            default:
-                break;
+        // Formata datas
+        if (delivery.getCreatedAt() != null) {
+            delivery.setFormattedCreatedAt(DateFormatter.formatLocalDateTime(delivery.getCreatedAt()));
+        }
+        if (delivery.getUpdatedAt() != null) {
+            delivery.setFormattedUpdatedAt(DateFormatter.formatLocalDateTime(delivery.getUpdatedAt()));
+        }
+        if (delivery.getDeliveredAt() != null) {
+            delivery.setFormattedDeliveredAt(DateFormatter.formatLocalDateTime(delivery.getDeliveredAt()));
         }
 
-        if (!validTransitions.contains(newStatus)) {
-            throw new IllegalArgumentException(
-                "Transição inválida de " + currentStatus + " para " + newStatus
-            );
-        }
-    }
+        try {
+            // Enriquecer com dados do remetente
+            if (delivery.getShipperId() != null) {
+                clientService.getClientById(delivery.getShipperId()).ifPresent(delivery::setShipper);
+            }
+            // Enriquecer com dados do destinatário
+            if (delivery.getRecipientId() != null) {
+                clientService.getClientById(delivery.getRecipientId()).ifPresent(delivery::setRecipient);
+            }
+            // Enriquecer com dados do endereço de origem
+            if (delivery.getOriginAddressId() != null) {
+                addressService.getAddressById(delivery.getOriginAddressId()).ifPresent(delivery::setOriginAddress);
+            }
+            // Enriquecer com dados do endereço de destino
+            if (delivery.getDestinationAddressId() != null) {
+                addressService.getAddressById(delivery.getDestinationAddressId()).ifPresent(delivery::setDestinationAddress);
+            }
+            // Enriquecer com histórico da entrega
+            List<DeliveryHistory> history = deliveryHistoryDAO.getHistoryByDeliveryId(delivery.getId());
+            history.forEach(h -> h.setFormattedCreatedAt(DateFormatter.formatLocalDateTime(h.getCreatedAt())));
+            delivery.setHistory(history);
 
-    private String generateTrackingCode() {
-        return "TG" + System.currentTimeMillis() + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        } catch (SQLException e) {
+            System.err.println("Erro ao enriquecer entrega " + delivery.getId() + ": " + e.getMessage());
+            // Em um ambiente real, você pode querer logar isso ou lançar uma exceção mais específica
+        }
     }
 }

@@ -7,24 +7,21 @@ public class Product {
     private Integer id;
     private String name;
     private String description;
-    private BigDecimal weightKg;
-    private BigDecimal volumeM3;
-    private BigDecimal declaredValue;
-    private String category;
-    private Boolean active;
+    private BigDecimal price;
+    private BigDecimal weightKg; // Adicionado
+    private BigDecimal volumeM3; // Adicionado
+    private Integer stockQuantity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public Product() {}
+    // Campos formatados
+    private String formattedCreatedAt;
+    private String formattedUpdatedAt;
 
-    public Product(String name, BigDecimal weightKg, BigDecimal volumeM3, BigDecimal declaredValue) {
-        this.name = name;
-        this.weightKg = weightKg;
-        this.volumeM3 = volumeM3;
-        this.declaredValue = declaredValue;
-        this.active = true;
+    public Product() {
     }
 
+    // Getters e Setters
     public Integer getId() {
         return id;
     }
@@ -49,6 +46,15 @@ public class Product {
         this.description = description;
     }
 
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    // Novos Getters e Setters para weightKg
     public BigDecimal getWeightKg() {
         return weightKg;
     }
@@ -57,6 +63,7 @@ public class Product {
         this.weightKg = weightKg;
     }
 
+    // Novos Getters e Setters para volumeM3
     public BigDecimal getVolumeM3() {
         return volumeM3;
     }
@@ -65,28 +72,12 @@ public class Product {
         this.volumeM3 = volumeM3;
     }
 
-    public BigDecimal getDeclaredValue() {
-        return declaredValue;
+    public Integer getStockQuantity() {
+        return stockQuantity;
     }
 
-    public void setDeclaredValue(BigDecimal declaredValue) {
-        this.declaredValue = declaredValue;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public Boolean getActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
+    public void setStockQuantity(Integer stockQuantity) {
+        this.stockQuantity = stockQuantity;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -105,15 +96,19 @@ public class Product {
         this.updatedAt = updatedAt;
     }
 
-    @Override
-    public String toString() {
-        return "Product{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", weightKg=" + weightKg +
-                ", volumeM3=" + volumeM3 +
-                ", declaredValue=" + declaredValue +
-                ", active=" + active +
-                '}';
+    public String getFormattedCreatedAt() {
+        return formattedCreatedAt;
+    }
+
+    public void setFormattedCreatedAt(String formattedCreatedAt) {
+        this.formattedCreatedAt = formattedCreatedAt;
+    }
+
+    public String getFormattedUpdatedAt() {
+        return formattedUpdatedAt;
+    }
+
+    public void setFormattedUpdatedAt(String formattedUpdatedAt) {
+        this.formattedUpdatedAt = formattedUpdatedAt;
     }
 }

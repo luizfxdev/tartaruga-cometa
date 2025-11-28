@@ -1,107 +1,159 @@
 package com.tartarugacometasystem.service;
 
+import com.tartarugacometasystem.dao.ClientDAO;
+import com.tartarugacometasystem.model.Client;
+import com.tartarugacometasystem.model.PersonType; // Importar PersonType
+import com.tartarugacometasystem.util.DateFormatter;
+
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
-
-import com.tartarugacometasystem.dao.ClientDAO;
-import com.tartarugacometasystem.model.Client;
-import com.tartarugacometasystem.model.PersonType;
-import com.tartarugacometasystem.util.Validator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class ClientService {
-    private final ClientDAO clientDAO;
+    private ClientDAO clientDAO;
 
     public ClientService() {
         this.clientDAO = new ClientDAO();
     }
 
-    public void createClient(Client client) throws SQLException, IllegalArgumentException {
+    /**
+     * Cria um novo cliente.
+     *
+     * @param client O objeto Client a ser criado.
+     * @return O objeto Client criado com o ID.
+     * @throws SQLException           Se ocorrer um erro de SQL.
+     * @throws IllegalArgumentException Se o cliente for inválido.
+     */
+    public Client createClient(Client client) throws SQLException {
         validateClient(client);
-
-        Optional<Client> existing = clientDAO.findByDocument(client.getDocument());
-        if (existing.isPresent()) {
-            throw new IllegalArgumentException("Cliente com este documento já existe");
-        }
-
-        clientDAO.save(client);
+        return clientDAO.save(client);
     }
 
-    public void updateClient(Client client) throws SQLException, IllegalArgumentException {
-        validateClient(client);
+    /**
+     * Busca um cliente pelo ID.
+     *
+     * @param id O ID do cliente.
+     * @return Um Optional contendo o Client se encontrado, ou Optional.empty().
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public Optional<Client> getClientById(Integer id) throws SQLException {
+        Optional<Client> client = clientDAO.findById(id);
+        client.ifPresent(this::enrichClient); // Enriquecer se presente
+        return client;
+    }
 
+    /**
+     * Atualiza um cliente existente.
+     *
+     * @param client O objeto Client a ser atualizado.
+     * @throws SQLException           Se ocorrer um erro de SQL.
+     * @throws IllegalArgumentException Se o cliente for inválido ou não existir.
+     */
+    public void updateClient(Client client) throws SQLException {
         if (client.getId() == null) {
-            throw new IllegalArgumentException("ID do cliente é obrigatório para atualização");
+            throw new IllegalArgumentException("ID do cliente é obrigatório para atualização.");
         }
-
+        validateClient(client);
+        Optional<Client> existingClient = clientDAO.findById(client.getId());
+        if (existingClient.isEmpty()) {
+            throw new IllegalArgumentException("Cliente com ID " + client.getId() + " não encontrado.");
+        }
         clientDAO.update(client);
     }
 
-    public void deleteClient(Integer clientId) throws SQLException {
-        if (clientId == null || clientId <= 0) {
-            throw new IllegalArgumentException("ID do cliente inválido");
-        }
-
-        clientDAO.delete(clientId);
+    /**
+     * Deleta um cliente pelo ID.
+     *
+     * @param id O ID do cliente a ser deletado.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public void deleteClient(Integer id) throws SQLException {
+        clientDAO.delete(id);
     }
 
-    public Optional<Client> getClientById(Integer clientId) throws SQLException {
-        if (clientId == null || clientId <= 0) {
-            throw new IllegalArgumentException("ID do cliente inválido");
-        }
-
-        return clientDAO.findById(clientId);
-    }
-
-    public Optional<Client> getClientByDocument(String document) throws SQLException {
-        if (!Validator.isValidDocument(document)) {
-            throw new IllegalArgumentException("Documento inválido");
-        }
-
-        return clientDAO.findByDocument(document);
-    }
-
+    /**
+     * Busca todos os clientes, enriquecendo-os com dados formatados.
+     *
+     * @return Uma lista de todos os clientes.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
     public List<Client> getAllClients() throws SQLException {
-        return clientDAO.findAll();
+        List<Client> clients = clientDAO.getAll();
+        clients.forEach(this::enrichClient);
+        return clients;
     }
 
-    public List<Client> getClientsByPersonType(PersonType personType) throws SQLException {
-        if (personType == null) {
-            throw new IllegalArgumentException("Tipo de pessoa é obrigatório");
-        }
-
-        return clientDAO.findByPersonType(personType);
+    /**
+     * Busca clientes por nome (ou parte do nome), enriquecendo-os com dados formatados.
+     *
+     * @param searchTerm O termo de busca.
+     * @return Uma lista de clientes que correspondem à busca.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public List<Client> searchClientsByName(String searchTerm) throws SQLException {
+        List<Client> clients = clientDAO.searchByName(searchTerm);
+        clients.forEach(this::enrichClient);
+        return clients;
     }
 
-    public List<Client> searchClientsByName(String name) throws SQLException {
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Nome de busca não pode estar vazio");
-        }
-
-        return clientDAO.findByName(name.trim());
-    }
-
+    /**
+     * Valida os campos de um cliente.
+     *
+     * @param client O objeto Client a ser validado.
+     * @throws IllegalArgumentException Se algum campo for inválido.
+     */
     private void validateClient(Client client) {
-        if (client.getPersonType() == null) {
-            throw new IllegalArgumentException("Tipo de pessoa é obrigatório");
-        }
-
-        if (client.getDocument() == null || client.getDocument().trim().isEmpty()) {
-            throw new IllegalArgumentException("Documento é obrigatório");
-        }
-
-        if (!Validator.isValidDocument(client.getDocument())) {
-            throw new IllegalArgumentException("Documento inválido");
-        }
-
         if (client.getName() == null || client.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Nome é obrigatório");
+            throw new IllegalArgumentException("Nome é obrigatório.");
         }
+        if (client.getDocument() == null || client.getDocument().trim().isEmpty()) {
+            throw new IllegalArgumentException("Documento (CPF/CNPJ) é obrigatório.");
+        }
+        if (client.getEmail() == null || client.getEmail().trim().isEmpty()) {
+            throw new IllegalArgumentException("Email é obrigatório.");
+        }
+        if (!isValidEmail(client.getEmail())) {
+            throw new IllegalArgumentException("Formato de email inválido.");
+        }
+        if (client.getPhone() == null || client.getPhone().trim().isEmpty()) {
+            throw new IllegalArgumentException("Telefone é obrigatório.");
+        }
+        if (client.getPersonType() == null) {
+            throw new IllegalArgumentException("Tipo de pessoa é obrigatório.");
+        }
+        // Adicionar validação de CPF/CNPJ se necessário
+    }
 
-        if (client.getEmail() != null && !client.getEmail().trim().isEmpty()) {
-            if (!Validator.isValidEmail(client.getEmail())) {
-                throw new IllegalArgumentException("Email inválido");
-            }
+    /**
+     * Valida o formato de um email.
+     *
+     * @param email O email a ser validado.
+     * @return true se o email for válido, false caso contrário.
+     */
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
+
+    /**
+     * Enriquecer um objeto Client com dados formatados.
+     *
+     * @param client O objeto Client a ser enriquecido.
+     */
+    private void enrichClient(Client client) {
+        if (client == null) return;
+
+        if (client.getCreatedAt() != null) {
+            client.setFormattedCreatedAt(DateFormatter.formatLocalDateTime(client.getCreatedAt()));
         }
+        if (client.getUpdatedAt() != null) {
+            client.setFormattedUpdatedAt(DateFormatter.formatLocalDateTime(client.getUpdatedAt()));
+        }
+        // Você pode adicionar mais enriquecimentos aqui, como formatar o documento, etc.
     }
 }

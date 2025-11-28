@@ -4,24 +4,45 @@ import java.time.LocalDateTime;
 
 public class Client {
     private Integer id;
-    private PersonType personType;
-    private String document;
     private String name;
+    private String document; // CPF ou CNPJ
     private String email;
     private String phone;
+    private PersonType personType; // NOVO CAMPO: Tipo de pessoa (Física/Jurídica)
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public Client() {}
+    // Campos formatados para exibição no JSP
+    private String formattedCreatedAt;
+    private String formattedUpdatedAt;
 
-    public Client(PersonType personType, String document, String name, String email, String phone) {
-        this.personType = personType;
-        this.document = document;
-        this.name = name;
-        this.email = email;
-        this.phone = phone;
+    // Construtor padrão
+    public Client() {
     }
 
+    // Construtor completo (sem IDs e datas)
+    public Client(String name, String document, String email, String phone, PersonType personType) {
+        this.name = name;
+        this.document = document;
+        this.email = email;
+        this.phone = phone;
+        this.personType = personType;
+    }
+
+    // Construtor completo (com IDs e datas)
+    public Client(Integer id, String name, String document, String email, String phone, PersonType personType,
+                  LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.name = name;
+        this.document = document;
+        this.email = email;
+        this.phone = phone;
+        this.personType = personType;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    // Getters e Setters
     public Integer getId() {
         return id;
     }
@@ -30,12 +51,12 @@ public class Client {
         this.id = id;
     }
 
-    public PersonType getPersonType() {
-        return personType;
+    public String getName() {
+        return name;
     }
 
-    public void setPersonType(PersonType personType) {
-        this.personType = personType;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDocument() {
@@ -44,14 +65,6 @@ public class Client {
 
     public void setDocument(String document) {
         this.document = document;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getEmail() {
@@ -70,6 +83,14 @@ public class Client {
         this.phone = phone;
     }
 
+    public PersonType getPersonType() {
+        return personType;
+    }
+
+    public void setPersonType(PersonType personType) {
+        this.personType = personType;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -86,17 +107,33 @@ public class Client {
         this.updatedAt = updatedAt;
     }
 
+    public String getFormattedCreatedAt() {
+        return formattedCreatedAt;
+    }
+
+    public void setFormattedCreatedAt(String formattedCreatedAt) {
+        this.formattedCreatedAt = formattedCreatedAt;
+    }
+
+    public String getFormattedUpdatedAt() {
+        return formattedUpdatedAt;
+    }
+
+    public void setFormattedUpdatedAt(String formattedUpdatedAt) {
+        this.formattedUpdatedAt = formattedUpdatedAt;
+    }
+
     @Override
     public String toString() {
         return "Client{" +
-                "id=" + id +
-                ", personType=" + personType +
-                ", document='" + document + '\'' +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", phone='" + phone + '\'' +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
+               "id=" + id +
+               ", name='" + name + '\'' +
+               ", document='" + document + '\'' +
+               ", email='" + email + '\'' +
+               ", phone='" + phone + '\'' +
+               ", personType=" + personType +
+               ", createdAt=" + createdAt +
+               ", updatedAt=" + updatedAt +
+               '}';
     }
 }

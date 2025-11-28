@@ -14,8 +14,8 @@
         <c:remove var="error" scope="session"/>
     </c:if>
 
-    <form method="POST" action="${pageContext.request.contextPath}/clients/save" class="form">
-        <input type="hidden" name="id" value="${client != null && client.id != null ? client.id : ''}">
+    <form method="POST" action="${pageContext.request.contextPath}/clients/save">
+        <input type="hidden" name="id" value="${client != null ? client.id : ''}">
 
         <div class="form-group">
             <label for="personType">Tipo de Pessoa *</label>
@@ -29,28 +29,28 @@
         <div class="form-group">
             <label for="document">Documento (CPF/CNPJ) *</label>
             <input type="text" id="document" name="document" 
-                   value="${client != null && client.document != null ? client.document : ''}" 
-                   required placeholder="000.000.000-00">
+                   value="${client != null ? client.document : ''}" 
+                   placeholder="000.000.000-00" required>
         </div>
 
         <div class="form-group">
             <label for="name">Nome/Razão Social *</label>
             <input type="text" id="name" name="name" 
-                   value="${client != null && client.name != null ? client.name : ''}" 
-                   required placeholder="Nome completo">
+                   value="${client != null ? client.name : ''}" 
+                   placeholder="Nome completo ou razão social" required>
         </div>
 
         <div class="form-group">
             <label for="email">Email</label>
             <input type="email" id="email" name="email" 
-                   value="${client != null && client.email != null ? client.email : ''}" 
+                   value="${client != null ? client.email : ''}" 
                    placeholder="email@example.com">
         </div>
 
         <div class="form-group">
             <label for="phone">Telefone</label>
             <input type="tel" id="phone" name="phone" 
-                   value="${client != null && client.phone != null ? client.phone : ''}" 
+                   value="${client != null ? client.phone : ''}" 
                    placeholder="(11) 99999-9999">
         </div>
 
@@ -59,6 +59,14 @@
             <a href="${pageContext.request.contextPath}/clients/" class="btn btn-secondary">Cancelar</a>
         </div>
     </form>
+
+    <script>
+        // Remove formatação do documento antes de enviar
+        document.querySelector('form').addEventListener('submit', function() {
+            const documentInput = document.getElementById('document');
+            documentInput.value = documentInput.value.replace(/\D/g, '');
+        });
+    </script>
 </t:header>
 
 <t:footer />

@@ -1,22 +1,26 @@
 package com.tartarugacometasystem.model;
 
 public enum PersonType {
-    PF("PF"),
-    PJ("PJ");
+    FISICA("Pessoa Física"),
+    JURIDICA("Pessoa Jurídica");
 
-    private final String value;
+    private final String label;
 
-    PersonType(String value) {
-        this.value = value;
+    PersonType(String label) {
+        this.label = label;
+    }
+
+    public String getLabel() {
+        return label;
     }
 
     public String getValue() {
-        return value;
+        return this.name();
     }
 
     public static PersonType fromValue(String value) {
         for (PersonType type : PersonType.values()) {
-            if (type.value.equals(value)) {
+            if (type.name().equalsIgnoreCase(value)) {
                 return type;
             }
         }

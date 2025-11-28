@@ -1,185 +1,200 @@
 package com.tartarugacometasystem.dao;
 
+import com.tartarugacometasystem.model.Product;
+import com.tartarugacometasystem.util.ConnectionFactory; // Importar ConnectionFactory
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.time.LocalDateTime; // Importar LocalDateTime
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.tartarugacometasystem.config.DatabaseConfig;
-import com.tartarugacometasystem.model.Product;
-
 public class ProductDAO {
 
-    public void save(Product product) throws SQLException {
-        String sql = "INSERT INTO produto (nome, descricao, peso_kg, volume_m3, " +
-                     "valor_declarado, categoria, ativo) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    /**
+     * Cria um novo produto no banco de dados.
+     *
+     * @param product O objeto Product a ser criado.
+     * @return O objeto Product com o ID gerado.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public Product save(Product product) throws SQLException {
+        String sql = "INSERT INTO products (name, description, price, weight_kg, volume_m3, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = ConnectionFactory.getConnection();
+            pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            pstmt.setString(1, product.getName());
+            pstmt.setString(2, product.getDescription());
+            pstmt.setBigDecimal(3, product.getPrice());
+            pstmt.setBigDecimal(4, product.getWeightKg());
+            pstmt.setBigDecimal(5, product.getVolumeM3());
+            pstmt.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
+            pstmt.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
+            pstmt.executeUpdate();
 
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            stmt.setString(1, product.getName());
-            stmt.setString(2, product.getDescription());
-            stmt.setBigDecimal(3, product.getWeightKg());
-            stmt.setBigDecimal(4, product.getVolumeM3());
-            stmt.setBigDecimal(5, product.getDeclaredValue());
-            stmt.setString(6, product.getCategory());
-
-            Boolean active = product.getActive();
-            stmt.setBoolean(7, active != null ? active : true);
-
-            stmt.executeUpdate();
-
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    product.setId(rs.getInt(1));
-                }
+            rs = pstmt.getGeneratedKeys();
+            if (rs.next()) {
+                product.setId(rs.getInt(1));
             }
+            return product;
+        } finally {
+            ConnectionFactory.close(conn, pstmt, rs);
         }
     }
 
-    public void update(Product product) throws SQLException {
-        String sql = "UPDATE produto SET nome = ?, descricao = ?, peso_kg = ?, " +
-                     "volume_m3 = ?, valor_declarado = ?, categoria = ?, ativo = ? WHERE id = ?";
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, product.getName());
-            stmt.setString(2, product.getDescription());
-            stmt.setBigDecimal(3, product.getWeightKg());
-            stmt.setBigDecimal(4, product.getVolumeM3());
-            stmt.setBigDecimal(5, product.getDeclaredValue());
-            stmt.setString(6, product.getCategory());
-
-            Boolean active = product.getActive();
-            stmt.setBoolean(7, active != null ? active : true);
-            stmt.setInt(8, product.getId());
-
-            stmt.executeUpdate();
-        }
-    }
-
-    public void delete(Integer id) throws SQLException {
-        String sql = "DELETE FROM produto WHERE id = ?";
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
-        }
-    }
-
+    /**
+     * Busca um produto pelo ID.
+     *
+     * @param id O ID do produto.
+     * @return Um Optional contendo o Product se encontrado, ou Optional.empty().
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
     public Optional<Product> findById(Integer id) throws SQLException {
-        String sql = "SELECT id, nome, descricao, peso_kg, volume_m3, valor_declarado, " +
-                     "categoria, ativo, created_at, updated_at FROM produto WHERE id = ?";
+        String sql = "SELECT * FROM products WHERE id = ?";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = ConnectionFactory.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, id);
+            rs = pstmt.executeQuery();
 
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, id);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapResultSetToProduct(rs));
-                }
+            if (rs.next()) {
+                return Optional.of(mapResultSetToProduct(rs));
             }
+            return Optional.empty();
+        } finally {
+            ConnectionFactory.close(conn, pstmt, rs);
         }
-        return Optional.empty();
     }
 
-    public List<Product> findAll() throws SQLException {
-        String sql = "SELECT id, nome, descricao, peso_kg, volume_m3, valor_declarado, " +
-                     "categoria, ativo, created_at, updated_at FROM produto ORDER BY nome";
-        List<Product> products = new ArrayList<>();
+    /**
+     * Atualiza um produto existente no banco de dados.
+     *
+     * @param product O objeto Product a ser atualizado.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public void update(Product product) throws SQLException {
+        String sql = "UPDATE products SET name = ?, description = ?, price = ?, weight_kg = ?, volume_m3 = ?, updated_at = ? WHERE id = ?";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        try {
+            conn = ConnectionFactory.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, product.getName());
+            pstmt.setString(2, product.getDescription());
+            pstmt.setBigDecimal(3, product.getPrice());
+            pstmt.setBigDecimal(4, product.getWeightKg());
+            pstmt.setBigDecimal(5, product.getVolumeM3());
+            pstmt.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
+            pstmt.setInt(7, product.getId());
+            pstmt.executeUpdate();
+        } finally {
+            ConnectionFactory.close(conn, pstmt);
+        }
+    }
 
-        try (Connection conn = DatabaseConfig.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+    /**
+     * Deleta um produto pelo ID.
+     *
+     * @param id O ID do produto a ser deletado.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public void delete(Integer id) throws SQLException {
+        String sql = "DELETE FROM products WHERE id = ?";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        try {
+            conn = ConnectionFactory.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+        } finally {
+            ConnectionFactory.close(conn, pstmt);
+        }
+    }
+
+    /**
+     * Busca todos os produtos.
+     *
+     * @return Uma lista de todos os produtos.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public List<Product> getAll() throws SQLException {
+        List<Product> products = new ArrayList<>();
+        String sql = "SELECT * FROM products";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = ConnectionFactory.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
 
             while (rs.next()) {
                 products.add(mapResultSetToProduct(rs));
             }
+        } finally {
+            ConnectionFactory.close(conn, pstmt, rs);
         }
         return products;
     }
 
-    public List<Product> findAllActive() throws SQLException {
-        String sql = "SELECT id, nome, descricao, peso_kg, volume_m3, valor_declarado, " +
-                     "categoria, ativo, created_at, updated_at FROM produto WHERE ativo = true ORDER BY nome";
+    /**
+     * Busca produtos pelo nome.
+     *
+     * @param query O termo de busca.
+     * @return Uma lista de produtos que correspondem ao termo de busca.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public List<Product> searchByName(String query) throws SQLException {
         List<Product> products = new ArrayList<>();
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        String sql = "SELECT * FROM products WHERE name LIKE ? OR description LIKE ?";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = ConnectionFactory.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, "%" + query + "%");
+            pstmt.setString(2, "%" + query + "%");
+            rs = pstmt.executeQuery();
 
             while (rs.next()) {
                 products.add(mapResultSetToProduct(rs));
             }
+        } finally {
+            ConnectionFactory.close(conn, pstmt, rs);
         }
         return products;
     }
 
-    public List<Product> findByName(String name) throws SQLException {
-        String sql = "SELECT id, nome, descricao, peso_kg, volume_m3, valor_declarado, " +
-                     "categoria, ativo, created_at, updated_at FROM produto WHERE nome ILIKE ? ORDER BY nome";
-        List<Product> products = new ArrayList<>();
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, "%" + name + "%");
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    products.add(mapResultSetToProduct(rs));
-                }
-            }
-        }
-        return products;
-    }
-
-    public List<Product> findByCategory(String category) throws SQLException {
-        String sql = "SELECT id, nome, descricao, peso_kg, volume_m3, valor_declarado, " +
-                     "categoria, ativo, created_at, updated_at FROM produto WHERE categoria = ? ORDER BY nome";
-        List<Product> products = new ArrayList<>();
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, category);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    products.add(mapResultSetToProduct(rs));
-                }
-            }
-        }
-        return products;
-    }
-
+    /**
+     * Mapeia um ResultSet para um objeto Product.
+     *
+     * @param rs O ResultSet.
+     * @return Um objeto Product.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
     private Product mapResultSetToProduct(ResultSet rs) throws SQLException {
         Product product = new Product();
         product.setId(rs.getInt("id"));
-        product.setName(rs.getString("nome"));
-        product.setDescription(rs.getString("descricao"));
-        product.setWeightKg(rs.getBigDecimal("peso_kg"));
+        product.setName(rs.getString("name"));
+        product.setDescription(rs.getString("description"));
+        product.setPrice(rs.getBigDecimal("price"));
+        product.setWeightKg(rs.getBigDecimal("weight_kg"));
         product.setVolumeM3(rs.getBigDecimal("volume_m3"));
-        product.setDeclaredValue(rs.getBigDecimal("valor_declarado"));
-        product.setCategory(rs.getString("categoria"));
-        product.setActive(rs.getBoolean("ativo"));
         product.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-
-        Timestamp updatedAt = rs.getTimestamp("updated_at");
-        if (updatedAt != null) {
-            product.setUpdatedAt(updatedAt.toLocalDateTime());
-        }
-
+        product.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
         return product;
     }
 }

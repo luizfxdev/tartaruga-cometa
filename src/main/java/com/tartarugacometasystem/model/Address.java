@@ -4,8 +4,7 @@ import java.time.LocalDateTime;
 
 public class Address {
     private Integer id;
-    private Integer clientId;
-    private AddressType addressType;
+    private Integer clientId; // ID do cliente ao qual o endereço pertence
     private String street;
     private String number;
     private String complement;
@@ -13,25 +12,55 @@ public class Address {
     private String city;
     private String state;
     private String zipCode;
-    private String reference;
-    private Boolean isPrincipal;
+    private String country;
+    private Boolean isPrincipal; // Indica se é o endereço principal do cliente
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    public Address() {}
+    // Campos formatados para exibição no JSP
+    private String formattedAddress;
+    private String formattedCreatedAt;
+    private String formattedUpdatedAt;
 
-    public Address(Integer clientId, AddressType addressType, String street, String number,
-                   String neighborhood, String city, String state, String zipCode) {
+    // Construtor padrão
+    public Address() {
+    }
+
+    // Construtor completo (sem IDs e datas)
+    public Address(Integer clientId, String street, String number, String complement, String neighborhood, String city,
+                   String state, String zipCode, String country, Boolean isPrincipal) {
         this.clientId = clientId;
-        this.addressType = addressType;
         this.street = street;
         this.number = number;
+        this.complement = complement;
         this.neighborhood = neighborhood;
         this.city = city;
         this.state = state;
         this.zipCode = zipCode;
-        this.isPrincipal = false;
+        this.country = country;
+        this.isPrincipal = isPrincipal;
     }
 
+    // Construtor completo (com IDs e datas)
+    public Address(Integer id, Integer clientId, String street, String number, String complement, String neighborhood,
+                   String city, String state, String zipCode, String country, Boolean isPrincipal,
+                   LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.clientId = clientId;
+        this.street = street;
+        this.number = number;
+        this.complement = complement;
+        this.neighborhood = neighborhood;
+        this.city = city;
+        this.state = state;
+        this.zipCode = zipCode;
+        this.country = country;
+        this.isPrincipal = isPrincipal;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    // Getters e Setters
     public Integer getId() {
         return id;
     }
@@ -46,14 +75,6 @@ public class Address {
 
     public void setClientId(Integer clientId) {
         this.clientId = clientId;
-    }
-
-    public AddressType getAddressType() {
-        return addressType;
-    }
-
-    public void setAddressType(AddressType addressType) {
-        this.addressType = addressType;
     }
 
     public String getStreet() {
@@ -112,12 +133,12 @@ public class Address {
         this.zipCode = zipCode;
     }
 
-    public String getReference() {
-        return reference;
+    public String getCountry() {
+        return country;
     }
 
-    public void setReference(String reference) {
-        this.reference = reference;
+    public void setCountry(String country) {
+        this.country = country;
     }
 
     public Boolean getIsPrincipal() {
@@ -136,17 +157,54 @@ public class Address {
         this.createdAt = createdAt;
     }
 
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getFormattedAddress() {
+        return formattedAddress;
+    }
+
+    public void setFormattedAddress(String formattedAddress) {
+        this.formattedAddress = formattedAddress;
+    }
+
+    public String getFormattedCreatedAt() {
+        return formattedCreatedAt;
+    }
+
+    public void setFormattedCreatedAt(String formattedCreatedAt) {
+        this.formattedCreatedAt = formattedCreatedAt;
+    }
+
+    public String getFormattedUpdatedAt() {
+        return formattedUpdatedAt;
+    }
+
+    public void setFormattedUpdatedAt(String formattedUpdatedAt) {
+        this.formattedUpdatedAt = formattedUpdatedAt;
+    }
+
     @Override
     public String toString() {
         return "Address{" +
-                "id=" + id +
-                ", clientId=" + clientId +
-                ", addressType=" + addressType +
-                ", street='" + street + '\'' +
-                ", number='" + number + '\'' +
-                ", city='" + city + '\'' +
-                ", state='" + state + '\'' +
-                ", zipCode='" + zipCode + '\'' +
-                '}';
+               "id=" + id +
+               ", clientId=" + clientId +
+               ", street='" + street + '\'' +
+               ", number='" + number + '\'' +
+               ", complement='" + complement + '\'' +
+               ", neighborhood='" + neighborhood + '\'' +
+               ", city='" + city + '\'' +
+               ", state='" + state + '\'' +
+               ", zipCode='" + zipCode + '\'' +
+               ", country='" + country + '\'' +
+               ", isPrincipal=" + isPrincipal +
+               ", createdAt=" + createdAt +
+               ", updatedAt=" + updatedAt +
+               '}';
     }
 }

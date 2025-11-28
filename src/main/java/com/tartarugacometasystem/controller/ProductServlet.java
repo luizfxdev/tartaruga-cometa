@@ -2,7 +2,7 @@ package com.tartarugacometasystem.controller;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.HashMap; // Importar Mapper
 import java.util.List;
 import java.util.Optional;
 
@@ -27,7 +27,7 @@ public class ProductServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
 
@@ -52,12 +52,12 @@ public class ProductServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
 
         try {
-            if (pathInfo.equals("/save")) {
+            if (pathInfo == null || pathInfo.equals("/") || pathInfo.equals("/save")) {
                 saveProduct(request, response);
             } else if (pathInfo.startsWith("/delete/")) {
                 deleteProduct(request, response, pathInfo);
@@ -70,94 +70,87 @@ public class ProductServlet extends HttpServlet {
         }
     }
 
-    private void listProducts(HttpServletRequest request, HttpServletResponse response) 
+    private void listProducts(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
         List<Product> products = productService.getAllProducts();
         request.setAttribute("products", products);
         request.getRequestDispatcher("/pages/products/list.jsp").forward(request, response);
     }
 
-    private void showNewForm(HttpServletRequest request, HttpServletResponse response) 
+    private void showNewForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.getRequestDispatcher("/pages/products/new.jsp").forward(request, response);
     }
 
-    private void showEditForm(HttpServletRequest request, HttpServletResponse response, String pathInfo) 
+    private void showEditForm(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, ServletException, IOException {
         Integer id = extractId(pathInfo);
-        Optional<Product> productOptional = productService.getProductById(id);
-        Product product = productOptional.orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
+        Optional<Product> product = productService.getProductById(id);
 
-        request.setAttribute("product", product);
-        request.getRequestDispatcher("/pages/products/new.jsp").forward(request, response);
-    }
-
-    private void viewProduct(HttpServletRequest request, HttpServletResponse response, String pathInfo) 
-            throws SQLException, ServletException, IOException {
-        Integer id = extractId(pathInfo);
-        Optional<Product> productOptional = productService.getProductById(id);
-        Product product = productOptional.orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
-
-        request.setAttribute("product", product);
-        request.getRequestDispatcher("/pages/products/view.jsp").forward(request, response);
-    }
-
-    private void searchProducts(HttpServletRequest request, HttpServletResponse response) 
-            throws SQLException, ServletException, IOException {
-        String searchTerm = request.getParameter("q");
-
-        if (searchTerm == null || searchTerm.trim().isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/products/");
-            return;
+        if (product.isPresent()) {
+            request.setAttribute("product", product.get());
+            request.getRequestDispatcher("/pages/products/new.jsp").forward(request, response);
+        } else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
+    }
 
+    private void viewProduct(HttpServletRequest request, HttpServletResponse response, String pathInfo)
+            throws SQLException, ServletException, IOException {
+        Integer id = extractId(pathInfo);
+        Optional<Product> product = productService.getProductById(id);
+
+        if (product.isPresent()) {
+            request.setAttribute("product", product.get());
+            request.getRequestDispatcher("/pages/products/view.jsp").forward(request, response);
+        } else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+
+    private void saveProduct(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, IOException, ServletException {
+        HashMap<String, String> params = new HashMap<>();
+        request.getParameterMap().forEach((key, value) -> params.put(key, value[0]));
+        Product product = Mapper.mapToProduct(params); // Usar Mapper
+
+        try {
+            if (product.getId() == null) {
+                productService.createProduct(product);
+                request.getSession().setAttribute("success", "Produto criado com sucesso!");
+            } else {
+                productService.updateProduct(product);
+                request.getSession().setAttribute("success", "Produto atualizado com sucesso!");
+            }
+            response.sendRedirect(request.getContextPath() + "/products/");
+        } catch (IllegalArgumentException e) {
+            request.getSession().setAttribute("error", e.getMessage());
+            request.setAttribute("product", product); // Mantém os dados preenchidos
+            request.getRequestDispatcher("/pages/products/new.jsp").forward(request, response);
+        }
+    }
+
+    private void deleteProduct(HttpServletRequest request, HttpServletResponse response, String pathInfo)
+            throws SQLException, IOException {
+        Integer id = extractId(pathInfo);
+        productService.deleteProduct(id);
+        request.getSession().setAttribute("success", "Produto deletado com sucesso!");
+        response.sendRedirect(request.getContextPath() + "/products/");
+    }
+
+    private void searchProducts(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, ServletException, IOException {
+        String searchTerm = request.getParameter("query");
         List<Product> products = productService.searchProductsByName(searchTerm);
         request.setAttribute("products", products);
-        request.setAttribute("searchTerm", searchTerm);
         request.getRequestDispatcher("/pages/products/list.jsp").forward(request, response);
     }
 
-    private void saveProduct(HttpServletRequest request, HttpServletResponse response) 
-            throws SQLException, IOException {
-        try {
-            HashMap<String, String> params = new HashMap<>();
-            params.put("id", request.getParameter("id"));
-            params.put("name", request.getParameter("name"));
-            params.put("description", request.getParameter("description"));
-            params.put("weightKg", request.getParameter("weightKg"));
-            params.put("volumeM3", request.getParameter("volumeM3"));
-            params.put("declaredValue", request.getParameter("declaredValue"));
-            params.put("category", request.getParameter("category"));
-            params.put("active", request.getParameter("active"));
-
-            Product product = Mapper.mapToProduct(params);
-
-            if (product.getId() != null && product.getId() > 0) {
-                productService.updateProduct(product);
-                request.getSession().setAttribute("success", "Produto atualizado com sucesso");
-            } else {
-                productService.createProduct(product);
-                request.getSession().setAttribute("success", "Produto criado com sucesso");
-            }
-
-            response.sendRedirect(request.getContextPath() + "/products/");
-        } catch (IllegalArgumentException e) {
-            request.getSession().setAttribute("error", e.getMessage());
-            response.sendRedirect(request.getContextPath() + "/products/new");
-        }
-    }
-
-    private void deleteProduct(HttpServletRequest request, HttpServletResponse response, String pathInfo) 
-            throws SQLException, IOException {
-        try {
-            Integer id = extractId(pathInfo);
-            productService.deleteProduct(id);
-            request.getSession().setAttribute("success", "Produto deletado com sucesso");
-            response.sendRedirect(request.getContextPath() + "/products/");
-        } catch (IllegalArgumentException e) {
-            request.getSession().setAttribute("error", e.getMessage());
-            response.sendRedirect(request.getContextPath() + "/products/");
-        }
+    // Método auxiliar para construir um objeto Product a partir dos parâmetros da requisição (usando Mapper)
+    private Product buildProductFromRequest(HttpServletRequest request) {
+        HashMap<String, String> params = new HashMap<>();
+        request.getParameterMap().forEach((key, value) -> params.put(key, value[0]));
+        return Mapper.mapToProduct(params);
     }
 
     private Integer extractId(String pathInfo) {

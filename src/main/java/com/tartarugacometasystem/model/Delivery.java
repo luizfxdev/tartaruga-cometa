@@ -2,7 +2,6 @@ package com.tartarugacometasystem.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Delivery {
@@ -12,39 +11,55 @@ public class Delivery {
     private Integer recipientId;
     private Integer originAddressId;
     private Integer destinationAddressId;
-    private DeliveryStatus status;
     private BigDecimal totalValue;
+    private BigDecimal freightValue;
     private BigDecimal totalWeightKg;
     private BigDecimal totalVolumeM3;
-    private BigDecimal freightValue;
+    private DeliveryStatus status;
     private String observations;
     private LocalDateTime createdAt;
-    private LocalDateTime pickupDate;
-    private LocalDateTime shipmentDate;
-    private LocalDateTime deliveryDate;
-    private LocalDateTime cancellationDate;
-    private String cancellationReason;
     private LocalDateTime updatedAt;
-    private List<DeliveryProduct> products;
+    private LocalDateTime deliveredAt;
+    private String reasonNotDelivered;
+    private LocalDateTime deliveryDate; // NOVO
 
+    // Campos para objetos relacionados
+    private Client shipper;
+    private Client recipient;
+    private Address originAddress;
+    private Address destinationAddress;
+    private List<DeliveryHistory> history; // NOVO
+
+    // Campos formatados
+    private String formattedCreatedAt;
+    private String formattedUpdatedAt;
+    private String formattedDeliveredAt;
+    private String formattedDeliveryDate; // NOVO
+
+    // Construtor padrão
     public Delivery() {
-        this.products = new ArrayList<>();
-        this.status = DeliveryStatus.PENDENTE;
-        this.totalValue = BigDecimal.ZERO;
-        this.totalWeightKg = BigDecimal.ZERO;
-        this.totalVolumeM3 = BigDecimal.ZERO;
     }
 
-    public Delivery(String trackingCode, Integer shipperId, Integer recipientId,
-                   Integer originAddressId, Integer destinationAddressId) {
-        this();
+    // Construtor completo (sem IDs e datas)
+    public Delivery(String trackingCode, Integer shipperId, Integer recipientId, 
+                    Integer originAddressId, Integer destinationAddressId, 
+                    BigDecimal totalValue, BigDecimal freightValue,
+                    BigDecimal totalWeightKg, BigDecimal totalVolumeM3, 
+                    DeliveryStatus status, String observations) {
         this.trackingCode = trackingCode;
         this.shipperId = shipperId;
         this.recipientId = recipientId;
         this.originAddressId = originAddressId;
         this.destinationAddressId = destinationAddressId;
+        this.totalValue = totalValue;
+        this.freightValue = freightValue;
+        this.totalWeightKg = totalWeightKg;
+        this.totalVolumeM3 = totalVolumeM3;
+        this.status = status;
+        this.observations = observations;
     }
 
+    // Getters e Setters
     public Integer getId() {
         return id;
     }
@@ -93,20 +108,20 @@ public class Delivery {
         this.destinationAddressId = destinationAddressId;
     }
 
-    public DeliveryStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(DeliveryStatus status) {
-        this.status = status;
-    }
-
     public BigDecimal getTotalValue() {
         return totalValue;
     }
 
     public void setTotalValue(BigDecimal totalValue) {
         this.totalValue = totalValue;
+    }
+
+    public BigDecimal getFreightValue() {
+        return freightValue;
+    }
+
+    public void setFreightValue(BigDecimal freightValue) {
+        this.freightValue = freightValue;
     }
 
     public BigDecimal getTotalWeightKg() {
@@ -125,12 +140,12 @@ public class Delivery {
         this.totalVolumeM3 = totalVolumeM3;
     }
 
-    public BigDecimal getFreightValue() {
-        return freightValue;
+    public DeliveryStatus getStatus() {
+        return status;
     }
 
-    public void setFreightValue(BigDecimal freightValue) {
-        this.freightValue = freightValue;
+    public void setStatus(DeliveryStatus status) {
+        this.status = status;
     }
 
     public String getObservations() {
@@ -149,46 +164,6 @@ public class Delivery {
         this.createdAt = createdAt;
     }
 
-    public LocalDateTime getPickupDate() {
-        return pickupDate;
-    }
-
-    public void setPickupDate(LocalDateTime pickupDate) {
-        this.pickupDate = pickupDate;
-    }
-
-    public LocalDateTime getShipmentDate() {
-        return shipmentDate;
-    }
-
-    public void setShipmentDate(LocalDateTime shipmentDate) {
-        this.shipmentDate = shipmentDate;
-    }
-
-    public LocalDateTime getDeliveryDate() {
-        return deliveryDate;
-    }
-
-    public void setDeliveryDate(LocalDateTime deliveryDate) {
-        this.deliveryDate = deliveryDate;
-    }
-
-    public LocalDateTime getCancellationDate() {
-        return cancellationDate;
-    }
-
-    public void setCancellationDate(LocalDateTime cancellationDate) {
-        this.cancellationDate = cancellationDate;
-    }
-
-    public String getCancellationReason() {
-        return cancellationReason;
-    }
-
-    public void setCancellationReason(String cancellationReason) {
-        this.cancellationReason = cancellationReason;
-    }
-
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
@@ -197,44 +172,112 @@ public class Delivery {
         this.updatedAt = updatedAt;
     }
 
-    public List<DeliveryProduct> getProducts() {
-        return products;
+    public LocalDateTime getDeliveredAt() {
+        return deliveredAt;
     }
 
-    public void setProducts(List<DeliveryProduct> products) {
-        this.products = products;
+    public void setDeliveredAt(LocalDateTime deliveredAt) {
+        this.deliveredAt = deliveredAt;
     }
 
-    public void addProduct(DeliveryProduct product) {
-        this.products.add(product);
-        updateTotals();
+    public String getReasonNotDelivered() {
+        return reasonNotDelivered;
     }
 
-    public void updateTotals() {
-        this.totalValue = BigDecimal.ZERO;
-        this.totalWeightKg = BigDecimal.ZERO;
-        this.totalVolumeM3 = BigDecimal.ZERO;
+    public void setReasonNotDelivered(String reasonNotDelivered) {
+        this.reasonNotDelivered = reasonNotDelivered;
+    }
 
-        for (DeliveryProduct product : products) {
-            this.totalValue = this.totalValue.add(product.getSubtotal());
-            this.totalWeightKg = this.totalWeightKg.add(
-                product.getUnitWeightKg().multiply(new BigDecimal(product.getQuantity()))
-            );
-            this.totalVolumeM3 = this.totalVolumeM3.add(
-                product.getUnitVolumeM3().multiply(new BigDecimal(product.getQuantity()))
-            );
-        }
+    // NOVOS GETTERS/SETTERS
+    public LocalDateTime getDeliveryDate() {
+        return deliveryDate;
+    }
+
+    public void setDeliveryDate(LocalDateTime deliveryDate) {
+        this.deliveryDate = deliveryDate;
+    }
+
+    public List<DeliveryHistory> getHistory() {
+        return history;
+    }
+
+    public void setHistory(List<DeliveryHistory> history) {
+        this.history = history;
+    }
+
+    public String getFormattedDeliveryDate() {
+        return formattedDeliveryDate;
+    }
+
+    public void setFormattedDeliveryDate(String formattedDeliveryDate) {
+        this.formattedDeliveryDate = formattedDeliveryDate;
+    }
+
+    public String getFormattedDeliveredAt() {
+        return formattedDeliveredAt;
+    }
+
+    public void setFormattedDeliveredAt(String formattedDeliveredAt) {
+        this.formattedDeliveredAt = formattedDeliveredAt;
+    }
+
+    // Getters/Setters dos objetos relacionados
+    public Client getShipper() {
+        return shipper;
+    }
+
+    public void setShipper(Client shipper) {
+        this.shipper = shipper;
+    }
+
+    public Client getRecipient() {
+        return recipient;
+    }
+
+    public void setRecipient(Client recipient) {
+        this.recipient = recipient;
+    }
+
+    public Address getOriginAddress() {
+        return originAddress;
+    }
+
+    public void setOriginAddress(Address originAddress) {
+        this.originAddress = originAddress;
+    }
+
+    public Address getDestinationAddress() {
+        return destinationAddress;
+    }
+
+    public void setDestinationAddress(Address destinationAddress) {
+        this.destinationAddress = destinationAddress;
+    }
+
+    public String getFormattedCreatedAt() {
+        return formattedCreatedAt;
+    }
+
+    public void setFormattedCreatedAt(String formattedCreatedAt) {
+        this.formattedCreatedAt = formattedCreatedAt;
+    }
+
+    public String getFormattedUpdatedAt() {
+        return formattedUpdatedAt;
+    }
+
+    public void setFormattedUpdatedAt(String formattedUpdatedAt) {
+        this.formattedUpdatedAt = formattedUpdatedAt;
     }
 
     @Override
     public String toString() {
         return "Delivery{" +
-                "id=" + id +
-                ", trackingCode='" + trackingCode + '\'' +
-                ", status=" + status +
-                ", totalValue=" + totalValue +
-                ", totalWeightKg=" + totalWeightKg +
-                ", totalVolumeM3=" + totalVolumeM3 +
-                '}';
+               "id=" + id +
+               ", trackingCode='" + trackingCode + '\'' +
+               ", shipperId=" + shipperId +
+               ", recipientId=" + recipientId +
+               ", status=" + status +
+               '}';
     }
 }

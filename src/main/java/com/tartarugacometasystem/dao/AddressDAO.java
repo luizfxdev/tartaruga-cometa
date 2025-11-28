@@ -5,180 +5,261 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.tartarugacometasystem.config.DatabaseConfig;
 import com.tartarugacometasystem.model.Address;
-import com.tartarugacometasystem.model.AddressType;
+import com.tartarugacometasystem.util.ConnectionFactory;
 
 public class AddressDAO {
 
-    public void save(Address address) throws SQLException {
-        String sql = "INSERT INTO endereco (id_cliente, tipo_endereco, logradouro, numero, " +
-                     "complemento, bairro, cidade, estado, cep, referencia, is_principal) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    /**
+     * Cria um novo endereço no banco de dados.
+     *
+     * @param address O objeto Address a ser criado.
+     * @return O objeto Address com o ID gerado.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public Address save(Address address) throws SQLException {
+        String sql = "INSERT INTO addresses (client_id, street, number, complement, neighborhood, city, state, zip_code, country, is_principal, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = ConnectionFactory.getConnection();
+            pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            pstmt.setInt(1, address.getClientId());
+            pstmt.setString(2, address.getStreet());
+            pstmt.setString(3, address.getNumber());
+            pstmt.setString(4, address.getComplement());
+            pstmt.setString(5, address.getNeighborhood());
+            pstmt.setString(6, address.getCity());
+            pstmt.setString(7, address.getState());
+            pstmt.setString(8, address.getZipCode());
+            pstmt.setString(9, address.getCountry());
+            pstmt.setBoolean(10, address.getIsPrincipal());
+            pstmt.setTimestamp(11, Timestamp.valueOf(LocalDateTime.now()));
+            pstmt.setTimestamp(12, Timestamp.valueOf(LocalDateTime.now()));
+            pstmt.executeUpdate();
 
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            stmt.setInt(1, address.getClientId());
-            stmt.setString(2, address.getAddressType().getValue());
-            stmt.setString(3, address.getStreet());
-            stmt.setString(4, address.getNumber());
-            stmt.setString(5, address.getComplement());
-            stmt.setString(6, address.getNeighborhood());
-            stmt.setString(7, address.getCity());
-            stmt.setString(8, address.getState());
-            stmt.setString(9, address.getZipCode());
-            stmt.setString(10, address.getReference());
-
-            Boolean isPrincipal = address.getIsPrincipal();
-            stmt.setBoolean(11, isPrincipal != null ? isPrincipal : false);
-
-            stmt.executeUpdate();
-
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    address.setId(rs.getInt(1));
-                }
+            rs = pstmt.getGeneratedKeys();
+            if (rs.next()) {
+                address.setId(rs.getInt(1));
             }
+            return address;
+        } finally {
+            // Correção aqui: Usar ConnectionFactory.close(conn, pstmt, rs)
+            ConnectionFactory.close(conn, pstmt, rs);
         }
     }
 
-    public void update(Address address) throws SQLException {
-        String sql = "UPDATE endereco SET tipo_endereco = ?, logradouro = ?, numero = ?, " +
-                     "complemento = ?, bairro = ?, cidade = ?, estado = ?, cep = ?, " +
-                     "referencia = ?, is_principal = ? WHERE id = ?";
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, address.getAddressType().getValue());
-            stmt.setString(2, address.getStreet());
-            stmt.setString(3, address.getNumber());
-            stmt.setString(4, address.getComplement());
-            stmt.setString(5, address.getNeighborhood());
-            stmt.setString(6, address.getCity());
-            stmt.setString(7, address.getState());
-            stmt.setString(8, address.getZipCode());
-            stmt.setString(9, address.getReference());
-
-            Boolean isPrincipal = address.getIsPrincipal();
-            stmt.setBoolean(10, isPrincipal != null ? isPrincipal : false);
-            stmt.setInt(11, address.getId());
-
-            stmt.executeUpdate();
-        }
-    }
-
-    public void delete(Integer id) throws SQLException {
-        String sql = "DELETE FROM endereco WHERE id = ?";
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
-        }
-    }
-
+    /**
+     * Busca um endereço pelo ID.
+     *
+     * @param id O ID do endereço.
+     * @return Um Optional contendo o Address se encontrado, ou Optional.empty().
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
     public Optional<Address> findById(Integer id) throws SQLException {
-        String sql = "SELECT id, id_cliente, tipo_endereco, logradouro, numero, complemento, " +
-                     "bairro, cidade, estado, cep, referencia, is_principal, created_at " +
-                     "FROM endereco WHERE id = ?";
+        String sql = "SELECT * FROM addresses WHERE id = ?";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = ConnectionFactory.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, id);
+            rs = pstmt.executeQuery();
 
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, id);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapResultSetToAddress(rs));
-                }
+            if (rs.next()) {
+                return Optional.of(mapResultSetToAddress(rs));
             }
+            return Optional.empty();
+        } finally {
+            // Correção aqui: Usar ConnectionFactory.close(conn, pstmt, rs)
+            ConnectionFactory.close(conn, pstmt, rs);
         }
-        return Optional.empty();
     }
 
+    /**
+     * Busca todos os endereços de um cliente específico.
+     *
+     * @param clientId O ID do cliente.
+     * @return Uma lista de endereços do cliente.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
     public List<Address> findByClientId(Integer clientId) throws SQLException {
-        String sql = "SELECT id, id_cliente, tipo_endereco, logradouro, numero, complemento, " +
-                     "bairro, cidade, estado, cep, referencia, is_principal, created_at " +
-                     "FROM endereco WHERE id_cliente = ? ORDER BY is_principal DESC, created_at DESC";
         List<Address> addresses = new ArrayList<>();
+        String sql = "SELECT * FROM addresses WHERE client_id = ? ORDER BY is_principal DESC, street ASC";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = ConnectionFactory.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, clientId);
+            rs = pstmt.executeQuery();
 
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, clientId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    addresses.add(mapResultSetToAddress(rs));
-                }
+            while (rs.next()) {
+                addresses.add(mapResultSetToAddress(rs));
             }
+        } finally {
+            // Correção aqui: Usar ConnectionFactory.close(conn, pstmt, rs)
+            ConnectionFactory.close(conn, pstmt, rs);
         }
         return addresses;
     }
 
-    public List<Address> findByClientIdAndType(Integer clientId, AddressType addressType) throws SQLException {
-        String sql = "SELECT id, id_cliente, tipo_endereco, logradouro, numero, complemento, " +
-                     "bairro, cidade, estado, cep, referencia, is_principal, created_at " +
-                     "FROM endereco WHERE id_cliente = ? AND tipo_endereco = ? ORDER BY is_principal DESC";
+    /**
+     * Busca todos os endereços.
+     *
+     * @return Uma lista de todos os endereços.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public List<Address> getAll() throws SQLException {
         List<Address> addresses = new ArrayList<>();
+        String sql = "SELECT * FROM addresses ORDER BY client_id, is_principal DESC, street ASC";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = ConnectionFactory.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
 
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, clientId);
-            stmt.setString(2, addressType.getValue());
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    addresses.add(mapResultSetToAddress(rs));
-                }
+            while (rs.next()) {
+                addresses.add(mapResultSetToAddress(rs));
             }
+        } finally {
+            // Correção aqui: Usar ConnectionFactory.close(conn, pstmt, rs)
+            ConnectionFactory.close(conn, pstmt, rs);
         }
         return addresses;
     }
 
-    public Optional<Address> findPrincipalByClientId(Integer clientId) throws SQLException {
-        String sql = "SELECT id, id_cliente, tipo_endereco, logradouro, numero, complemento, " +
-                     "bairro, cidade, estado, cep, referencia, is_principal, created_at " +
-                     "FROM endereco WHERE id_cliente = ? AND is_principal = true LIMIT 1";
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, clientId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapResultSetToAddress(rs));
-                }
-            }
+    /**
+     * Atualiza um endereço existente no banco de dados.
+     *
+     * @param address O objeto Address a ser atualizado.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public void update(Address address) throws SQLException {
+        String sql = "UPDATE addresses SET client_id = ?, street = ?, number = ?, complement = ?, neighborhood = ?, city = ?, state = ?, zip_code = ?, country = ?, is_principal = ?, updated_at = ? WHERE id = ?";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        try {
+            conn = ConnectionFactory.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, address.getClientId());
+            pstmt.setString(2, address.getStreet());
+            pstmt.setString(3, address.getNumber());
+            pstmt.setString(4, address.getComplement());
+            pstmt.setString(5, address.getNeighborhood());
+            pstmt.setString(6, address.getCity());
+            pstmt.setString(7, address.getState());
+            pstmt.setString(8, address.getZipCode());
+            pstmt.setString(9, address.getCountry());
+            pstmt.setBoolean(10, address.getIsPrincipal());
+            pstmt.setTimestamp(11, Timestamp.valueOf(LocalDateTime.now()));
+            pstmt.setInt(12, address.getId());
+            pstmt.executeUpdate();
+        } finally {
+            // Correção aqui: Usar ConnectionFactory.close(conn, pstmt)
+            ConnectionFactory.close(conn, pstmt);
         }
-        return Optional.empty();
     }
 
+    /**
+     * Deleta um endereço pelo ID.
+     *
+     * @param id O ID do endereço a ser deletado.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public void delete(Integer id) throws SQLException {
+        String sql = "DELETE FROM addresses WHERE id = ?";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        try {
+            conn = ConnectionFactory.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+        } finally {
+            // Correção aqui: Usar ConnectionFactory.close(conn, pstmt)
+            ConnectionFactory.close(conn, pstmt);
+        }
+    }
+
+    /**
+     * Define um endereço como principal para um cliente, desmarcando outros.
+     *
+     * @param clientId O ID do cliente.
+     * @param addressId O ID do endereço a ser definido como principal.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
+    public void setPrincipalAddress(Integer clientId, Integer addressId) throws SQLException {
+        Connection conn = null;
+        PreparedStatement pstmtUpdateOthers = null;
+        PreparedStatement pstmtUpdatePrincipal = null;
+        try {
+            conn = ConnectionFactory.getConnection();
+            conn.setAutoCommit(false); // Inicia transação
+
+            // 1. Desmarcar todos os outros endereços como principais para este cliente
+            String sqlUpdateOthers = "UPDATE addresses SET is_principal = FALSE, updated_at = ? WHERE client_id = ? AND id != ?";
+            pstmtUpdateOthers = conn.prepareStatement(sqlUpdateOthers);
+            pstmtUpdateOthers.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
+            pstmtUpdateOthers.setInt(2, clientId);
+            pstmtUpdateOthers.setInt(3, addressId);
+            pstmtUpdateOthers.executeUpdate();
+
+            // 2. Marcar o endereço especificado como principal
+            String sqlUpdatePrincipal = "UPDATE addresses SET is_principal = TRUE, updated_at = ? WHERE id = ? AND client_id = ?";
+            pstmtUpdatePrincipal = conn.prepareStatement(sqlUpdatePrincipal);
+            pstmtUpdatePrincipal.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
+            pstmtUpdatePrincipal.setInt(2, addressId);
+            pstmtUpdatePrincipal.setInt(3, clientId);
+            pstmtUpdatePrincipal.executeUpdate();
+
+            conn.commit(); // Confirma a transação
+        } catch (SQLException e) {
+            if (conn != null) {
+                conn.rollback(); // Reverte em caso de erro
+            }
+            throw e;
+        } finally {
+            // Correção aqui: Usar ConnectionFactory.close(conn, pstmtUpdateOthers) e ConnectionFactory.close(pstmtUpdatePrincipal)
+            ConnectionFactory.close(pstmtUpdateOthers);
+            ConnectionFactory.close(pstmtUpdatePrincipal);
+            ConnectionFactory.close(conn); // Fecha a conexão por último
+        }
+    }
+
+    /**
+     * Mapeia um ResultSet para um objeto Address.
+     *
+     * @param rs O ResultSet.
+     * @return Um objeto Address.
+     * @throws SQLException Se ocorrer um erro de SQL.
+     */
     private Address mapResultSetToAddress(ResultSet rs) throws SQLException {
         Address address = new Address();
         address.setId(rs.getInt("id"));
-        address.setClientId(rs.getInt("id_cliente"));
-        address.setAddressType(AddressType.fromValue(rs.getString("tipo_endereco")));
-        address.setStreet(rs.getString("logradouro"));
-        address.setNumber(rs.getString("numero"));
-        address.setComplement(rs.getString("complemento"));
-        address.setNeighborhood(rs.getString("bairro"));
-        address.setCity(rs.getString("cidade"));
-        address.setState(rs.getString("estado"));
-        address.setZipCode(rs.getString("cep"));
-        address.setReference(rs.getString("referencia"));
+        address.setClientId(rs.getInt("client_id"));
+        address.setStreet(rs.getString("street"));
+        address.setNumber(rs.getString("number"));
+        address.setComplement(rs.getString("complement"));
+        address.setNeighborhood(rs.getString("neighborhood"));
+        address.setCity(rs.getString("city"));
+        address.setState(rs.getString("state"));
+        address.setZipCode(rs.getString("zip_code"));
+        address.setCountry(rs.getString("country"));
         address.setIsPrincipal(rs.getBoolean("is_principal"));
         address.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-
+        address.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
         return address;
     }
 }
