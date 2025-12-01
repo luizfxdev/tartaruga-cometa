@@ -11,8 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.tartarugacometasystem.config.DatabaseConfig; // Import alterado
 import com.tartarugacometasystem.model.Address;
-import com.tartarugacometasystem.util.ConnectionFactory;
 
 public class AddressDAO {
 
@@ -24,25 +24,27 @@ public class AddressDAO {
      * @throws SQLException Se ocorrer um erro de SQL.
      */
     public Address save(Address address) throws SQLException {
-        String sql = "INSERT INTO addresses (client_id, street, number, complement, neighborhood, city, state, zip_code, country, is_principal, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO address (client_id, address_type, street, number, complement, neighborhood, city, state, zip_code, reference, is_main, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
-            conn = ConnectionFactory.getConnection();
+            conn = DatabaseConfig.getConnection(); // Chamada alterada
             pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             pstmt.setInt(1, address.getClientId());
-            pstmt.setString(2, address.getStreet());
-            pstmt.setString(3, address.getNumber());
-            pstmt.setString(4, address.getComplement());
-            pstmt.setString(5, address.getNeighborhood());
-            pstmt.setString(6, address.getCity());
-            pstmt.setString(7, address.getState());
-            pstmt.setString(8, address.getZipCode());
-            pstmt.setString(9, address.getCountry());
-            pstmt.setBoolean(10, address.getIsPrincipal());
-            pstmt.setTimestamp(11, Timestamp.valueOf(LocalDateTime.now()));
+            pstmt.setString(2, address.getAddressType()); // Nova coluna
+            pstmt.setString(3, address.getStreet());
+            pstmt.setString(4, address.getNumber());
+            pstmt.setString(5, address.getComplement());
+            pstmt.setString(6, address.getNeighborhood());
+            pstmt.setString(7, address.getCity());
+            pstmt.setString(8, address.getState());
+            pstmt.setString(9, address.getZipCode());
+            pstmt.setString(10, address.getReference()); // Nova coluna
+            pstmt.setBoolean(11, address.getIsMain()); // Nome da coluna alterado
             pstmt.setTimestamp(12, Timestamp.valueOf(LocalDateTime.now()));
+            // updated_at é tratado por trigger, não precisa ser definido aqui para INSERT
+
             pstmt.executeUpdate();
 
             rs = pstmt.getGeneratedKeys();
@@ -51,8 +53,7 @@ public class AddressDAO {
             }
             return address;
         } finally {
-            // Correção aqui: Usar ConnectionFactory.close(conn, pstmt, rs)
-            ConnectionFactory.close(conn, pstmt, rs);
+            DatabaseConfig.close(conn, pstmt, rs); // Chamada alterada
         }
     }
 
@@ -64,12 +65,12 @@ public class AddressDAO {
      * @throws SQLException Se ocorrer um erro de SQL.
      */
     public Optional<Address> findById(Integer id) throws SQLException {
-        String sql = "SELECT * FROM addresses WHERE id = ?";
+        String sql = "SELECT * FROM address WHERE id = ?"; // Nome da tabela alterado
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
-            conn = ConnectionFactory.getConnection();
+            conn = DatabaseConfig.getConnection(); // Chamada alterada
             pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, id);
             rs = pstmt.executeQuery();
@@ -79,8 +80,7 @@ public class AddressDAO {
             }
             return Optional.empty();
         } finally {
-            // Correção aqui: Usar ConnectionFactory.close(conn, pstmt, rs)
-            ConnectionFactory.close(conn, pstmt, rs);
+            DatabaseConfig.close(conn, pstmt, rs); // Chamada alterada
         }
     }
 
@@ -93,12 +93,12 @@ public class AddressDAO {
      */
     public List<Address> findByClientId(Integer clientId) throws SQLException {
         List<Address> addresses = new ArrayList<>();
-        String sql = "SELECT * FROM addresses WHERE client_id = ? ORDER BY is_principal DESC, street ASC";
+        String sql = "SELECT * FROM address WHERE client_id = ? ORDER BY is_main DESC, street ASC"; // Nome da tabela e coluna alterados
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
-            conn = ConnectionFactory.getConnection();
+            conn = DatabaseConfig.getConnection(); // Chamada alterada
             pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, clientId);
             rs = pstmt.executeQuery();
@@ -107,8 +107,7 @@ public class AddressDAO {
                 addresses.add(mapResultSetToAddress(rs));
             }
         } finally {
-            // Correção aqui: Usar ConnectionFactory.close(conn, pstmt, rs)
-            ConnectionFactory.close(conn, pstmt, rs);
+            DatabaseConfig.close(conn, pstmt, rs); // Chamada alterada
         }
         return addresses;
     }
@@ -121,12 +120,12 @@ public class AddressDAO {
      */
     public List<Address> getAll() throws SQLException {
         List<Address> addresses = new ArrayList<>();
-        String sql = "SELECT * FROM addresses ORDER BY client_id, is_principal DESC, street ASC";
+        String sql = "SELECT * FROM address ORDER BY client_id, is_main DESC, street ASC"; // Nome da tabela e coluna alterados
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
-            conn = ConnectionFactory.getConnection();
+            conn = DatabaseConfig.getConnection(); // Chamada alterada
             pstmt = conn.prepareStatement(sql);
             rs = pstmt.executeQuery();
 
@@ -134,8 +133,7 @@ public class AddressDAO {
                 addresses.add(mapResultSetToAddress(rs));
             }
         } finally {
-            // Correção aqui: Usar ConnectionFactory.close(conn, pstmt, rs)
-            ConnectionFactory.close(conn, pstmt, rs);
+            DatabaseConfig.close(conn, pstmt, rs); // Chamada alterada
         }
         return addresses;
     }
@@ -147,28 +145,28 @@ public class AddressDAO {
      * @throws SQLException Se ocorrer um erro de SQL.
      */
     public void update(Address address) throws SQLException {
-        String sql = "UPDATE addresses SET client_id = ?, street = ?, number = ?, complement = ?, neighborhood = ?, city = ?, state = ?, zip_code = ?, country = ?, is_principal = ?, updated_at = ? WHERE id = ?";
+        String sql = "UPDATE address SET client_id = ?, address_type = ?, street = ?, number = ?, complement = ?, neighborhood = ?, city = ?, state = ?, zip_code = ?, reference = ?, is_main = ? WHERE id = ?"; // Nome da tabela e colunas alterados
         Connection conn = null;
         PreparedStatement pstmt = null;
         try {
-            conn = ConnectionFactory.getConnection();
+            conn = DatabaseConfig.getConnection(); // Chamada alterada
             pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, address.getClientId());
-            pstmt.setString(2, address.getStreet());
-            pstmt.setString(3, address.getNumber());
-            pstmt.setString(4, address.getComplement());
-            pstmt.setString(5, address.getNeighborhood());
-            pstmt.setString(6, address.getCity());
-            pstmt.setString(7, address.getState());
-            pstmt.setString(8, address.getZipCode());
-            pstmt.setString(9, address.getCountry());
-            pstmt.setBoolean(10, address.getIsPrincipal());
-            pstmt.setTimestamp(11, Timestamp.valueOf(LocalDateTime.now()));
+            pstmt.setString(2, address.getAddressType());
+            pstmt.setString(3, address.getStreet());
+            pstmt.setString(4, address.getNumber());
+            pstmt.setString(5, address.getComplement());
+            pstmt.setString(6, address.getNeighborhood());
+            pstmt.setString(7, address.getCity());
+            pstmt.setString(8, address.getState());
+            pstmt.setString(9, address.getZipCode());
+            pstmt.setString(10, address.getReference());
+            pstmt.setBoolean(11, address.getIsMain());
+            // updated_at é tratado por trigger, não precisa ser definido aqui explicitamente
             pstmt.setInt(12, address.getId());
             pstmt.executeUpdate();
         } finally {
-            // Correção aqui: Usar ConnectionFactory.close(conn, pstmt)
-            ConnectionFactory.close(conn, pstmt);
+            DatabaseConfig.close(conn, pstmt); // Chamada alterada
         }
     }
 
@@ -179,17 +177,16 @@ public class AddressDAO {
      * @throws SQLException Se ocorrer um erro de SQL.
      */
     public void delete(Integer id) throws SQLException {
-        String sql = "DELETE FROM addresses WHERE id = ?";
+        String sql = "DELETE FROM address WHERE id = ?"; // Nome da tabela alterado
         Connection conn = null;
         PreparedStatement pstmt = null;
         try {
-            conn = ConnectionFactory.getConnection();
+            conn = DatabaseConfig.getConnection(); // Chamada alterada
             pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
         } finally {
-            // Correção aqui: Usar ConnectionFactory.close(conn, pstmt)
-            ConnectionFactory.close(conn, pstmt);
+            DatabaseConfig.close(conn, pstmt); // Chamada alterada
         }
     }
 
@@ -200,29 +197,27 @@ public class AddressDAO {
      * @param addressId O ID do endereço a ser definido como principal.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public void setPrincipalAddress(Integer clientId, Integer addressId) throws SQLException {
+    public void setMainAddress(Integer clientId, Integer addressId) throws SQLException { // Nome do método alterado
         Connection conn = null;
         PreparedStatement pstmtUpdateOthers = null;
-        PreparedStatement pstmtUpdatePrincipal = null;
+        PreparedStatement pstmtUpdateMain = null; // Nome da variável alterado
         try {
-            conn = ConnectionFactory.getConnection();
+            conn = DatabaseConfig.getConnection(); // Chamada alterada
             conn.setAutoCommit(false); // Inicia transação
 
             // 1. Desmarcar todos os outros endereços como principais para este cliente
-            String sqlUpdateOthers = "UPDATE addresses SET is_principal = FALSE, updated_at = ? WHERE client_id = ? AND id != ?";
+            String sqlUpdateOthers = "UPDATE address SET is_main = FALSE WHERE client_id = ? AND id != ?"; // Nome da tabela e colunas alterados
             pstmtUpdateOthers = conn.prepareStatement(sqlUpdateOthers);
-            pstmtUpdateOthers.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
-            pstmtUpdateOthers.setInt(2, clientId);
-            pstmtUpdateOthers.setInt(3, addressId);
+            pstmtUpdateOthers.setInt(1, clientId);
+            pstmtUpdateOthers.setInt(2, addressId);
             pstmtUpdateOthers.executeUpdate();
 
             // 2. Marcar o endereço especificado como principal
-            String sqlUpdatePrincipal = "UPDATE addresses SET is_principal = TRUE, updated_at = ? WHERE id = ? AND client_id = ?";
-            pstmtUpdatePrincipal = conn.prepareStatement(sqlUpdatePrincipal);
-            pstmtUpdatePrincipal.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
-            pstmtUpdatePrincipal.setInt(2, addressId);
-            pstmtUpdatePrincipal.setInt(3, clientId);
-            pstmtUpdatePrincipal.executeUpdate();
+            String sqlUpdateMain = "UPDATE address SET is_main = TRUE WHERE id = ? AND client_id = ?"; // Nome da tabela e colunas alterados
+            pstmtUpdateMain = conn.prepareStatement(sqlUpdateMain);
+            pstmtUpdateMain.setInt(1, addressId);
+            pstmtUpdateMain.setInt(2, clientId);
+            pstmtUpdateMain.executeUpdate();
 
             conn.commit(); // Confirma a transação
         } catch (SQLException e) {
@@ -231,10 +226,9 @@ public class AddressDAO {
             }
             throw e;
         } finally {
-            // Correção aqui: Usar ConnectionFactory.close(conn, pstmtUpdateOthers) e ConnectionFactory.close(pstmtUpdatePrincipal)
-            ConnectionFactory.close(pstmtUpdateOthers);
-            ConnectionFactory.close(pstmtUpdatePrincipal);
-            ConnectionFactory.close(conn); // Fecha a conexão por último
+            DatabaseConfig.close(pstmtUpdateOthers); // Chamada alterada
+            DatabaseConfig.close(pstmtUpdateMain); // Chamada alterada
+            DatabaseConfig.close(conn); // Fecha a conexão por último
         }
     }
 
@@ -249,6 +243,7 @@ public class AddressDAO {
         Address address = new Address();
         address.setId(rs.getInt("id"));
         address.setClientId(rs.getInt("client_id"));
+        address.setAddressType(rs.getString("address_type")); // Nova coluna
         address.setStreet(rs.getString("street"));
         address.setNumber(rs.getString("number"));
         address.setComplement(rs.getString("complement"));
@@ -256,8 +251,8 @@ public class AddressDAO {
         address.setCity(rs.getString("city"));
         address.setState(rs.getString("state"));
         address.setZipCode(rs.getString("zip_code"));
-        address.setCountry(rs.getString("country"));
-        address.setIsPrincipal(rs.getBoolean("is_principal"));
+        address.setReference(rs.getString("reference")); // Nova coluna
+        address.setIsMain(rs.getBoolean("is_main")); // Nome da coluna alterado
         address.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
         address.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
         return address;

@@ -10,9 +10,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.tartarugacometasystem.config.DatabaseConfig; // Import alterado
 import com.tartarugacometasystem.model.DeliveryHistory;
 import com.tartarugacometasystem.model.DeliveryStatus;
-import com.tartarugacometasystem.util.ConnectionFactory;
 
 public class DeliveryHistoryDAO {
 
@@ -24,18 +24,20 @@ public class DeliveryHistoryDAO {
      * @throws SQLException Se ocorrer um erro de SQL.
      */
     public DeliveryHistory save(DeliveryHistory history) throws SQLException {
-        String sql = "INSERT INTO delivery_history (delivery_id, status, observations, user, created_at) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO delivery_history (delivery_id, previous_status, new_status, change_date, \"user\", observations, location) VALUES (?, ?, ?, ?, ?, ?, ?)"; // Nomes das colunas alterados e novas adicionadas
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            conn = ConnectionFactory.getConnection();
+            conn = DatabaseConfig.getConnection(); // Chamada alterada
             stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             stmt.setInt(1, history.getDeliveryId());
-            stmt.setString(2, history.getStatus().name()); // Salva o nome do enum
-            stmt.setString(3, history.getObservations());
-            stmt.setString(4, history.getUser());
-            stmt.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
+            stmt.setString(2, history.getPreviousStatus() != null ? history.getPreviousStatus().name() : null); // Nova coluna
+            stmt.setString(3, history.getNewStatus().name()); // Nome da coluna alterado
+            stmt.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now())); // change_date
+            stmt.setString(5, history.getUser());
+            stmt.setString(6, history.getObservations()); // Nova coluna
+            stmt.setString(7, history.getLocation()); // Nova coluna
             stmt.executeUpdate();
 
             rs = stmt.getGeneratedKeys();
@@ -44,7 +46,7 @@ public class DeliveryHistoryDAO {
             }
             return history;
         } finally {
-            ConnectionFactory.close(conn, stmt, rs);
+            DatabaseConfig.close(conn, stmt, rs); // Chamada alterada
         }
     }
 
@@ -57,12 +59,12 @@ public class DeliveryHistoryDAO {
      */
     public List<DeliveryHistory> getHistoryByDeliveryId(Integer deliveryId) throws SQLException {
         List<DeliveryHistory> historyList = new ArrayList<>();
-        String sql = "SELECT * FROM delivery_history WHERE delivery_id = ? ORDER BY created_at ASC";
+        String sql = "SELECT * FROM delivery_history WHERE delivery_id = ? ORDER BY change_date ASC"; // Nome da coluna alterado
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            conn = ConnectionFactory.getConnection();
+            conn = DatabaseConfig.getConnection(); // Chamada alterada
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, deliveryId);
             rs = stmt.executeQuery();
@@ -70,7 +72,7 @@ public class DeliveryHistoryDAO {
                 historyList.add(mapResultSetToDeliveryHistory(rs));
             }
         } finally {
-            ConnectionFactory.close(conn, stmt, rs);
+            DatabaseConfig.close(conn, stmt, rs); // Chamada alterada
         }
         return historyList;
     }
@@ -86,12 +88,12 @@ public class DeliveryHistoryDAO {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            conn = ConnectionFactory.getConnection();
+            conn = DatabaseConfig.getConnection(); // Chamada alterada
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, deliveryId);
             stmt.executeUpdate();
         } finally {
-            ConnectionFactory.close(conn, stmt);
+            DatabaseConfig.close(conn, stmt); // Chamada alterada
         }
     }
 
@@ -106,10 +108,12 @@ public class DeliveryHistoryDAO {
         DeliveryHistory history = new DeliveryHistory();
         history.setId(rs.getInt("id"));
         history.setDeliveryId(rs.getInt("delivery_id"));
-        history.setStatus(DeliveryStatus.fromValue(rs.getString("status"))); // Converte String para enum
-        history.setObservations(rs.getString("observations"));
+        history.setPreviousStatus(DeliveryStatus.fromValue(rs.getString("previous_status"))); // Nova coluna
+        history.setNewStatus(DeliveryStatus.fromValue(rs.getString("new_status"))); // Nome da coluna alterado
+        history.setChangeDate(rs.getTimestamp("change_date").toLocalDateTime()); // Nome da coluna alterado
         history.setUser(rs.getString("user"));
-        history.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+        history.setObservations(rs.getString("observations")); // Nova coluna
+        history.setLocation(rs.getString("location")); // Nova coluna
         return history;
     }
 }

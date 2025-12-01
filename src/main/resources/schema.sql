@@ -1,182 +1,197 @@
-DROP TABLE IF EXISTS historico_entrega CASCADE;
-DROP TABLE IF EXISTS entrega_produto CASCADE;
-DROP TABLE IF EXISTS entrega CASCADE;
-DROP TABLE IF EXISTS produto CASCADE;
-DROP TABLE IF EXISTS endereco CASCADE;
-DROP TABLE IF EXISTS cliente CASCADE;
+-- Drop existing tables and types to ensure a clean slate
+DROP TABLE IF EXISTS delivery_history CASCADE;
+DROP TABLE IF EXISTS delivery_product CASCADE;
+DROP TABLE IF EXISTS delivery CASCADE;
+DROP TABLE IF EXISTS product CASCADE;
+DROP TABLE IF EXISTS address CASCADE;
+DROP TABLE IF EXISTS client CASCADE;
 
-DROP TYPE IF EXISTS tipo_pessoa CASCADE;
-DROP TYPE IF EXISTS status_entrega CASCADE;
+DROP TYPE IF EXISTS person_type_enum CASCADE;
+DROP TYPE IF EXISTS delivery_status_enum CASCADE;
 
-CREATE TYPE tipo_pessoa AS ENUM ('PF', 'PJ');
+-- Create ENUM types
+CREATE TYPE person_type_enum AS ENUM ('INDIVIDUAL', 'LEGAL_ENTITY');
 
-CREATE TYPE status_entrega AS ENUM (
-    'PENDENTE',
-    'EM_TRANSITO',
-    'ENTREGUE',
-    'CANCELADA',
-    'NAO_REALIZADA'
+CREATE TYPE delivery_status_enum AS ENUM (
+    'PENDING',
+    'IN_TRANSIT',
+    'DELIVERED',
+    'CANCELED',
+    'NOT_PERFORMED'
 );
 
-CREATE TABLE cliente (
+-- Create client table
+CREATE TABLE client (
     id SERIAL PRIMARY KEY,
-    tipo_pessoa tipo_pessoa NOT NULL,
-    documento VARCHAR(20) NOT NULL UNIQUE,
-    nome VARCHAR(200) NOT NULL,
+    person_type person_type_enum NOT NULL,
+    document VARCHAR(20) NOT NULL UNIQUE,
+    name VARCHAR(200) NOT NULL,
     email VARCHAR(100),
-    telefone VARCHAR(20),
+    phone VARCHAR(20),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT chk_documento_length CHECK (
-        (tipo_pessoa = 'PF' AND LENGTH(REPLACE(documento, '.', '')) = 11) OR
-        (tipo_pessoa = 'PJ' AND LENGTH(REPLACE(documento, '.', '')) = 14)
+    CONSTRAINT chk_document_length CHECK (
+        (person_type = 'INDIVIDUAL' AND LENGTH(REPLACE(document, '.', '')) = 11) OR
+        (person_type = 'LEGAL_ENTITY' AND LENGTH(REPLACE(document, '.', '')) = 14)
     ),
     CONSTRAINT chk_email_format CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' OR email IS NULL)
 );
 
-CREATE INDEX idx_cliente_documento ON cliente(documento);
-CREATE INDEX idx_cliente_nome ON cliente(nome);
-CREATE INDEX idx_cliente_tipo ON cliente(tipo_pessoa);
+-- Create indexes for client table
+CREATE INDEX idx_client_document ON client(document);
+CREATE INDEX idx_client_name ON client(name);
+CREATE INDEX idx_client_person_type ON client(person_type);
 
-CREATE TABLE endereco (
+-- Create address table
+CREATE TABLE address (
     id SERIAL PRIMARY KEY,
-    id_cliente INTEGER NOT NULL,
-    tipo_endereco VARCHAR(20) NOT NULL,
-    logradouro VARCHAR(200) NOT NULL,
-    numero VARCHAR(10) NOT NULL,
-    complemento VARCHAR(100),
-    bairro VARCHAR(100) NOT NULL,
-    cidade VARCHAR(100) NOT NULL,
-    estado CHAR(2) NOT NULL,
-    cep VARCHAR(10) NOT NULL,
-    referencia TEXT,
-    is_principal BOOLEAN DEFAULT FALSE,
+    client_id INTEGER NOT NULL,
+    address_type VARCHAR(20) NOT NULL,
+    street VARCHAR(200) NOT NULL,
+    number VARCHAR(10) NOT NULL,
+    complement VARCHAR(100),
+    neighborhood VARCHAR(100) NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    state CHAR(2) NOT NULL,
+    zip_code VARCHAR(10) NOT NULL,
+    reference TEXT,
+    is_main BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_endereco_cliente FOREIGN KEY (id_cliente)
-        REFERENCES cliente(id) ON DELETE CASCADE,
-    CONSTRAINT chk_tipo_endereco CHECK (tipo_endereco IN ('ORIGEM', 'DESTINO', 'CADASTRAL')),
-    CONSTRAINT chk_estado CHECK (LENGTH(estado) = 2),
-    CONSTRAINT chk_cep CHECK (cep ~ '^\d{5}-?\d{3}$')
+    CONSTRAINT fk_address_client FOREIGN KEY (client_id)
+        REFERENCES client(id) ON DELETE CASCADE,
+    CONSTRAINT chk_address_type CHECK (address_type IN ('ORIGIN', 'DESTINATION', 'REGISTRATION')),
+    CONSTRAINT chk_state_length CHECK (LENGTH(state) = 2),
+    CONSTRAINT chk_zip_code_format CHECK (zip_code ~ '^\d{5}-?\d{3}$')
 );
 
-CREATE INDEX idx_endereco_cliente ON endereco(id_cliente);
-CREATE INDEX idx_endereco_cep ON endereco(cep);
-CREATE INDEX idx_endereco_principal ON endereco(id_cliente, is_principal);
+-- Create indexes for address table
+CREATE INDEX idx_address_client ON address(client_id);
+CREATE INDEX idx_address_zip_code ON address(zip_code);
+CREATE INDEX idx_address_is_main ON address(client_id, is_main);
 
-CREATE TABLE produto (
+-- Create product table
+CREATE TABLE product (
     id SERIAL PRIMARY KEY,
-    nome VARCHAR(200) NOT NULL,
-    descricao TEXT,
-    peso_kg DECIMAL(10,3) NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    description TEXT,
+    weight_kg DECIMAL(10,3) NOT NULL,
     volume_m3 DECIMAL(10,4) NOT NULL,
-    valor_declarado DECIMAL(12,2) NOT NULL,
-    categoria VARCHAR(50),
-    ativo BOOLEAN DEFAULT TRUE,
+    declared_value DECIMAL(12,2) NOT NULL,
+    category VARCHAR(50),
+    is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT chk_peso_positivo CHECK (peso_kg > 0),
-    CONSTRAINT chk_volume_positivo CHECK (volume_m3 > 0),
-    CONSTRAINT chk_valor_positivo CHECK (valor_declarado > 0)
+    CONSTRAINT chk_weight_positive CHECK (weight_kg > 0),
+    CONSTRAINT chk_volume_positive CHECK (volume_m3 > 0),
+    CONSTRAINT chk_declared_value_positive CHECK (declared_value > 0)
 );
 
-CREATE INDEX idx_produto_nome ON produto(nome);
-CREATE INDEX idx_produto_ativo ON produto(ativo);
-CREATE INDEX idx_produto_categoria ON produto(categoria);
+-- Create indexes for product table
+CREATE INDEX idx_product_name ON product(name);
+CREATE INDEX idx_product_is_active ON product(is_active);
+CREATE INDEX idx_product_category ON product(category);
 
-CREATE TABLE entrega (
+-- Create delivery table
+CREATE TABLE delivery (
     id SERIAL PRIMARY KEY,
-    codigo_rastreio VARCHAR(50) UNIQUE NOT NULL,
-    id_remetente INTEGER NOT NULL,
-    id_destinatario INTEGER NOT NULL,
-    id_endereco_origem INTEGER NOT NULL,
-    id_endereco_destino INTEGER NOT NULL,
-    status status_entrega NOT NULL DEFAULT 'PENDENTE',
-    valor_total DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-    peso_total_kg DECIMAL(10,3) NOT NULL DEFAULT 0.000,
-    volume_total_m3 DECIMAL(10,4) NOT NULL DEFAULT 0.0000,
-    valor_frete DECIMAL(10,2),
-    observacoes TEXT,
-    data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    data_coleta TIMESTAMP,
-    data_envio TIMESTAMP,
-    data_entrega TIMESTAMP,
-    data_cancelamento TIMESTAMP,
-    motivo_cancelamento TEXT,
+    tracking_code VARCHAR(50) UNIQUE NOT NULL,
+    sender_id INTEGER NOT NULL,
+    recipient_id INTEGER NOT NULL,
+    origin_address_id INTEGER NOT NULL,
+    destination_address_id INTEGER NOT NULL,
+    status delivery_status_enum NOT NULL DEFAULT 'PENDING',
+    total_value DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    total_weight_kg DECIMAL(10,3) NOT NULL DEFAULT 0.000,
+    total_volume_m3 DECIMAL(10,4) NOT NULL DEFAULT 0.0000,
+    freight_value DECIMAL(10,2),
+    observations TEXT,
+    creation_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    collection_date TIMESTAMP,
+    shipping_date TIMESTAMP,
+    delivery_date TIMESTAMP,
+    cancellation_date TIMESTAMP,
+    cancellation_reason TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_entrega_remetente FOREIGN KEY (id_remetente)
-        REFERENCES cliente(id) ON DELETE RESTRICT,
-    CONSTRAINT fk_entrega_destinatario FOREIGN KEY (id_destinatario)
-        REFERENCES cliente(id) ON DELETE RESTRICT,
-    CONSTRAINT fk_entrega_endereco_origem FOREIGN KEY (id_endereco_origem)
-        REFERENCES endereco(id) ON DELETE RESTRICT,
-    CONSTRAINT fk_entrega_endereco_destino FOREIGN KEY (id_endereco_destino)
-        REFERENCES endereco(id) ON DELETE RESTRICT,
-    CONSTRAINT chk_remetente_diferente_destinatario CHECK (id_remetente != id_destinatario),
-    CONSTRAINT chk_endereco_origem_diferente_destino CHECK (id_endereco_origem != id_endereco_destino),
-    CONSTRAINT chk_valor_total_positivo CHECK (valor_total >= 0),
-    CONSTRAINT chk_valor_frete_positivo CHECK (valor_frete IS NULL OR valor_frete >= 0),
-    CONSTRAINT chk_data_coleta CHECK (data_coleta IS NULL OR data_coleta >= data_criacao),
-    CONSTRAINT chk_data_envio CHECK (data_envio IS NULL OR data_envio >= data_coleta),
-    CONSTRAINT chk_data_entrega CHECK (data_entrega IS NULL OR data_entrega >= data_envio)
+    CONSTRAINT fk_delivery_sender FOREIGN KEY (sender_id)
+        REFERENCES client(id) ON DELETE RESTRICT,
+    CONSTRAINT fk_delivery_recipient FOREIGN KEY (recipient_id)
+        REFERENCES client(id) ON DELETE RESTRICT,
+    CONSTRAINT fk_delivery_origin_address FOREIGN KEY (origin_address_id)
+        REFERENCES address(id) ON DELETE RESTRICT,
+    CONSTRAINT fk_delivery_destination_address FOREIGN KEY (destination_address_id)
+        REFERENCES address(id) ON DELETE RESTRICT,
+    CONSTRAINT chk_sender_different_recipient CHECK (sender_id != recipient_id),
+    CONSTRAINT chk_origin_address_different_destination_address CHECK (origin_address_id != destination_address_id),
+    CONSTRAINT chk_total_value_positive CHECK (total_value >= 0),
+    CONSTRAINT chk_freight_value_positive CHECK (freight_value IS NULL OR freight_value >= 0),
+    CONSTRAINT chk_collection_date CHECK (collection_date IS NULL OR collection_date >= creation_date),
+    CONSTRAINT chk_shipping_date CHECK (shipping_date IS NULL OR shipping_date >= collection_date),
+    CONSTRAINT chk_delivery_date CHECK (delivery_date IS NULL OR delivery_date >= shipping_date)
 );
 
-CREATE UNIQUE INDEX idx_entrega_codigo ON entrega(codigo_rastreio);
-CREATE INDEX idx_entrega_remetente ON entrega(id_remetente);
-CREATE INDEX idx_entrega_destinatario ON entrega(id_destinatario);
-CREATE INDEX idx_entrega_status ON entrega(status);
-CREATE INDEX idx_entrega_data_criacao ON entrega(data_criacao);
-CREATE INDEX idx_entrega_status_data ON entrega(status, data_criacao);
+-- Create indexes for delivery table
+CREATE UNIQUE INDEX idx_delivery_tracking_code ON delivery(tracking_code);
+CREATE INDEX idx_delivery_sender ON delivery(sender_id);
+CREATE INDEX idx_delivery_recipient ON delivery(recipient_id);
+CREATE INDEX idx_delivery_status ON delivery(status);
+CREATE INDEX idx_delivery_creation_date ON delivery(creation_date);
+CREATE INDEX idx_delivery_status_date ON delivery(status, creation_date);
 
-CREATE TABLE entrega_produto (
+-- Create delivery_product table (junction table for many-to-many relationship)
+CREATE TABLE delivery_product (
     id SERIAL PRIMARY KEY,
-    id_entrega INTEGER NOT NULL,
-    id_produto INTEGER NOT NULL,
-    quantidade INTEGER NOT NULL DEFAULT 1,
-    peso_unitario_kg DECIMAL(10,3) NOT NULL,
-    volume_unitario_m3 DECIMAL(10,4) NOT NULL,
-    valor_unitario DECIMAL(12,2) NOT NULL,
+    delivery_id INTEGER NOT NULL,
+    product_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 1,
+    unit_weight_kg DECIMAL(10,3) NOT NULL,
+    unit_volume_m3 DECIMAL(10,4) NOT NULL,
+    unit_value DECIMAL(12,2) NOT NULL,
     subtotal DECIMAL(12,2) NOT NULL,
-    observacoes TEXT,
+    observations TEXT,
 
-    CONSTRAINT fk_entrega_produto_entrega FOREIGN KEY (id_entrega)
-        REFERENCES entrega(id) ON DELETE CASCADE,
-    CONSTRAINT fk_entrega_produto_produto FOREIGN KEY (id_produto)
-        REFERENCES produto(id) ON DELETE RESTRICT,
-    CONSTRAINT chk_quantidade_positiva CHECK (quantidade > 0),
-    CONSTRAINT chk_peso_unitario_positivo CHECK (peso_unitario_kg > 0),
-    CONSTRAINT chk_volume_unitario_positivo CHECK (volume_unitario_m3 > 0),
-    CONSTRAINT chk_valor_unitario_positivo CHECK (valor_unitario > 0),
-    CONSTRAINT chk_subtotal CHECK (subtotal = quantidade * valor_unitario),
-    CONSTRAINT uk_entrega_produto UNIQUE (id_entrega, id_produto)
+    CONSTRAINT fk_delivery_product_delivery FOREIGN KEY (delivery_id)
+        REFERENCES delivery(id) ON DELETE CASCADE,
+    CONSTRAINT fk_delivery_product_product FOREIGN KEY (product_id)
+        REFERENCES product(id) ON DELETE RESTRICT,
+    CONSTRAINT chk_quantity_positive CHECK (quantity > 0),
+    CONSTRAINT chk_unit_weight_positive CHECK (unit_weight_kg > 0),
+    CONSTRAINT chk_unit_volume_positive CHECK (unit_volume_m3 > 0),
+    CONSTRAINT chk_unit_value_positive CHECK (unit_value > 0),
+    CONSTRAINT chk_subtotal_calculation CHECK (subtotal = quantity * unit_value),
+    CONSTRAINT uk_delivery_product UNIQUE (delivery_id, product_id)
 );
 
-CREATE INDEX idx_ep_entrega ON entrega_produto(id_entrega);
-CREATE INDEX idx_ep_produto ON entrega_produto(id_produto);
+-- Create indexes for delivery_product table
+CREATE INDEX idx_dp_delivery ON delivery_product(delivery_id);
+CREATE INDEX idx_dp_product ON delivery_product(product_id);
 
-CREATE TABLE historico_entrega (
+-- Create delivery_history table
+CREATE TABLE delivery_history (
     id SERIAL PRIMARY KEY,
-    id_entrega INTEGER NOT NULL,
-    status_anterior status_entrega,
-    status_novo status_entrega NOT NULL,
-    data_mudanca TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    usuario VARCHAR(100),
-    observacoes TEXT,
-    localizacao VARCHAR(200),
+    delivery_id INTEGER NOT NULL,
+    previous_status delivery_status_enum,
+    new_status delivery_status_enum NOT NULL,
+    change_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "user" VARCHAR(100), -- "user" is a reserved keyword, so it's quoted
+    observations TEXT,
+    location VARCHAR(200),
 
-    CONSTRAINT fk_historico_entrega FOREIGN KEY (id_entrega)
-        REFERENCES entrega(id) ON DELETE CASCADE
+    CONSTRAINT fk_delivery_history_delivery FOREIGN KEY (delivery_id)
+        REFERENCES delivery(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_historico_entrega ON historico_entrega(id_entrega);
-CREATE INDEX idx_historico_data ON historico_entrega(data_mudanca);
-CREATE INDEX idx_historico_status ON historico_entrega(status_novo);
+-- Create indexes for delivery_history table
+CREATE INDEX idx_delivery_history_delivery ON delivery_history(delivery_id);
+CREATE INDEX idx_delivery_history_date ON delivery_history(change_date);
+CREATE INDEX idx_delivery_history_status ON delivery_history(new_status);
 
-CREATE OR REPLACE FUNCTION update_updated_at_column()
+-- Function to update the 'updated_at' column automatically
+CREATE OR REPLACE FUNCTION update_timestamp_column()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = CURRENT_TIMESTAMP;
@@ -184,60 +199,65 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-CREATE TRIGGER update_cliente_updated_at BEFORE UPDATE ON cliente
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Triggers for 'updated_at' column
+CREATE TRIGGER update_client_timestamp BEFORE UPDATE ON client
+    FOR EACH ROW EXECUTE FUNCTION update_timestamp_column();
 
-CREATE TRIGGER update_produto_updated_at BEFORE UPDATE ON produto
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_product_timestamp BEFORE UPDATE ON product
+    FOR EACH ROW EXECUTE FUNCTION update_timestamp_column();
 
-CREATE TRIGGER update_entrega_updated_at BEFORE UPDATE ON entrega
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_delivery_timestamp BEFORE UPDATE ON delivery
+    FOR EACH ROW EXECUTE FUNCTION update_timestamp_column();
 
-CREATE OR REPLACE FUNCTION registrar_mudanca_status()
+-- Function to log status changes in delivery_history
+CREATE OR REPLACE FUNCTION log_delivery_status_change()
 RETURNS TRIGGER AS $$
 BEGIN
     IF (TG_OP = 'UPDATE' AND OLD.status IS DISTINCT FROM NEW.status) THEN
-        INSERT INTO historico_entrega (id_entrega, status_anterior, status_novo, usuario)
+        INSERT INTO delivery_history (delivery_id, previous_status, new_status, "user")
         VALUES (NEW.id, OLD.status, NEW.status, CURRENT_USER);
     END IF;
     RETURN NEW;
 END;
 $$ language 'plpgsql';
 
-CREATE TRIGGER trigger_mudanca_status AFTER UPDATE ON entrega
-    FOR EACH ROW EXECUTE FUNCTION registrar_mudanca_status();
+-- Trigger to call the status change logging function
+CREATE TRIGGER trigger_log_delivery_status_change AFTER UPDATE ON delivery
+    FOR EACH ROW EXECUTE FUNCTION log_delivery_status_change();
 
-CREATE OR REPLACE VIEW vw_entregas_completas AS
+-- View for complete delivery details
+CREATE OR REPLACE VIEW vw_complete_deliveries AS
 SELECT
-    e.id,
-    e.codigo_rastreio,
-    e.status,
-    e.data_criacao,
-    e.data_entrega,
-    cr.nome AS remetente_nome,
-    cr.documento AS remetente_documento,
-    cd.nome AS destinatario_nome,
-    cd.documento AS destinatario_documento,
-    eo.cidade AS origem_cidade,
-    eo.estado AS origem_estado,
-    ed.cidade AS destino_cidade,
-    ed.estado AS destino_estado,
-    e.valor_total,
-    e.valor_frete,
-    e.peso_total_kg,
-    e.volume_total_m3
-FROM entrega e
-INNER JOIN cliente cr ON e.id_remetente = cr.id
-INNER JOIN cliente cd ON e.id_destinatario = cd.id
-INNER JOIN endereco eo ON e.id_endereco_origem = eo.id
-INNER JOIN endereco ed ON e.id_endereco_destino = ed.id;
+    d.id,
+    d.tracking_code,
+    d.status,
+    d.creation_date,
+    d.delivery_date,
+    cr.name AS sender_name,
+    cr.document AS sender_document,
+    cd.name AS recipient_name,
+    cd.document AS recipient_document,
+    ao.city AS origin_city,
+    ao.state AS origin_state,
+    ad.city AS destination_city,
+    ad.state AS destination_state,
+    d.total_value,
+    d.freight_value,
+    d.total_weight_kg,
+    d.total_volume_m3
+FROM delivery d
+INNER JOIN client cr ON d.sender_id = cr.id
+INNER JOIN client cd ON d.recipient_id = cd.id
+INNER JOIN address ao ON d.origin_address_id = ao.id
+INNER JOIN address ad ON d.destination_address_id = ad.id;
 
-CREATE OR REPLACE VIEW vw_estatisticas_entregas AS
+-- View for delivery statistics
+CREATE OR REPLACE VIEW vw_delivery_statistics AS
 SELECT
     status,
-    COUNT(*) AS quantidade,
-    SUM(valor_total) AS valor_total,
-    SUM(peso_total_kg) AS peso_total,
-    AVG(valor_frete) AS valor_frete_medio
-FROM entrega
+    COUNT(*) AS quantity,
+    SUM(total_value) AS total_value,
+    SUM(total_weight_kg) AS total_weight,
+    AVG(freight_value) AS average_freight_value
+FROM delivery
 GROUP BY status;

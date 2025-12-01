@@ -14,7 +14,6 @@ gradle-app.setting
 
 # ============ JAVA ============
 *.class
-*.jar
 *.war
 *.ear
 *.zip
@@ -22,6 +21,10 @@ gradle-app.setting
 *.rar
 hs_err_pid*
 replay_pid*
+
+# Ignorar JARs, mas permitir gradle-wrapper.jar
+*.jar
+!gradle/wrapper/*.jar
 
 # ============ IDE ============
 # IntelliJ IDEA
@@ -64,7 +67,6 @@ local.properties
 /tomcat/
 /tomcat.*/
 RUNNING_PID
-*.log
 
 # ============ LOGS ============
 logs/

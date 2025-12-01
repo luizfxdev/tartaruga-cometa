@@ -1,6 +1,7 @@
 package com.tartarugacometasystem.util;
 
 import com.tartarugacometasystem.model.Address;
+import com.tartarugacometasystem.model.AddressType; // Importar AddressType
 import com.tartarugacometasystem.model.Client;
 import com.tartarugacometasystem.model.Delivery;
 import com.tartarugacometasystem.model.DeliveryStatus;
@@ -16,6 +17,9 @@ public class Mapper {
 
     /**
      * Mapeia um HashMap de parâmetros para um objeto Client.
+     *
+     * @param params HashMap contendo os parâmetros do cliente.
+     * @return Um objeto Client preenchido.
      */
     public static Client mapToClient(HashMap<String, String> params) {
         Client client = new Client();
@@ -50,6 +54,9 @@ public class Mapper {
 
     /**
      * Mapeia um HashMap de parâmetros para um objeto Address.
+     *
+     * @param params HashMap contendo os parâmetros do endereço.
+     * @return Um objeto Address preenchido.
      */
     public static Address mapToAddress(HashMap<String, String> params) {
         Address address = new Address();
@@ -73,9 +80,18 @@ public class Mapper {
         address.setZipCode(params.get("zipCode"));
         address.setCountry(params.get("country"));
 
-        Optional.ofNullable(params.get("isPrincipal"))
+        // Campo renomeado: isPrincipal -> isMain
+        Optional.ofNullable(params.get("isMain")) // Usar "isMain"
                 .map(s -> s.equalsIgnoreCase("on") || s.equalsIgnoreCase("true"))
-                .ifPresent(address::setIsPrincipal);
+                .ifPresent(address::setIsMain); // Chamar setIsMain()
+
+        // Novos campos: addressType e reference
+        Optional.ofNullable(params.get("addressType"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(AddressType::fromValue) // Mapear para o ENUM AddressType
+                .ifPresent(address::setAddressType);
+
+        address.setReference(params.get("reference")); // Novo campo
 
         Optional.ofNullable(params.get("createdAt"))
                 .filter(s -> !s.trim().isEmpty())
@@ -91,93 +107,10 @@ public class Mapper {
     }
 
     /**
-     * Mapeia um HashMap de parâmetros para um objeto Delivery.
-     */
-    public static Delivery mapToDelivery(HashMap<String, String> params) {
-        Delivery delivery = new Delivery();
-
-        Optional.ofNullable(params.get("id"))
-                .filter(s -> !s.trim().isEmpty())
-                .map(Integer::parseInt)
-                .ifPresent(delivery::setId);
-
-        delivery.setTrackingCode(params.get("trackingCode"));
-
-        Optional.ofNullable(params.get("shipperId"))
-                .filter(s -> !s.trim().isEmpty())
-                .map(Integer::parseInt)
-                .ifPresent(delivery::setShipperId);
-
-        Optional.ofNullable(params.get("recipientId"))
-                .filter(s -> !s.trim().isEmpty())
-                .map(Integer::parseInt)
-                .ifPresent(delivery::setRecipientId);
-
-        Optional.ofNullable(params.get("originAddressId"))
-                .filter(s -> !s.trim().isEmpty())
-                .map(Integer::parseInt)
-                .ifPresent(delivery::setOriginAddressId);
-
-        Optional.ofNullable(params.get("destinationAddressId"))
-                .filter(s -> !s.trim().isEmpty())
-                .map(Integer::parseInt)
-                .ifPresent(delivery::setDestinationAddressId);
-
-        Optional.ofNullable(params.get("totalValue"))
-                .filter(s -> !s.trim().isEmpty())
-                .map(BigDecimal::new)
-                .ifPresent(delivery::setTotalValue);
-
-        Optional.ofNullable(params.get("freightValue"))
-                .filter(s -> !s.trim().isEmpty())
-                .map(BigDecimal::new)
-                .ifPresent(delivery::setFreightValue);
-
-        Optional.ofNullable(params.get("totalWeightKg"))
-                .filter(s -> !s.trim().isEmpty())
-                .map(BigDecimal::new)
-                .ifPresent(delivery::setTotalWeightKg);
-
-        Optional.ofNullable(params.get("totalVolumeM3"))
-                .filter(s -> !s.trim().isEmpty())
-                .map(BigDecimal::new)
-                .ifPresent(delivery::setTotalVolumeM3);
-
-        Optional.ofNullable(params.get("status"))
-                .filter(s -> !s.trim().isEmpty())
-                .map(DeliveryStatus::fromValue)
-                .ifPresent(delivery::setStatus);
-
-        delivery.setObservations(params.get("observations"));
-
-        // Campos novos
-        Optional.ofNullable(params.get("deliveredAt"))
-                .filter(s -> !s.trim().isEmpty())
-                .map(DateFormatter::parseLocalDateTime)
-                .ifPresent(delivery::setDeliveredAt);
-
-        Optional.ofNullable(params.get("deliveryDate"))
-                .filter(s -> !s.trim().isEmpty())
-                .map(DateFormatter::parseLocalDateTime)
-                .ifPresent(delivery::setDeliveryDate);
-
-        delivery.setReasonNotDelivered(params.get("reasonNotDelivered"));
-
-        Optional.ofNullable(params.get("createdAt"))
-                .filter(s -> !s.trim().isEmpty())
-                .map(DateFormatter::parseLocalDateTime)
-                .ifPresent(delivery::setCreatedAt);
-
-        Optional.ofNullable(params.get("updatedAt"))
-                .filter(s -> !s.trim().isEmpty())
-                .map(DateFormatter::parseLocalDateTime)
-                .ifPresent(delivery::setUpdatedAt);
-
-        return delivery;
-    }
-
-    /**
      * Mapeia um HashMap de parâmetros para um objeto Product.
+     *
+     * @param params HashMap contendo os parâmetros do produto.
+     * @return Um objeto Product preenchido.
      */
     public static Product mapToProduct(HashMap<String, String> params) {
         Product product = new Product();
@@ -194,6 +127,17 @@ public class Mapper {
                 .filter(s -> !s.trim().isEmpty())
                 .map(BigDecimal::new)
                 .ifPresent(product::setPrice);
+
+        // Novos campos: weightKg e volumeM3
+        Optional.ofNullable(params.get("weightKg"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(BigDecimal::new)
+                .ifPresent(product::setWeightKg);
+
+        Optional.ofNullable(params.get("volumeM3"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(BigDecimal::new)
+                .ifPresent(product::setVolumeM3);
 
         Optional.ofNullable(params.get("stockQuantity"))
                 .filter(s -> !s.trim().isEmpty())
@@ -214,27 +158,68 @@ public class Mapper {
     }
 
     /**
-     * Converte um objeto Delivery para um Map.
+     * Mapeia um HashMap de parâmetros para um objeto Delivery.
+     *
+     * @param params HashMap contendo os parâmetros da entrega.
+     * @return Um objeto Delivery preenchido.
      */
-    public static HashMap<String, Object> deliveryToMap(Delivery delivery) {
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("id", delivery.getId());
-        map.put("trackingCode", delivery.getTrackingCode());
-        map.put("shipperId", delivery.getShipperId());
-        map.put("recipientId", delivery.getRecipientId());
-        map.put("originAddressId", delivery.getOriginAddressId());
-        map.put("destinationAddressId", delivery.getDestinationAddressId());
-        map.put("totalValue", delivery.getTotalValue());
-        map.put("freightValue", delivery.getFreightValue());
-        map.put("totalWeightKg", delivery.getTotalWeightKg());
-        map.put("totalVolumeM3", delivery.getTotalVolumeM3());
-        map.put("status", delivery.getStatus().name());
-        map.put("observations", delivery.getObservations());
-        map.put("deliveryDate", delivery.getDeliveryDate());
-        map.put("deliveredAt", delivery.getDeliveredAt());
-        map.put("reasonNotDelivered", delivery.getReasonNotDelivered());
-        map.put("createdAt", delivery.getCreatedAt());
-        map.put("updatedAt", delivery.getUpdatedAt());
-        return map;
-    }
-}
+    public static Delivery mapToDelivery(HashMap<String, String> params) {
+        Delivery delivery = new Delivery();
+
+        Optional.ofNullable(params.get("id"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(Integer::parseInt)
+                .ifPresent(delivery::setId);
+
+        // Campos renomeados
+        delivery.setTrackingCode(params.get("trackingCode")); // Renomeado
+        Optional.ofNullable(params.get("senderId")) // Renomeado
+                .filter(s -> !s.trim().isEmpty())
+                .map(Integer::parseInt)
+                .ifPresent(delivery::setSenderId); // Renomeado
+
+        Optional.ofNullable(params.get("recipientId")) // Renomeado
+                .filter(s -> !s.trim().isEmpty())
+                .map(Integer::parseInt)
+                .ifPresent(delivery::setRecipientId); // Renomeado
+
+        Optional.ofNullable(params.get("originAddressId")) // Renomeado
+                .filter(s -> !s.trim().isEmpty())
+                .map(Integer::parseInt)
+                .ifPresent(delivery::setOriginAddressId); // Renomeado
+
+        Optional.ofNullable(params.get("destinationAddressId")) // Renomeado
+                .filter(s -> !s.trim().isEmpty())
+                .map(Integer::parseInt)
+                .ifPresent(delivery::setDestinationAddressId); // Renomeado
+
+        Optional.ofNullable(params.get("totalValue")) // Renomeado
+                .filter(s -> !s.trim().isEmpty())
+                .map(BigDecimal::new)
+                .ifPresent(delivery::setTotalValue); // Renomeado
+
+        Optional.ofNullable(params.get("freightValue")) // Renomeado
+                .filter(s -> !s.trim().isEmpty())
+                .map(BigDecimal::new)
+                .ifPresent(delivery::setFreightValue); // Renomeado
+
+        Optional.ofNullable(params.get("totalWeightKg")) // Renomeado
+                .filter(s -> !s.trim().isEmpty())
+                .map(BigDecimal::new)
+                .ifPresent(delivery::setTotalWeightKg); // Renomeado
+
+        Optional.ofNullable(params.get("totalVolumeM3")) // Renomeado
+                .filter(s -> !s.trim().isEmpty())
+                .map(BigDecimal::new)
+                .ifPresent(delivery::setTotalVolumeM3); // Renomeado
+
+        Optional.ofNullable(params.get("status"))
+                .filter(s -> !s.trim().isEmpty())
+                .map(DeliveryStatus::fromValue)
+                .ifPresent(delivery::setStatus);
+
+        delivery.setObservations(params.get("observations"));
+
+        Optional.ofNullable(params.get("creationDate")) // Renomeado
+                .filter(s -> !s
+

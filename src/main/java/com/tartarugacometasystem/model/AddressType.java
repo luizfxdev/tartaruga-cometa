@@ -1,23 +1,25 @@
 package com.tartarugacometasystem.model;
 
 public enum AddressType {
-    ORIGEM("ORIGEM"),
-    DESTINO("DESTINO"),
-    CADASTRAL("CADASTRAL");
+    ORIGIN("Origem"), // Traduzido o valor interno para inglês, mantendo o label em português
+    DESTINATION("Destino"),
+    REGISTRATION("Cadastral"); // Renomeado de CADASTRAL para REGISTRATION
 
-    private final String value;
+    private final String label; // Mantém o label em português para exibição
 
-    AddressType(String value) {
-        this.value = value;
+    AddressType(String label) {
+        this.label = label;
     }
 
-    public String getValue() {
-        return value;
+    public String getLabel() {
+        return label;
     }
 
+    // Método para converter String para AddressType (útil para DAO)
     public static AddressType fromValue(String value) {
         for (AddressType type : AddressType.values()) {
-            if (type.value.equals(value)) {
+            // Compara o nome do ENUM (em inglês) com o valor fornecido (case-insensitive)
+            if (type.name().equalsIgnoreCase(value)) {
                 return type;
             }
         }

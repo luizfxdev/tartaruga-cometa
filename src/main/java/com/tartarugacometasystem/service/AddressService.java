@@ -2,20 +2,21 @@ package com.tartarugacometasystem.service;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional; // Importar Client para enriquecimento
+import java.util.Optional; // Manter este import, pois Optional é usado diretamente
 
 import com.tartarugacometasystem.dao.AddressDAO;
 import com.tartarugacometasystem.model.Address;
+import com.tartarugacometasystem.model.AddressType;
 import com.tartarugacometasystem.model.Client;
 import com.tartarugacometasystem.util.DateFormatter;
 
 public class AddressService {
-    private AddressDAO addressDAO;
-    private ClientService clientService; // Para buscar dados do cliente associado
+    private final AddressDAO addressDAO; // Marcado como final
+    private final ClientService clientService; // Marcado como final
 
     public AddressService() {
         this.addressDAO = new AddressDAO();
-        this.clientService = new ClientService(); // Inicializa o ClientService
+        this.clientService = new ClientService();
     }
 
     /**
@@ -23,7 +24,7 @@ public class AddressService {
      *
      * @param address O objeto Address a ser criado.
      * @return O objeto Address criado com o ID.
-     * @throws SQLException         Se ocorrer um erro de SQL.
+     * @throws SQLException             Se ocorrer um erro de SQL.
      * @throws IllegalArgumentException Se o endereço for inválido.
      */
     public Address createAddress(Address address) throws SQLException {
@@ -40,7 +41,7 @@ public class AddressService {
      */
     public Optional<Address> getAddressById(Integer id) throws SQLException {
         Optional<Address> address = addressDAO.findById(id);
-        address.ifPresent(this::enrichAddress); // Enriquecer se presente
+        address.ifPresent(this::enrichAddress);
         return address;
     }
 
@@ -48,7 +49,7 @@ public class AddressService {
      * Atualiza um endereço existente.
      *
      * @param address O objeto Address a ser atualizado.
-     * @throws SQLException         Se ocorrer um erro de SQL.
+     * @throws SQLException             Se ocorrer um erro de SQL.
      * @throws IllegalArgumentException Se o endereço for inválido ou não existir.
      */
     public void updateAddress(Address address) throws SQLException {
@@ -93,8 +94,7 @@ public class AddressService {
      * @throws SQLException Se ocorrer um erro de SQL.
      */
     public List<Address> getAddressesByClientId(Integer clientId) throws SQLException {
-        // CORREÇÃO: O método na AddressDAO é findByClientId, não getAddressesByClientId
-        List<Address> addresses = addressDAO.findByClientId(clientId); 
+        List<Address> addresses = addressDAO.findByClientId(clientId);
         addresses.forEach(this::enrichAddress);
         return addresses;
     }
@@ -104,10 +104,10 @@ public class AddressService {
      *
      * @param clientId  O ID do cliente.
      * @param addressId O ID do endereço a ser definido como principal.
-     * @throws SQLException         Se ocorrer um erro de SQL.
+     * @throws SQLException             Se ocorrer um erro de SQL.
      * @throws IllegalArgumentException Se o cliente ou endereço não forem encontrados.
      */
-    public void setPrincipalAddress(Integer clientId, Integer addressId) throws SQLException {
+    public void setMainAddress(Integer clientId, Integer addressId) throws SQLException {
         Optional<Client> client = clientService.getClientById(clientId);
         if (client.isEmpty()) {
             throw new IllegalArgumentException("Cliente com ID " + clientId + " não encontrado.");
@@ -116,7 +116,7 @@ public class AddressService {
         if (address.isEmpty() || !address.get().getClientId().equals(clientId)) {
             throw new IllegalArgumentException("Endereço com ID " + addressId + " não encontrado ou não pertence ao cliente " + clientId + ".");
         }
-        addressDAO.setPrincipalAddress(clientId, addressId);
+        addressDAO.setMainAddress(clientId, addressId);
     }
 
     /**
@@ -128,6 +128,9 @@ public class AddressService {
     private void validateAddress(Address address) {
         if (address.getClientId() == null) {
             throw new IllegalArgumentException("ID do cliente é obrigatório.");
+        }
+        if (address.getAddressType() == null) {
+            throw new IllegalArgumentException("Tipo de endereço é obrigatório.");
         }
         if (address.getStreet() == null || address.getStreet().trim().isEmpty()) {
             throw new IllegalArgumentException("Rua é obrigatória.");
@@ -150,6 +153,7 @@ public class AddressService {
         if (address.getCountry() == null || address.getCountry().trim().isEmpty()) {
             throw new IllegalArgumentException("País é obrigatório.");
         }
+        // O campo 'reference' é opcional, então não precisa de validação de obrigatoriedade aqui
     }
 
     /**
@@ -181,17 +185,12 @@ public class AddressService {
         }
 
         // Enriquecer com dados do cliente
-        if (address.getClientId() != null) {
-            try {
-                Optional<Client> client = clientService.getClientById(address.getClientId());
-                client.ifPresent(c -> {
-                    // Você pode adicionar mais dados do cliente ao endereço se necessário
-                    // Por exemplo, address.setClientName(c.getName());
-                });
-            } catch (SQLException e) {
-                System.err.println("Erro ao buscar cliente para endereço " + address.getId() + ": " + e.getMessage());
-                // Lidar com o erro, talvez logar ou definir um valor padrão
+        try {
+            if (address.getClientId() != null) {
+                clientService.getClientById(address.getClientId()).ifPresent(address::setClient);
             }
+        } catch (SQLException e) {
+            System.err.println("Erro ao enriquecer endereço " + address.getId() + " com dados do cliente: " + e.getMessage());
         }
     }
 }

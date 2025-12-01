@@ -2,18 +2,21 @@ package com.tartarugacometasystem.service;
 
 import com.tartarugacometasystem.dao.ClientDAO;
 import com.tartarugacometasystem.model.Client;
-import com.tartarugacometasystem.model.PersonType; // Importar PersonType
+import com.tartarugacometasystem.model.PersonType;
 import com.tartarugacometasystem.util.DateFormatter;
 
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.regex.Matcher; // Import adicionado
+import java.util.regex.Pattern; // Import adicionado
 
 public class ClientService {
-    private ClientDAO clientDAO;
+    private final ClientDAO clientDAO; // Marcado como final
+
+    // Padrões de regex para validação de documentos
+    private static final String CPF_REGEX = "(^\\d{3}\\x2E\\d{3}\\x2E\\d{3}\\x2D\\d{2}$)";
+    private static final String CNPJ_REGEX = "(^\\d{2}\\x2E\\d{3}\\x2E\\d{3}\\x2F\\d{4}\\x2D\\d{2}$)";
 
     public ClientService() {
         this.clientDAO = new ClientDAO();
@@ -24,7 +27,7 @@ public class ClientService {
      *
      * @param client O objeto Client a ser criado.
      * @return O objeto Client criado com o ID.
-     * @throws SQLException           Se ocorrer um erro de SQL.
+     * @throws SQLException             Se ocorrer um erro de SQL.
      * @throws IllegalArgumentException Se o cliente for inválido.
      */
     public Client createClient(Client client) throws SQLException {
@@ -49,7 +52,7 @@ public class ClientService {
      * Atualiza um cliente existente.
      *
      * @param client O objeto Client a ser atualizado.
-     * @throws SQLException           Se ocorrer um erro de SQL.
+     * @throws SQLException             Se ocorrer um erro de SQL.
      * @throws IllegalArgumentException Se o cliente for inválido ou não existir.
      */
     public void updateClient(Client client) throws SQLException {
@@ -87,14 +90,14 @@ public class ClientService {
     }
 
     /**
-     * Busca clientes por nome (ou parte do nome), enriquecendo-os com dados formatados.
+     * Busca clientes por nome ou documento, enriquecendo-os com dados formatados.
      *
      * @param searchTerm O termo de busca.
      * @return Uma lista de clientes que correspondem à busca.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public List<Client> searchClientsByName(String searchTerm) throws SQLException {
-        List<Client> clients = clientDAO.searchByName(searchTerm);
+    public List<Client> searchClients(String searchTerm) throws SQLException {
+        List<Client> clients = clientDAO.search(searchTerm);
         clients.forEach(this::enrichClient);
         return clients;
     }
@@ -107,37 +110,29 @@ public class ClientService {
      */
     private void validateClient(Client client) {
         if (client.getName() == null || client.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Nome é obrigatório.");
-        }
-        if (client.getDocument() == null || client.getDocument().trim().isEmpty()) {
-            throw new IllegalArgumentException("Documento (CPF/CNPJ) é obrigatório.");
-        }
-        if (client.getEmail() == null || client.getEmail().trim().isEmpty()) {
-            throw new IllegalArgumentException("Email é obrigatório.");
-        }
-        if (!isValidEmail(client.getEmail())) {
-            throw new IllegalArgumentException("Formato de email inválido.");
-        }
-        if (client.getPhone() == null || client.getPhone().trim().isEmpty()) {
-            throw new IllegalArgumentException("Telefone é obrigatório.");
+            throw new IllegalArgumentException("Nome do cliente é obrigatório.");
         }
         if (client.getPersonType() == null) {
-            throw new IllegalArgumentException("Tipo de pessoa é obrigatório.");
+            throw new IllegalArgumentException("Tipo de pessoa é obrigatório (Física ou Jurídica).");
         }
-        // Adicionar validação de CPF/CNPJ se necessário
-    }
+        if (client.getDocument() == null || client.getDocument().trim().isEmpty()) {
+            throw new IllegalArgumentException("Documento é obrigatório.");
+        }
 
-    /**
-     * Valida o formato de um email.
-     *
-     * @param email O email a ser validado.
-     * @return true se o email for válido, false caso contrário.
-     */
-    private boolean isValidEmail(String email) {
-        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
-        Pattern pattern = Pattern.compile(emailRegex);
-        Matcher matcher = pattern.matcher(email);
-        return matcher.matches();
+        // Validação do formato do documento com base no tipo de pessoa
+        if (client.getPersonType() == PersonType.INDIVIDUAL) {
+            Pattern pattern = Pattern.compile(CPF_REGEX);
+            Matcher matcher = pattern.matcher(client.getDocument());
+            if (!matcher.matches()) {
+                throw new IllegalArgumentException("CPF inválido. Formato esperado: XXX.XXX.XXX-XX");
+            }
+        } else if (client.getPersonType() == PersonType.LEGAL_ENTITY) {
+            Pattern pattern = Pattern.compile(CNPJ_REGEX);
+            Matcher matcher = pattern.matcher(client.getDocument());
+            if (!matcher.matches()) {
+                throw new IllegalArgumentException("CNPJ inválido. Formato esperado: XX.XXX.XXX/XXXX-XX");
+            }
+        }
     }
 
     /**
@@ -154,6 +149,8 @@ public class ClientService {
         if (client.getUpdatedAt() != null) {
             client.setFormattedUpdatedAt(DateFormatter.formatLocalDateTime(client.getUpdatedAt()));
         }
-        // Você pode adicionar mais enriquecimentos aqui, como formatar o documento, etc.
+        if (client.getPersonType() != null) {
+            client.setFormattedPersonType(client.getPersonType().getLabel());
+        }
     }
 }

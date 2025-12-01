@@ -1,7 +1,7 @@
 package com.tartarugacometasystem.dao;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement; // Importar PersonType
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.tartarugacometasystem.config.DatabaseConfig; // Import alterado
 import com.tartarugacometasystem.model.Client;
 import com.tartarugacometasystem.model.PersonType;
-import com.tartarugacometasystem.util.ConnectionFactory;
 
 public class ClientDAO {
 
@@ -25,12 +25,12 @@ public class ClientDAO {
      * @throws SQLException Se ocorrer um erro de SQL.
      */
     public Client save(Client client) throws SQLException {
-        String sql = "INSERT INTO clients (name, document, email, phone, person_type, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO client (name, document, email, phone, person_type, created_at) VALUES (?, ?, ?, ?, ?, ?)"; // Nome da tabela alterado e updated_at removido do insert
         Connection conn = null;
-        PreparedStatement pstmt = null; // Usar PreparedStatement
+        PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
-            conn = ConnectionFactory.getConnection();
+            conn = DatabaseConfig.getConnection(); // Chamada alterada
             pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             pstmt.setString(1, client.getName());
             pstmt.setString(2, client.getDocument());
@@ -38,7 +38,7 @@ public class ClientDAO {
             pstmt.setString(4, client.getPhone());
             pstmt.setString(5, client.getPersonType().name()); // Salva o nome do enum
             pstmt.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
-            pstmt.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
+            // updated_at é tratado por trigger, não precisa ser definido aqui para INSERT
             pstmt.executeUpdate();
 
             rs = pstmt.getGeneratedKeys();
@@ -47,7 +47,7 @@ public class ClientDAO {
             }
             return client;
         } finally {
-            ConnectionFactory.close(conn, pstmt, rs); // Usar ConnectionFactory.close
+            DatabaseConfig.close(conn, pstmt, rs); // Chamada alterada
         }
     }
 
@@ -59,12 +59,12 @@ public class ClientDAO {
      * @throws SQLException Se ocorrer um erro de SQL.
      */
     public Optional<Client> findById(Integer id) throws SQLException {
-        String sql = "SELECT * FROM clients WHERE id = ?";
+        String sql = "SELECT * FROM client WHERE id = ?"; // Nome da tabela alterado
         Connection conn = null;
-        PreparedStatement pstmt = null; // Usar PreparedStatement
+        PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
-            conn = ConnectionFactory.getConnection();
+            conn = DatabaseConfig.getConnection(); // Chamada alterada
             pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, id);
             rs = pstmt.executeQuery();
@@ -74,7 +74,7 @@ public class ClientDAO {
             }
             return Optional.empty();
         } finally {
-            ConnectionFactory.close(conn, pstmt, rs); // Usar ConnectionFactory.close
+            DatabaseConfig.close(conn, pstmt, rs); // Chamada alterada
         }
     }
 
@@ -85,22 +85,22 @@ public class ClientDAO {
      * @throws SQLException Se ocorrer um erro de SQL.
      */
     public void update(Client client) throws SQLException {
-        String sql = "UPDATE clients SET name = ?, document = ?, email = ?, phone = ?, person_type = ?, updated_at = ? WHERE id = ?";
+        String sql = "UPDATE client SET name = ?, document = ?, email = ?, phone = ?, person_type = ? WHERE id = ?"; // Nome da tabela alterado e updated_at removido do set
         Connection conn = null;
-        PreparedStatement pstmt = null; // Usar PreparedStatement
+        PreparedStatement pstmt = null;
         try {
-            conn = ConnectionFactory.getConnection();
+            conn = DatabaseConfig.getConnection(); // Chamada alterada
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, client.getName());
             pstmt.setString(2, client.getDocument());
             pstmt.setString(3, client.getEmail());
             pstmt.setString(4, client.getPhone());
             pstmt.setString(5, client.getPersonType().name()); // Salva o nome do enum
-            pstmt.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
-            pstmt.setInt(7, client.getId());
+            // updated_at é tratado por trigger, não precisa ser definido aqui explicitamente
+            pstmt.setInt(6, client.getId());
             pstmt.executeUpdate();
         } finally {
-            ConnectionFactory.close(conn, pstmt); // Usar ConnectionFactory.close
+            DatabaseConfig.close(conn, pstmt); // Chamada alterada
         }
     }
 
@@ -111,16 +111,16 @@ public class ClientDAO {
      * @throws SQLException Se ocorrer um erro de SQL.
      */
     public void delete(Integer id) throws SQLException {
-        String sql = "DELETE FROM clients WHERE id = ?";
+        String sql = "DELETE FROM client WHERE id = ?"; // Nome da tabela alterado
         Connection conn = null;
-        PreparedStatement pstmt = null; // Usar PreparedStatement
+        PreparedStatement pstmt = null;
         try {
-            conn = ConnectionFactory.getConnection();
+            conn = DatabaseConfig.getConnection(); // Chamada alterada
             pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
         } finally {
-            ConnectionFactory.close(conn, pstmt); // Usar ConnectionFactory.close
+            DatabaseConfig.close(conn, pstmt); // Chamada alterada
         }
     }
 
@@ -132,12 +132,12 @@ public class ClientDAO {
      */
     public List<Client> getAll() throws SQLException {
         List<Client> clients = new ArrayList<>();
-        String sql = "SELECT * FROM clients";
+        String sql = "SELECT * FROM client"; // Nome da tabela alterado
         Connection conn = null;
-        PreparedStatement pstmt = null; // Usar PreparedStatement
+        PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
-            conn = ConnectionFactory.getConnection();
+            conn = DatabaseConfig.getConnection(); // Chamada alterada
             pstmt = conn.prepareStatement(sql);
             rs = pstmt.executeQuery();
 
@@ -145,7 +145,7 @@ public class ClientDAO {
                 clients.add(mapResultSetToClient(rs));
             }
         } finally {
-            ConnectionFactory.close(conn, pstmt, rs); // Usar ConnectionFactory.close
+            DatabaseConfig.close(conn, pstmt, rs); // Chamada alterada
         }
         return clients;
     }
@@ -159,12 +159,12 @@ public class ClientDAO {
      */
     public List<Client> searchByName(String query) throws SQLException {
         List<Client> clients = new ArrayList<>();
-        String sql = "SELECT * FROM clients WHERE name LIKE ? OR document LIKE ? OR email LIKE ?";
+        String sql = "SELECT * FROM client WHERE name LIKE ? OR document LIKE ? OR email LIKE ?"; // Nome da tabela alterado
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
-            conn = ConnectionFactory.getConnection();
+            conn = DatabaseConfig.getConnection(); // Chamada alterada
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, "%" + query + "%");
             pstmt.setString(2, "%" + query + "%");
@@ -175,7 +175,7 @@ public class ClientDAO {
                 clients.add(mapResultSetToClient(rs));
             }
         } finally {
-            ConnectionFactory.close(conn, pstmt, rs);
+            DatabaseConfig.close(conn, pstmt, rs); // Chamada alterada
         }
         return clients;
     }

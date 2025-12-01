@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 public class Address {
     private Integer id;
     private Integer clientId; // ID do cliente ao qual o endereço pertence
+    private AddressType addressType; // NOVO CAMPO: Tipo de endereço (ORIGEM, DESTINO, CADASTRAL)
     private String street;
     private String number;
     private String complement;
@@ -13,7 +14,8 @@ public class Address {
     private String state;
     private String zipCode;
     private String country;
-    private Boolean isPrincipal; // Indica se é o endereço principal do cliente
+    private String reference; // NOVO CAMPO: Ponto de referência
+    private Boolean isMain; // Indica se é o endereço principal do cliente (renomeado de isPrincipal)
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -27,9 +29,10 @@ public class Address {
     }
 
     // Construtor completo (sem IDs e datas)
-    public Address(Integer clientId, String street, String number, String complement, String neighborhood, String city,
-                   String state, String zipCode, String country, Boolean isPrincipal) {
+    public Address(Integer clientId, AddressType addressType, String street, String number, String complement, String neighborhood,
+                   String city, String state, String zipCode, String country, String reference, Boolean isMain) {
         this.clientId = clientId;
+        this.addressType = addressType;
         this.street = street;
         this.number = number;
         this.complement = complement;
@@ -38,15 +41,17 @@ public class Address {
         this.state = state;
         this.zipCode = zipCode;
         this.country = country;
-        this.isPrincipal = isPrincipal;
+        this.reference = reference;
+        this.isMain = isMain;
     }
 
     // Construtor completo (com IDs e datas)
-    public Address(Integer id, Integer clientId, String street, String number, String complement, String neighborhood,
-                   String city, String state, String zipCode, String country, Boolean isPrincipal,
+    public Address(Integer id, Integer clientId, AddressType addressType, String street, String number, String complement, String neighborhood,
+                   String city, String state, String zipCode, String country, String reference, Boolean isMain,
                    LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.clientId = clientId;
+        this.addressType = addressType;
         this.street = street;
         this.number = number;
         this.complement = complement;
@@ -55,7 +60,8 @@ public class Address {
         this.state = state;
         this.zipCode = zipCode;
         this.country = country;
-        this.isPrincipal = isPrincipal;
+        this.reference = reference;
+        this.isMain = isMain;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -75,6 +81,14 @@ public class Address {
 
     public void setClientId(Integer clientId) {
         this.clientId = clientId;
+    }
+
+    public AddressType getAddressType() {
+        return addressType;
+    }
+
+    public void setAddressType(AddressType addressType) {
+        this.addressType = addressType;
     }
 
     public String getStreet() {
@@ -141,12 +155,20 @@ public class Address {
         this.country = country;
     }
 
-    public Boolean getIsPrincipal() {
-        return isPrincipal;
+    public String getReference() {
+        return reference;
     }
 
-    public void setIsPrincipal(Boolean isPrincipal) {
-        this.isPrincipal = isPrincipal;
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
+    public Boolean getIsMain() { // Renomeado
+        return isMain;
+    }
+
+    public void setIsMain(Boolean isMain) { // Renomeado
+        this.isMain = isMain;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -192,19 +214,21 @@ public class Address {
     @Override
     public String toString() {
         return "Address{" +
-               "id=" + id +
-               ", clientId=" + clientId +
-               ", street='" + street + '\'' +
-               ", number='" + number + '\'' +
-               ", complement='" + complement + '\'' +
-               ", neighborhood='" + neighborhood + '\'' +
-               ", city='" + city + '\'' +
-               ", state='" + state + '\'' +
-               ", zipCode='" + zipCode + '\'' +
-               ", country='" + country + '\'' +
-               ", isPrincipal=" + isPrincipal +
-               ", createdAt=" + createdAt +
-               ", updatedAt=" + updatedAt +
-               '}';
+                "id=" + id +
+                ", clientId=" + clientId +
+                ", addressType=" + addressType +
+                ", street='" + street + '\'' +
+                ", number='" + number + '\'' +
+                ", complement='" + complement + '\'' +
+                ", neighborhood='" + neighborhood + '\'' +
+                ", city='" + city + '\'' +
+                ", state='" + state + '\'' +
+                ", zipCode='" + zipCode + '\'' +
+                ", country='" + country + '\'' +
+                ", reference='" + reference + '\'' +
+                ", isMain=" + isMain +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
     }
 }

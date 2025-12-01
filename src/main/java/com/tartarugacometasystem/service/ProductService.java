@@ -1,13 +1,12 @@
 package com.tartarugacometasystem.service;
 
-import com.tartarugacometasystem.dao.ProductDAO;
-import com.tartarugacometasystem.model.Product;
-import com.tartarugacometasystem.util.DateFormatter;
-
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import com.tartarugacometasystem.dao.ProductDAO;
+import com.tartarugacometasystem.model.Product;
+import com.tartarugacometasystem.util.DateFormatter;
 
 public class ProductService {
     private ProductDAO productDAO;
@@ -21,7 +20,7 @@ public class ProductService {
      *
      * @param product O objeto Product a ser criado.
      * @return O objeto Product criado com o ID.
-     * @throws SQLException           Se ocorrer um erro de SQL.
+     * @throws SQLException             Se ocorrer um erro de SQL.
      * @throws IllegalArgumentException Se o produto for inválido.
      */
     public Product createProduct(Product product) throws SQLException {
@@ -46,7 +45,7 @@ public class ProductService {
      * Atualiza um produto existente.
      *
      * @param product O objeto Product a ser atualizado.
-     * @throws SQLException           Se ocorrer um erro de SQL.
+     * @throws SQLException             Se ocorrer um erro de SQL.
      * @throws IllegalArgumentException Se o produto for inválido ou não existir.
      */
     public void updateProduct(Product product) throws SQLException {
@@ -111,6 +110,12 @@ public class ProductService {
         }
         if (product.getStockQuantity() == null || product.getStockQuantity() < 0) {
             throw new IllegalArgumentException("Quantidade em estoque deve ser um número não negativo.");
+        }
+        if (product.getWeightKg() == null || product.getWeightKg().compareTo(java.math.BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Peso em Kg deve ser um número positivo.");
+        }
+        if (product.getVolumeM3() == null || product.getVolumeM3().compareTo(java.math.BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Volume em M3 deve ser um número positivo.");
         }
     }
 

@@ -8,7 +8,7 @@ public class Client {
     private String document; // CPF ou CNPJ
     private String email;
     private String phone;
-    private PersonType personType; // NOVO CAMPO: Tipo de pessoa (Física/Jurídica)
+    private PersonType personType; // Tipo de pessoa (Física/Jurídica)
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -126,14 +126,14 @@ public class Client {
     @Override
     public String toString() {
         return "Client{" +
-               "id=" + id +
-               ", name='" + name + '\'' +
-               ", document='" + document + '\'' +
-               ", email='" + email + '\'' +
-               ", phone='" + phone + '\'' +
-               ", personType=" + personType +
-               ", createdAt=" + createdAt +
-               ", updatedAt=" + updatedAt +
-               '}';
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", document='" + document + '\'' +
+                ", email='" + email + '\'' +
+                ", phone='" + phone + '\'' +
+                ", personType=" + personType +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
     }
 }

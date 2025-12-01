@@ -16,8 +16,8 @@ public class DeliveryProduct {
     public DeliveryProduct() {}
 
     public DeliveryProduct(Integer deliveryId, Integer productId, Integer quantity,
-                          BigDecimal unitWeightKg, BigDecimal unitVolumeM3,
-                          BigDecimal unitValue) {
+                           BigDecimal unitWeightKg, BigDecimal unitVolumeM3,
+                           BigDecimal unitValue) {
         this.deliveryId = deliveryId;
         this.productId = productId;
         this.quantity = quantity;
@@ -106,7 +106,11 @@ public class DeliveryProduct {
                 ", deliveryId=" + deliveryId +
                 ", productId=" + productId +
                 ", quantity=" + quantity +
+                ", unitWeightKg=" + unitWeightKg +
+                ", unitVolumeM3=" + unitVolumeM3 +
+                ", unitValue=" + unitValue +
                 ", subtotal=" + subtotal +
+                ", observations='" + observations + '\'' +
                 '}';
     }
 }
