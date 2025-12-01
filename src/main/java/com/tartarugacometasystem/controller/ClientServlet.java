@@ -3,7 +3,7 @@ package com.tartarugacometasystem.controller;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List; // Importar Mapper
+import java.util.List;
 import java.util.Optional;
 
 import com.tartarugacometasystem.model.Client;
@@ -111,6 +111,14 @@ public class ClientServlet extends HttpServlet {
         }
     }
 
+    private void searchClients(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, ServletException, IOException {
+        String searchTerm = request.getParameter("query"); // O parâmetro de busca geralmente é "query" ou "searchTerm"
+        List<Client> clients = clientService.search(searchTerm); // CORRIGIDO: Chamada para search()
+        request.setAttribute("clients", clients);
+        request.getRequestDispatcher("/pages/clients/list.jsp").forward(request, response);
+    }
+
     private void saveClient(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException, ServletException {
         HashMap<String, String> params = new HashMap<>();
@@ -128,8 +136,9 @@ public class ClientServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/clients/");
         } catch (IllegalArgumentException e) {
             request.getSession().setAttribute("error", e.getMessage());
+            // Recarrega dados para o formulário em caso de erro
             request.setAttribute("client", client); // Mantém os dados preenchidos
-            request.setAttribute("personTypes", PersonType.values()); // Recarrega os tipos de pessoa
+            request.setAttribute("personTypes", PersonType.values());
             request.getRequestDispatcher("/pages/clients/new.jsp").forward(request, response);
         }
     }
@@ -142,23 +151,15 @@ public class ClientServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/clients/");
     }
 
-    private void searchClients(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, ServletException, IOException {
-        String searchTerm = request.getParameter("query");
-        List<Client> clients = clientService.searchClientsByName(searchTerm);
-        request.setAttribute("clients", clients);
-        request.getRequestDispatcher("/pages/clients/list.jsp").forward(request, response);
-    }
-
-    // Método auxiliar para construir um objeto Client a partir dos parâmetros da requisição (usando Mapper)
-    private Client buildClientFromRequest(HttpServletRequest request) {
-        HashMap<String, String> params = new HashMap<>();
-        request.getParameterMap().forEach((key, value) -> params.put(key, value[0]));
-        return Mapper.mapToClient(params);
-    }
-
     private Integer extractId(String pathInfo) {
         String[] parts = pathInfo.split("/");
-        return Integer.parseInt(parts[parts.length - 1]);
+        if (parts.length > 0 && !parts[parts.length - 1].isEmpty()) {
+            try {
+                return Integer.parseInt(parts[parts.length - 1]);
+            } catch (NumberFormatException e) {
+                return null; // Ou lançar uma exceção específica
+            }
+        }
+        return null;
     }
 }

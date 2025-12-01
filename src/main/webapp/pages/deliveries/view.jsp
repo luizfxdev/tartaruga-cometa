@@ -8,7 +8,7 @@
         <h2>Detalhes da Entrega - ${delivery.trackingCode}</h2>
         <div>
             <a href="${pageContext.request.contextPath}/deliveries/edit/${delivery.id}" class="btn btn-warning">Editar</a>
-            <a href="${pageContext.request.contextPath}/deliveries/" class="btn btn-secondary">Voltar</a>
+            <a href="${pageContext.request.contextPath}/deliveries/" class="btn btn-secondary">Voltar à Lista</a>
         </div>
     </div>
 
@@ -41,22 +41,50 @@
 
         <div class="detail-row">
             <label>Remetente:</label>
-            <span>${delivery.shipper.name} (${delivery.shipper.document})</span>
+            <span>
+                <c:choose>
+                    <c:when test="${delivery.sender != null}">
+                        <a href="${pageContext.request.contextPath}/clients/view/${delivery.sender.id}">${delivery.sender.name}</a> (${delivery.sender.document})
+                    </c:when>
+                    <c:otherwise>N/A</c:otherwise>
+                </c:choose>
+            </span>
         </div>
 
         <div class="detail-row">
             <label>Destinatário:</label>
-            <span>${delivery.recipient.name} (${delivery.recipient.document})</span>
+            <span>
+                <c:choose>
+                    <c:when test="${delivery.recipient != null}">
+                        <a href="${pageContext.request.contextPath}/clients/view/${delivery.recipient.id}">${delivery.recipient.name}</a> (${delivery.recipient.document})
+                    </c:when>
+                    <c:otherwise>N/A</c:otherwise>
+                </c:choose>
+            </span>
         </div>
 
         <div class="detail-row">
             <label>Endereço de Origem:</label>
-            <span>${delivery.formattedOriginAddress}</span>
+            <span>
+                <c:choose>
+                    <c:when test="${delivery.originAddress != null}">
+                        <a href="${pageContext.request.contextPath}/addresses/view/${delivery.originAddress.id}?clientId=${delivery.sender.id}">${delivery.originAddress.street}, ${delivery.originAddress.number} - ${delivery.originAddress.city}, ${delivery.originAddress.state}</a>
+                    </c:when>
+                    <c:otherwise>N/A</c:otherwise>
+                </c:choose>
+            </span>
         </div>
 
         <div class="detail-row">
             <label>Endereço de Destino:</label>
-            <span>${delivery.formattedDestinationAddress}</span>
+            <span>
+                <c:choose>
+                    <c:when test="${delivery.destinationAddress != null}">
+                        <a href="${pageContext.request.contextPath}/addresses/view/${delivery.destinationAddress.id}?clientId=${delivery.recipient.id}">${delivery.destinationAddress.street}, ${delivery.destinationAddress.number} - ${delivery.destinationAddress.city}, ${delivery.destinationAddress.state}</a>
+                    </c:when>
+                    <c:otherwise>N/A</c:otherwise>
+                </c:choose>
+            </span>
         </div>
 
         <div class="detail-row">
@@ -83,20 +111,20 @@
             <label>Status:</label>
             <span>
                 <c:choose>
-                    <c:when test="${delivery.status.value == 'PENDENTE'}">
-                        <span class="badge badge-warning">Pendente</span>
+                    <c:when test="${delivery.status.name() == 'PENDING'}">
+                        <span class="badge badge-warning">${delivery.status.label}</span>
                     </c:when>
-                    <c:when test="${delivery.status.value == 'EM_TRANSITO'}">
-                        <span class="badge badge-info">Em Trânsito</span>
+                    <c:when test="${delivery.status.name() == 'IN_TRANSIT'}">
+                        <span class="badge badge-info">${delivery.status.label}</span>
                     </c:when>
-                    <c:when test="${delivery.status.value == 'ENTREGUE'}">
-                        <span class="badge badge-success">Entregue</span>
+                    <c:when test="${delivery.status.name() == 'DELIVERED'}">
+                        <span class="badge badge-success">${delivery.status.label}</span>
                     </c:when>
-                    <c:when test="${delivery.status.value == 'NAO_REALIZADA'}">
-                        <span class="badge badge-secondary">Não Realizada</span>
+                    <c:when test="${delivery.status.name() == 'NOT_PERFORMED'}">
+                        <span class="badge badge-secondary">${delivery.status.label}</span>
                     </c:when>
-                    <c:when test="${delivery.status.value == 'CANCELADA'}">
-                        <span class="badge badge-danger">Cancelada</span>
+                    <c:when test="${delivery.status.name() == 'CANCELED'}">
+                        <span class="badge badge-danger">${delivery.status.label}</span>
                     </c:when>
                     <c:otherwise>
                         <span class="badge badge-light">${delivery.status.label}</span>
@@ -112,12 +140,12 @@
 
         <div class="detail-row">
             <label>Data de Criação:</label>
-            <span>${delivery.formattedCreatedAt}</span>
+            <span>${delivery.formattedCreationDate}</span>
         </div>
 
         <div class="detail-row">
             <label>Última Atualização:</label>
-            <span>${delivery.formattedUpdatedAt != null ? delivery.formattedUpdatedAt : 'Nunca atualizado'}</span>
+            <span>${delivery.formattedUpdatedDate != null ? delivery.formattedUpdatedDate : 'Nunca atualizado'}</span>
         </div>
     </div>
 

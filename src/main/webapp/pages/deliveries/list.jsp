@@ -3,10 +3,12 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
-<t:header title="Entregas">
+<t:header title="Lista de Entregas">
     <div class="page-header">
         <h2>Entregas</h2>
-        <a href="${pageContext.request.contextPath}/deliveries/new" class="btn btn-primary">+ Nova Entrega</a>
+        <div>
+            <a href="${pageContext.request.contextPath}/deliveries/new" class="btn btn-primary">Nova Entrega</a>
+        </div>
     </div>
 
     <c:if test="${not empty sessionScope.success}">
@@ -23,16 +25,10 @@
         <c:remove var="error" scope="session"/>
     </c:if>
 
-    <div class="search-box">
-        <form method="GET" action="${pageContext.request.contextPath}/deliveries/">
-            <select name="status" onchange="this.form.submit()" class="form-control">
-                <option value="">Todos os Status</option>
-                <option value="PENDENTE" ${param.status == 'PENDENTE' ? 'selected' : ''}>Pendente</option>
-                <option value="EM_TRANSITO" ${param.status == 'EM_TRANSITO' ? 'selected' : ''}>Em Trânsito</option>
-                <option value="ENTREGUE" ${param.status == 'ENTREGUE' ? 'selected' : ''}>Entregue</option>
-                <option value="NAO_REALIZADA" ${param.status == 'NAO_REALIZADA' ? 'selected' : ''}>Não Realizada</option>
-                <option value="CANCELADA" ${param.status == 'CANCELADA' ? 'selected' : ''}>Cancelada</option>
-            </select>
+    <div class="search-bar">
+        <form action="${pageContext.request.contextPath}/deliveries/search" method="GET">
+            <input type="text" name="query" placeholder="Buscar por código, status, observações..." value="${param.query}">
+            <button type="submit" class="btn btn-info">Buscar</button>
         </form>
     </div>
 
@@ -47,7 +43,6 @@
                             <th>Remetente</th>
                             <th>Destinatário</th>
                             <th>Status</th>
-                            <th>Valor Total</th>
                             <th>Data de Criação</th>
                             <th>Ações</th>
                         </tr>
@@ -56,39 +51,38 @@
                         <c:forEach var="delivery" items="${deliveries}">
                             <tr>
                                 <td>${delivery.id}</td>
-                                <td><strong>${delivery.trackingCode}</strong></td>
-                                <td>${delivery.shipper.name}</td> <%-- Alterado para nome do remetente --%>
-                                <td>${delivery.recipient.name}</td> <%-- Alterado para nome do destinatário --%>
+                                <td>${delivery.trackingCode}</td>
+                                <td>${delivery.sender != null ? delivery.sender.name : 'N/A'}</td>
+                                <td>${delivery.recipient != null ? delivery.recipient.name : 'N/A'}</td>
                                 <td>
                                     <c:choose>
-                                        <c:when test="${delivery.status.value == 'PENDENTE'}">
-                                            <span class="badge badge-warning">Pendente</span>
+                                        <c:when test="${delivery.status.name() == 'PENDING'}">
+                                            <span class="badge badge-warning">${delivery.status.label}</span>
                                         </c:when>
-                                        <c:when test="${delivery.status.value == 'EM_TRANSITO'}">
-                                            <span class="badge badge-info">Em Trânsito</span>
+                                        <c:when test="${delivery.status.name() == 'IN_TRANSIT'}">
+                                            <span class="badge badge-info">${delivery.status.label}</span>
                                         </c:when>
-                                        <c:when test="${delivery.status.value == 'ENTREGUE'}">
-                                            <span class="badge badge-success">Entregue</span>
+                                        <c:when test="${delivery.status.name() == 'DELIVERED'}">
+                                            <span class="badge badge-success">${delivery.status.label}</span>
                                         </c:when>
-                                        <c:when test="${delivery.status.value == 'NAO_REALIZADA'}">
-                                            <span class="badge badge-secondary">Não Realizada</span>
+                                        <c:when test="${delivery.status.name() == 'NOT_PERFORMED'}">
+                                            <span class="badge badge-secondary">${delivery.status.label}</span>
                                         </c:when>
-                                        <c:when test="${delivery.status.value == 'CANCELADA'}">
-                                            <span class="badge badge-danger">Cancelada</span>
+                                        <c:when test="${delivery.status.name() == 'CANCELED'}">
+                                            <span class="badge badge-danger">${delivery.status.label}</span>
                                         </c:when>
                                         <c:otherwise>
                                             <span class="badge badge-light">${delivery.status.label}</span>
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
-                                <td><fmt:formatNumber value="${delivery.totalValue}" type="currency" currencySymbol="R$ " minFractionDigits="2" maxFractionDigits="2"/></td>
-                                <td>${delivery.formattedCreatedAt}</td> <%-- Usando campo formatado --%>
+                                <td>${delivery.formattedCreationDate}</td>
                                 <td>
-                                    <div class="action-buttons">
+                                    <div class="btn-group" role="group">
                                         <a href="${pageContext.request.contextPath}/deliveries/view/${delivery.id}" class="btn btn-info btn-sm">Ver</a>
                                         <a href="${pageContext.request.contextPath}/deliveries/edit/${delivery.id}" class="btn btn-warning btn-sm">Editar</a>
                                         <form method="POST" action="${pageContext.request.contextPath}/deliveries/delete/${delivery.id}" style="display:inline;">
-                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja deletar esta entrega?')">Deletar</button>
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja deletar esta entrega? Isso também removerá o histórico.')">Deletar</button>
                                         </form>
                                     </div>
                                 </td>

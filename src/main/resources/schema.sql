@@ -55,9 +55,12 @@ CREATE TABLE address (
     city VARCHAR(100) NOT NULL,
     state CHAR(2) NOT NULL,
     zip_code VARCHAR(10) NOT NULL,
+    country VARCHAR(100) NOT NULL DEFAULT 'Brasil',
     reference TEXT,
     is_main BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    -- Adicionada a coluna 'updated_at'
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_address_client FOREIGN KEY (client_id)
         REFERENCES client(id) ON DELETE CASCADE,
@@ -76,17 +79,22 @@ CREATE TABLE product (
     id SERIAL PRIMARY KEY,
     name VARCHAR(200) NOT NULL,
     description TEXT,
+    price DECIMAL(12,2) NOT NULL,
     weight_kg DECIMAL(10,3) NOT NULL,
     volume_m3 DECIMAL(10,4) NOT NULL,
     declared_value DECIMAL(12,2) NOT NULL,
     category VARCHAR(50),
     is_active BOOLEAN DEFAULT TRUE,
+    -- Adicionada a coluna 'stock_quantity'
+    stock_quantity INTEGER NOT NULL DEFAULT 0, -- Adicionado com valor padrão
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT chk_weight_positive CHECK (weight_kg > 0),
     CONSTRAINT chk_volume_positive CHECK (volume_m3 > 0),
-    CONSTRAINT chk_declared_value_positive CHECK (declared_value > 0)
+    CONSTRAINT chk_declared_value_positive CHECK (declared_value > 0),
+    CONSTRAINT chk_price_positive CHECK (price > 0),
+    CONSTRAINT chk_stock_quantity_positive CHECK (stock_quantity >= 0) -- Adicionada restrição para stock_quantity
 );
 
 -- Create indexes for product table
@@ -108,6 +116,7 @@ CREATE TABLE delivery (
     total_volume_m3 DECIMAL(10,4) NOT NULL DEFAULT 0.0000,
     freight_value DECIMAL(10,2),
     observations TEXT,
+    reason_not_delivered TEXT,
     creation_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     collection_date TIMESTAMP,
     shipping_date TIMESTAMP,
@@ -208,6 +217,10 @@ CREATE TRIGGER update_product_timestamp BEFORE UPDATE ON product
 
 CREATE TRIGGER update_delivery_timestamp BEFORE UPDATE ON delivery
     FOR EACH ROW EXECUTE FUNCTION update_timestamp_column();
+-- Adicionado trigger para a tabela address
+CREATE TRIGGER update_address_timestamp BEFORE UPDATE ON address
+    FOR EACH ROW EXECUTE FUNCTION update_timestamp_column();
+
 
 -- Function to log status changes in delivery_history
 CREATE OR REPLACE FUNCTION log_delivery_status_change()

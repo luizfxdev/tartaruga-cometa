@@ -22,12 +22,8 @@
         <div class="detail-row">
             <label>Tipo de Pessoa:</label>
             <span>
-                <c:if test="${client.personType.value == 'FISICA'}">
-                    <span class="badge badge-info">Pessoa Física</span>
-                </c:if>
-                <c:if test="${client.personType.value == 'JURIDICA'}">
-                    <span class="badge badge-info">Pessoa Jurídica</span>
-                </c:if>
+                <%-- Usando formattedPersonType que já vem do serviço --%>
+                <span class="badge badge-info">${client.formattedPersonType}</span>
             </span>
         </div>
 
@@ -67,12 +63,7 @@
         <div class="detail-row">
             <label>Última Atualização:</label>
             <span>
-                <c:if test="${client.formattedUpdatedAt != null}">
-                    ${client.formattedUpdatedAt}
-                </c:if>
-                <c:if test="${client.formattedUpdatedAt == null}">
-                    Nunca atualizado
-                </c:if>
+                ${client.formattedUpdatedAt != null ? client.formattedUpdatedAt : 'Nunca atualizado'}
             </span>
         </div>
     </div>

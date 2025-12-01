@@ -1,11 +1,11 @@
 package com.tartarugacometasystem.model;
 
 public enum DeliveryStatus {
-    PENDING("Pendente"), // Traduzido o valor interno para inglês, mantendo o label em português
-    IN_TRANSIT("Em Trânsito"), // Renomeado de EM_TRANSPORTE para IN_TRANSIT
+    PENDING("Pendente"),
+    IN_TRANSIT("Em Trânsito"),
     DELIVERED("Entregue"),
     CANCELED("Cancelada"),
-    NOT_PERFORMED("Não Realizada"); // Renomeado de NAO_REALIZADA para NOT_PERFORMED
+    NOT_PERFORMED("Não Realizada");
 
     private final String label; // Mantém o label em português para exibição
 
@@ -17,8 +17,16 @@ public enum DeliveryStatus {
         return label;
     }
 
-    // Método para converter String para DeliveryStatus (útil para DAO)
+    // Adicionado este método para que o JSP possa acessar o nome do enum como "value"
+    public String getValue() {
+        return this.name();
+    }
+
+    // Método para converter String para DeliveryStatus (útil para DAO e Servlets)
     public static DeliveryStatus fromValue(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException("Status de entrega não pode ser nulo ou vazio.");
+        }
         for (DeliveryStatus status : DeliveryStatus.values()) {
             // Compara o nome do ENUM (em inglês) com o valor fornecido (case-insensitive)
             if (status.name().equalsIgnoreCase(value)) {

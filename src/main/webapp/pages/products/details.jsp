@@ -27,12 +27,12 @@
 
         <div class="detail-row">
             <label>Categoria:</label>
-            <span>${product.category != null ? product.category : '-'}</span>
+            <span>${product.category != null && !product.category.isEmpty() ? product.category : '-'}</span>
         </div>
 
         <div class="detail-row">
             <label>Descrição:</label>
-            <span>${product.description != null ? product.description : '-'}</span>
+            <span>${product.description != null && !product.description.isEmpty() ? product.description : '-'}</span>
         </div>
     </div>
 
@@ -41,17 +41,17 @@
 
         <div class="detail-row">
             <label>Peso (kg):</label>
-            <span>${product.weightKg}</span>
+            <span><fmt:formatNumber value="${product.weightKg}" pattern="#,##0.00" /> kg</span>
         </div>
 
         <div class="detail-row">
             <label>Volume (m³):</label>
-            <span>${product.volumeM3}</span>
+            <span><fmt:formatNumber value="${product.volumeM3}" pattern="#,##0.00" /> m³</span>
         </div>
 
         <div class="detail-row">
             <label>Valor Declarado:</label>
-            <span><fmt:formatNumber value="${product.declaredValue}" type="currency" currencySymbol="R$ "/></span>
+            <span><fmt:formatNumber value="${product.declaredValue}" type="currency" currencySymbol="R$ " minFractionDigits="2" maxFractionDigits="2"/></span>
         </div>
     </div>
 
@@ -72,19 +72,12 @@
 
         <div class="detail-row">
             <label>Data de Criação:</label>
-            <span><fmt:formatDate value="${product.createdAt}" pattern="dd/MM/yyyy HH:mm:ss"/></span>
+            <span>${product.formattedCreationDate}</span>
         </div>
 
         <div class="detail-row">
             <label>Última Atualização:</label>
-            <span>
-                <c:if test="${product.updatedAt != null}">
-                    <fmt:formatDate value="${product.updatedAt}" pattern="dd/MM/yyyy HH:mm:ss"/>
-                </c:if>
-                <c:if test="${product.updatedAt == null}">
-                    Nunca atualizado
-                </c:if>
-            </span>
+            <span>${product.formattedUpdatedDate != null ? product.formattedUpdatedDate : 'Nunca atualizado'}</span>
         </div>
     </div>
 

@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 
 public class Address {
     private Integer id;
-    private Integer clientId; // ID do cliente ao qual o endereço pertence
-    private AddressType addressType; // NOVO CAMPO: Tipo de endereço (ORIGEM, DESTINO, CADASTRAL)
+    private Integer clientId;
+    private AddressType addressType;
     private String street;
     private String number;
     private String complement;
@@ -14,10 +14,13 @@ public class Address {
     private String state;
     private String zipCode;
     private String country;
-    private String reference; // NOVO CAMPO: Ponto de referência
-    private Boolean isMain; // Indica se é o endereço principal do cliente (renomeado de isPrincipal)
+    private String reference;
+    private Boolean isMain;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // NOVO: Campo para associação com Cliente
+    private Client client;
 
     // Campos formatados para exibição no JSP
     private String formattedAddress;
@@ -163,11 +166,11 @@ public class Address {
         this.reference = reference;
     }
 
-    public Boolean getIsMain() { // Renomeado
+    public Boolean getIsMain() {
         return isMain;
     }
 
-    public void setIsMain(Boolean isMain) { // Renomeado
+    public void setIsMain(Boolean isMain) {
         this.isMain = isMain;
     }
 
@@ -185,6 +188,15 @@ public class Address {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    // NOVO: Getter e Setter para Client
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
     }
 
     public String getFormattedAddress() {

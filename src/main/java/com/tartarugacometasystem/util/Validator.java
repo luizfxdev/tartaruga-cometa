@@ -1,12 +1,13 @@
 package com.tartarugacometasystem.util;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Validator {
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
-    private static final Pattern PHONE_PATTERN = Pattern.compile("^\|$?\\d{2}\$|?\\s?\\d{4,5}-?\\d{4}$");
+    // Corrigido: Regex para telefone brasileiro com DDD opcional
+    // Formatos aceitos: (11) 98765-4321, 11 98765-4321, 1198765-4321, 98765-4321
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^\\(?\\d{2}\\)?\\s?\\d{4,5}-?\\d{4}$");
     private static final Pattern CEP_PATTERN = Pattern.compile("^\\d{5}-?\\d{3}$");
 
     // Método para validar e-mail

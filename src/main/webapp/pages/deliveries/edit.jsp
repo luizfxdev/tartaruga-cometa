@@ -1,85 +1,126 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
-<t:header title="Relatório de Status">
+<t:header title="${delivery != null && delivery.id != null ? 'Editar Entrega' : 'Nova Entrega'}">
     <div class="page-header">
-        <h2>Relatório de Status de Entregas</h2>
+        <h2>${delivery != null && delivery.id != null ? 'Editar Entrega' : 'Nova Entrega'}</h2>
     </div>
 
-    <div class="dashboard">
-        <div class="card">
-            <h3>📊 Resumo de Status</h3>
-            <p>Visualize a distribuição de
+    <c:if test="${not empty sessionScope.error}">
+        <div class="alert alert-danger">
+            ${sessionScope.error}
+        </div>
+        <c:remove var="error" scope="session"/>
+    </c:if>
+
+    <form method="POST" action="${pageContext.request.contextPath}/deliveries/save" class="form">
+        <c:if test="${delivery != null && delivery.id != null}">
+            <input type="hidden" name="id" value="${delivery.id}">
+        </c:if>
+
+        <div class="form-group">
+            <label for="trackingCode">Código de Rastreio *</label>
+            <input type="text" id="trackingCode" name="trackingCode" value="${delivery.trackingCode}" required>
         </div>
 
-        <div class="card">
-            <h3>⏳ Pendentes</h3>
-            <p class="status-count">${statusCounts.PENDENTE != null ? statusCounts.PENDENTE : 0}</p>
-            <span class="badge badge-warning">Aguardando processamento</span>
+        <div class="form-group">
+            <label for="senderId">Remetente *</label>
+            <select id="senderId" name="senderId" required>
+                <option value="">Selecione...</option>
+                <c:forEach var="client" items="${clients}">
+                    <option value="${client.id}" ${delivery != null && delivery.senderId == client.id ? 'selected' : ''}>
+                        ${client.name} (${client.document})
+                    </option>
+                </c:forEach>
+            </select>
         </div>
 
-        <div class="card">
-            <h3>🚚 Em Trânsito</h3>
-            <p class="status-count">${statusCounts.EM_TRANSITO != null ? statusCounts.EM_TRANSITO : 0}</p>
-            <span class="badge badge-info">Em rota</span>
+        <div class="form-group">
+            <label for="recipientId">Destinatário *</label>
+            <select id="recipientId" name="recipientId" required>
+                <option value="">Selecione...</option>
+                <c:forEach var="client" items="${clients}">
+                    <option value="${client.id}" ${delivery != null && delivery.recipientId == client.id ? 'selected' : ''}>
+                        ${client.name} (${client.document})
+                    </option>
+                </c:forEach>
+            </select>
         </div>
 
-        <div class="card">
-            <h3>✅ Entregues</h3>
-            <p class="status-count">${statusCounts.ENTREGUE != null ? statusCounts.ENTREGUE : 0}</p>
-            <span class="badge badge-success">Concluídas</span>
+        <div class="form-group">
+            <label for="originAddressId">Endereço de Origem *</label>
+            <select id="originAddressId" name="originAddressId" required>
+                <option value="">Selecione...</option>
+                <c:forEach var="address" items="${addresses}">
+                    <option value="${address.id}" ${delivery != null && delivery.originAddressId == address.id ? 'selected' : ''}>
+                        ${address.street}, ${address.number} - ${address.city}, ${address.state} (${address.addressType.label})
+                    </option>
+                </c:forEach>
+            </select>
         </div>
 
-        <div class="card">
-            <h3>❌ Não Realizadas</h3>
-            <p class="status-count">${statusCounts.NAO_REALIZADA != null ? statusCounts.NAO_REALIZADA : 0}</p>
-            <span class="badge badge-secondary">Problemas na entrega</span>
+        <div class="form-group">
+            <label for="destinationAddressId">Endereço de Destino *</label>
+            <select id="destinationAddressId" name="destinationAddressId" required>
+                <option value="">Selecione...</option>
+                <c:forEach var="address" items="${addresses}">
+                    <option value="${address.id}" ${delivery != null && delivery.destinationAddressId == address.id ? 'selected' : ''}>
+                        ${address.street}, ${address.number} - ${address.city}, ${address.state} (${address.addressType.label})
+                    </option>
+                </c:forEach>
+            </select>
         </div>
 
-        <div class="card">
-            <h3>🚫 Canceladas</h3>
-            <p class="status-count">${statusCounts.CANCELADA != null ? statusCounts.CANCELADA : 0}</p>
-            <span class="badge badge-danger">Canceladas</span>
-        </div>
-    </div>
-
-    <div class="detailsd" style="margin-top: 2rem;">
-        <h3>Estatísticas Gerais</h3>
-
-        <div class="detail-row">
-            <label>Total de Entregas:</label>
-            <span><strong>${totalDeliveries != null ? totalDeliveries : 0}</strong></span>
+        <div class="form-group">
+            <label for="deliveryDate">Data Prevista de Entrega</label>
+            <input type="datetime-local" id="deliveryDate" name="deliveryDate"
+                   value="<fmt:formatDate value="${delivery.deliveryDate}" pattern="yyyy-MM-dd'T'HH:mm"/>">
         </div>
 
-        <div class="detail-row">
-            <label>Taxa de Sucesso:</label>
-            <span>
-                <c:if test="${totalDeliveries > 0}">
-                    <fmt:formatNumber value="${(statusCounts.ENTREGUE / totalDeliveries) * 100}" maxFractionDigits="2"/>%
-                </c:if>
-                <c:if test="${totalDeliveries == 0}">
-                    0%
-                </c:if>
-            </span>
+        <div class="form-group">
+            <label for="status">Status *</label>
+            <select id="status" name="status" required>
+                <option value="">Selecione...</option>
+                <c:forEach var="deliveryStatus" items="${deliveryStatuses}">
+                    <option value="${deliveryStatus.name()}" ${delivery != null && delivery.status.name() == deliveryStatus.name() ? 'selected' : ''}>
+                        ${deliveryStatus.label}
+                    </option>
+                </c:forEach>
+            </select>
         </div>
 
-        <div class="detail-row">
-            <label>Valor Total Transportado:</label>
-            <span>
-                <c:if test="${totalValue != null}">
-                    <fmt:formatNumber value="${totalValue}" type="currency" currencySymbol="R$ "/>
-                </c:if>
-                <c:if test="${totalValue == null}">
-                    R$ 0,00
-                </c:if>
-            </span>
+        <div class="form-group">
+            <label for="totalValue">Valor Total (R$) *</label>
+            <input type="number" step="0.01" id="totalValue" name="totalValue" value="${delivery.totalValue}" required>
         </div>
-    </div>
 
-    <div class="form-actions" style="margin-top: 2rem;">
-        <a href="${pageContext.request.contextPath}/deliveries/" class="btn btn-secondary">Voltar</a>
-    </div>
+        <div class="form-group">
+            <label for="totalWeightKg">Peso Total (kg) *</label>
+            <input type="number" step="0.01" id="totalWeightKg" name="totalWeightKg" value="${delivery.totalWeightKg}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="totalVolumeM3">Volume Total (m³) *</label>
+            <input type="number" step="0.01" id="totalVolumeM3" name="totalVolumeM3" value="${delivery.totalVolumeM3}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="freightValue">Valor do Frete (R$) *</label>
+            <input type="number" step="0.01" id="freightValue" name="freightValue" value="${delivery.freightValue}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="observations">Observações</label>
+            <textarea id="observations" name="observations" rows="3">${delivery.observations}</textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Salvar</button>
+            <a href="${pageContext.request.contextPath}/deliveries/" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
 </t:header>
 
 <t:footer />

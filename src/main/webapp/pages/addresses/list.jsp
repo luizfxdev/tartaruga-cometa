@@ -2,17 +2,33 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<t:header title="Endereços">
+<c:choose>
+    <c:when test="${client != null}">
+        <c:set var="pageTitle" value="Endereços do Cliente ${client.name}" />
+    </c:when>
+    <c:otherwise>
+        <c:set var="pageTitle" value="Endereços" />
+    </c:otherwise>
+</c:choose>
+
+<t:header title="${pageTitle}">
     <div class="page-header">
-        <h2>
-            Endereços
-            <c:if test="${client != null}">
-                de ${client.name}
-            </c:if>
-        </h2>
-        <c:if test="${client != null}">
-            <a href="${pageContext.request.contextPath}/addresses/new?clientId=${client.id}" class="btn btn-primary">+ Novo Endereço</a>
-        </c:if>
+        <h2>${pageTitle}</h2>
+        <div>
+            <c:choose>
+                <c:when test="${client != null}">
+                    <a href="${pageContext.request.contextPath}/addresses/new/${client.id}" class="btn btn-primary">Novo Endereço</a>
+                    <a href="${pageContext.request.contextPath}/clients/view/${client.id}" class="btn btn-secondary">Voltar ao Cliente</a>
+                </c:when>
+                <c:when test="${clientId != null}">
+                    <a href="${pageContext.request.contextPath}/addresses/new/${clientId}" class="btn btn-primary">Novo Endereço</a>
+                    <a href="${pageContext.request.contextPath}/clients/view/${clientId}" class="btn btn-secondary">Voltar ao Cliente</a>
+                </c:when>
+                <c:otherwise>
+                    <a href="${pageContext.request.contextPath}/addresses/new" class="btn btn-primary">Novo Endereço</a>
+                </c:otherwise>
+            </c:choose>
+        </div>
     </div>
 
     <c:if test="${not empty sessionScope.success}">
@@ -21,7 +37,6 @@
         </div>
         <c:remove var="success" scope="session"/>
     </c:if>
-
     <c:if test="${not empty sessionScope.error}">
         <div class="alert alert-danger">
             ${sessionScope.error}
@@ -31,8 +46,8 @@
 
     <c:choose>
         <c:when test="${not empty addresses}">
-            <div class="table-container">
-                <table class="table">
+            <div class="table-responsive">
+                <table class="table table-striped">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -40,8 +55,7 @@
                             <th>Logradouro</th>
                             <th>Número</th>
                             <th>Bairro</th>
-                            <th>Cidade</th>
-                            <th>Estado</th>
+                            <th>Cidade/Estado</th>
                             <th>CEP</th>
                             <th>Principal</th>
                             <th>Ações</th>
@@ -51,32 +65,37 @@
                         <c:forEach var="address" items="${addresses}">
                             <tr>
                                 <td>${address.id}</td>
-                                <td>${address.addressType.label}</td>
+                                <td>${address.addressType}</td>
                                 <td>${address.street}</td>
                                 <td>${address.number}</td>
                                 <td>${address.neighborhood}</td>
-                                <td>${address.city}</td>
-                                <td>${address.state}</td>
+                                <td>${address.city}/${address.state}</td>
                                 <td>${address.zipCode}</td>
                                 <td>
-                                    <c:if test="${address.isPrincipal}">
-                                        <span class="badge badge-success">Sim</span>
-                                    </c:if>
-                                    <c:if test="${not address.isPrincipal}">
-                                        <span class="badge badge-secondary">Não</span>
-                                    </c:if>
+                                    <c:choose>
+                                        <c:when test="${address.isMain}">
+                                            <span class="badge badge-success">Sim</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="badge badge-secondary">Não</span>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </td>
                                 <td>
                                     <div class="actions">
                                         <a href="${pageContext.request.contextPath}/addresses/edit/${address.id}" class="btn btn-warning btn-sm">Editar</a>
-                                        <c:if test="${not address.isPrincipal}">
-                                            <form method="POST" action="${pageContext.request.contextPath}/addresses/set-principal/${address.id}" style="display:inline;">
-                                                <button type="submit" class="btn btn-info btn-sm">Principal</button>
-                                            </form>
+                                        <c:if test="${not address.isMain}">
+                                            <a href="${pageContext.request.contextPath}/addresses/set-principal/${address.id}" 
+                                               class="btn btn-info btn-sm"
+                                               onclick="return confirm('Definir como endereço principal?')">
+                                                Principal
+                                            </a>
                                         </c:if>
-                                        <form method="POST" action="${pageContext.request.contextPath}/addresses/delete/${address.id}" style="display:inline;">
-                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza?')">Deletar</button>
-                                        </form>
+                                        <a href="${pageContext.request.contextPath}/addresses/delete/${address.id}" 
+                                           class="btn btn-danger btn-sm" 
+                                           onclick="return confirm('Tem certeza que deseja deletar este endereço?')">
+                                            Deletar
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
@@ -88,12 +107,21 @@
         <c:otherwise>
             <div class="alert alert-info">
                 Nenhum endereço encontrado.
-                <c:if test="${client != null}">
-                    <a href="${pageContext.request.contextPath}/addresses/new?clientId=${client.id}">Criar novo endereço</a>
-                </c:if>
+                <c:choose>
+                    <c:when test="${client != null}">
+                        <a href="${pageContext.request.contextPath}/addresses/new/${client.id}" class="btn btn-primary">Criar novo endereço</a>
+                    </c:when>
+                    <c:when test="${clientId != null}">
+                        <a href="${pageContext.request.contextPath}/addresses/new/${clientId}" class="btn btn-primary">Criar novo endereço</a>
+                    </c:when>
+                    <c:otherwise>
+                        <a href="${pageContext.request.contextPath}/addresses/new" class="btn btn-primary">Criar novo endereço</a>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </c:otherwise>
     </c:choose>
 </t:header>
 
 <t:footer />
+

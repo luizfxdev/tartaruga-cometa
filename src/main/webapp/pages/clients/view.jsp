@@ -22,12 +22,8 @@
         <div class="detail-row">
             <label>Tipo de Pessoa:</label>
             <span>
-                <c:if test="${client.personType.value == 'FISICA'}">
-                    Pessoa Física
-                </c:if>
-                <c:if test="${client.personType.value == 'JURIDICA'}">
-                    Pessoa Jurídica
-                </c:if>
+                <%-- Usando formattedPersonType que já vem do serviço --%>
+                <span class="badge badge-info">${client.formattedPersonType}</span>
             </span>
         </div>
 

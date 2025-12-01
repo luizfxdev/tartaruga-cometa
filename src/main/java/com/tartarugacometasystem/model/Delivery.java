@@ -2,22 +2,32 @@ package com.tartarugacometasystem.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List; // Para o histórico
 
 public class Delivery {
     private Integer id;
-    private String trackingCode; // Renomeado de codigoRastreio
+    private String trackingCode;
+    private Integer senderId; // ID do cliente remetente
+    private Integer recipientId; // ID do cliente destinatário
+    private Integer originAddressId; // ID do endereço de origem
+    private Integer destinationAddressId; // ID do endereço de destino
+    private BigDecimal totalValue;
+    private BigDecimal freightValue;
+    private BigDecimal totalWeightKg;
+    private BigDecimal totalVolumeM3;
     private DeliveryStatus status;
-    private LocalDateTime creationDate; // Renomeado de dataCriacao
-    private LocalDateTime deliveryDate; // Renomeado de dataEntrega
-    private Integer senderId; // Renomeado de idRemetente
-    private Integer recipientId; // Renomeado de idDestinatario
-    private Integer originAddressId; // Renomeado de idEnderecoOrigem
-    private Integer destinationAddressId; // Renomeado de idEnderecoDestino
-    private BigDecimal totalValue; // Renomeado de valorTotal
-    private BigDecimal freightValue; // Renomeado de valorFrete
-    private BigDecimal totalWeightKg; // Renomeado de pesoTotalKg
-    private BigDecimal totalVolumeM3; // Renomeado de volumeTotalM3
+    private String observations;
+    private LocalDateTime creationDate;
+    private LocalDateTime deliveryDate; // Data de entrega efetiva
+    private String reasonNotDelivered; // Motivo da não entrega
     private LocalDateTime updatedAt;
+
+    // Campos para objetos relacionados (para enriquecimento)
+    private Client sender; // Objeto Cliente Remetente
+    private Client recipient; // Objeto Cliente Destinatário
+    private Address originAddress; // Objeto Endereço de Origem
+    private Address destinationAddress; // Objeto Endereço de Destino
+    private List<DeliveryHistory> history; // Histórico da entrega
 
     // Campos formatados para exibição no JSP
     private String formattedCreationDate;
@@ -29,11 +39,11 @@ public class Delivery {
     }
 
     // Construtor completo (sem IDs e datas)
-    public Delivery(String trackingCode, DeliveryStatus status, Integer senderId, Integer recipientId,
-                    Integer originAddressId, Integer destinationAddressId, BigDecimal totalValue,
-                    BigDecimal freightValue, BigDecimal totalWeightKg, BigDecimal totalVolumeM3) {
+    public Delivery(String trackingCode, Integer senderId, Integer recipientId, Integer originAddressId,
+                    Integer destinationAddressId, BigDecimal totalValue, BigDecimal freightValue,
+                    BigDecimal totalWeightKg, BigDecimal totalVolumeM3, DeliveryStatus status,
+                    String observations, LocalDateTime deliveryDate, String reasonNotDelivered) {
         this.trackingCode = trackingCode;
-        this.status = status;
         this.senderId = senderId;
         this.recipientId = recipientId;
         this.originAddressId = originAddressId;
@@ -42,20 +52,20 @@ public class Delivery {
         this.freightValue = freightValue;
         this.totalWeightKg = totalWeightKg;
         this.totalVolumeM3 = totalVolumeM3;
-        this.creationDate = LocalDateTime.now(); // Define a data de criação automaticamente
+        this.status = status;
+        this.observations = observations;
+        this.deliveryDate = deliveryDate;
+        this.reasonNotDelivered = reasonNotDelivered;
     }
 
     // Construtor completo (com IDs e datas)
-    public Delivery(Integer id, String trackingCode, DeliveryStatus status, LocalDateTime creationDate,
-                    LocalDateTime deliveryDate, Integer senderId, Integer recipientId,
-                    Integer originAddressId, Integer destinationAddressId, BigDecimal totalValue,
-                    BigDecimal freightValue, BigDecimal totalWeightKg, BigDecimal totalVolumeM3,
-                    LocalDateTime updatedAt) {
+    public Delivery(Integer id, String trackingCode, Integer senderId, Integer recipientId, Integer originAddressId,
+                    Integer destinationAddressId, BigDecimal totalValue, BigDecimal freightValue,
+                    BigDecimal totalWeightKg, BigDecimal totalVolumeM3, DeliveryStatus status,
+                    String observations, LocalDateTime creationDate, LocalDateTime deliveryDate,
+                    String reasonNotDelivered, LocalDateTime updatedAt) {
         this.id = id;
         this.trackingCode = trackingCode;
-        this.status = status;
-        this.creationDate = creationDate;
-        this.deliveryDate = deliveryDate;
         this.senderId = senderId;
         this.recipientId = recipientId;
         this.originAddressId = originAddressId;
@@ -64,6 +74,11 @@ public class Delivery {
         this.freightValue = freightValue;
         this.totalWeightKg = totalWeightKg;
         this.totalVolumeM3 = totalVolumeM3;
+        this.status = status;
+        this.observations = observations;
+        this.creationDate = creationDate;
+        this.deliveryDate = deliveryDate;
+        this.reasonNotDelivered = reasonNotDelivered;
         this.updatedAt = updatedAt;
     }
 
@@ -76,12 +91,76 @@ public class Delivery {
         this.id = id;
     }
 
-    public String getTrackingCode() { // Renomeado
+    public String getTrackingCode() {
         return trackingCode;
     }
 
-    public void setTrackingCode(String trackingCode) { // Renomeado
+    public void setTrackingCode(String trackingCode) {
         this.trackingCode = trackingCode;
+    }
+
+    public Integer getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(Integer senderId) {
+        this.senderId = senderId;
+    }
+
+    public Integer getRecipientId() {
+        return recipientId;
+    }
+
+    public void setRecipientId(Integer recipientId) {
+        this.recipientId = recipientId;
+    }
+
+    public Integer getOriginAddressId() {
+        return originAddressId;
+    }
+
+    public void setOriginAddressId(Integer originAddressId) {
+        this.originAddressId = originAddressId;
+    }
+
+    public Integer getDestinationAddressId() {
+        return destinationAddressId;
+    }
+
+    public void setDestinationAddressId(Integer destinationAddressId) {
+        this.destinationAddressId = destinationAddressId;
+    }
+
+    public BigDecimal getTotalValue() {
+        return totalValue;
+    }
+
+    public void setTotalValue(BigDecimal totalValue) {
+        this.totalValue = totalValue;
+    }
+
+    public BigDecimal getFreightValue() {
+        return freightValue;
+    }
+
+    public void setFreightValue(BigDecimal freightValue) {
+        this.freightValue = freightValue;
+    }
+
+    public BigDecimal getTotalWeightKg() {
+        return totalWeightKg;
+    }
+
+    public void setTotalWeightKg(BigDecimal totalWeightKg) {
+        this.totalWeightKg = totalWeightKg;
+    }
+
+    public BigDecimal getTotalVolumeM3() {
+        return totalVolumeM3;
+    }
+
+    public void setTotalVolumeM3(BigDecimal totalVolumeM3) {
+        this.totalVolumeM3 = totalVolumeM3;
     }
 
     public DeliveryStatus getStatus() {
@@ -92,84 +171,36 @@ public class Delivery {
         this.status = status;
     }
 
-    public LocalDateTime getCreationDate() { // Renomeado
+    public String getObservations() {
+        return observations;
+    }
+
+    public void setObservations(String observations) {
+        this.observations = observations;
+    }
+
+    public LocalDateTime getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(LocalDateTime creationDate) { // Renomeado
+    public void setCreationDate(LocalDateTime creationDate) {
         this.creationDate = creationDate;
     }
 
-    public LocalDateTime getDeliveryDate() { // Renomeado
+    public LocalDateTime getDeliveryDate() {
         return deliveryDate;
     }
 
-    public void setDeliveryDate(LocalDateTime deliveryDate) { // Renomeado
+    public void setDeliveryDate(LocalDateTime deliveryDate) {
         this.deliveryDate = deliveryDate;
     }
 
-    public Integer getSenderId() { // Renomeado
-        return senderId;
+    public String getReasonNotDelivered() {
+        return reasonNotDelivered;
     }
 
-    public void setSenderId(Integer senderId) { // Renomeado
-        this.senderId = senderId;
-    }
-
-    public Integer getRecipientId() { // Renomeado
-        return recipientId;
-    }
-
-    public void setRecipientId(Integer recipientId) { // Renomeado
-        this.recipientId = recipientId;
-    }
-
-    public Integer getOriginAddressId() { // Renomeado
-        return originAddressId;
-    }
-
-    public void setOriginAddressId(Integer originAddressId) { // Renomeado
-        this.originAddressId = originAddressId;
-    }
-
-    public Integer getDestinationAddressId() { // Renomeado
-        return destinationAddressId;
-    }
-
-    public void setDestinationAddressId(Integer destinationAddressId) { // Renomeado
-        this.destinationAddressId = destinationAddressId;
-    }
-
-    public BigDecimal getTotalValue() { // Renomeado
-        return totalValue;
-    }
-
-    public void setTotalValue(BigDecimal totalValue) { // Renomeado
-        this.totalValue = totalValue;
-    }
-
-    public BigDecimal getFreightValue() { // Renomeado
-        return freightValue;
-    }
-
-    public void setFreightValue(BigDecimal freightValue) { // Renomeado
-        this.freightValue = freightValue;
-    }
-
-    public BigDecimal getTotalWeightKg() { // Renomeado
-        return totalWeightKg;
-    }
-
-    public void setTotalWeightKg(BigDecimal totalWeightKg) { // Renomeado
-        this.totalWeightKg = totalWeightKg;
-    }
-
-    public BigDecimal getTotalVolumeM3() { // Renomeado
-        return totalVolumeM3;
-    }
-
-    public void setTotalVolumeM3(BigDecimal totalVolumeM3) { // Renomeado
-        this.totalVolumeM3 = totalVolumeM3;
+    public void setReasonNotDelivered(String reasonNotDelivered) {
+        this.reasonNotDelivered = reasonNotDelivered;
     }
 
     public LocalDateTime getUpdatedAt() {
@@ -180,6 +211,48 @@ public class Delivery {
         this.updatedAt = updatedAt;
     }
 
+    // Getters e Setters para objetos relacionados (NOVO)
+    public Client getSender() {
+        return sender;
+    }
+
+    public void setSender(Client sender) {
+        this.sender = sender;
+    }
+
+    public Client getRecipient() {
+        return recipient;
+    }
+
+    public void setRecipient(Client recipient) {
+        this.recipient = recipient;
+    }
+
+    public Address getOriginAddress() {
+        return originAddress;
+    }
+
+    public void setOriginAddress(Address originAddress) {
+        this.originAddress = originAddress;
+    }
+
+    public Address getDestinationAddress() {
+        return destinationAddress;
+    }
+
+    public void setDestinationAddress(Address destinationAddress) {
+        this.destinationAddress = destinationAddress;
+    }
+
+    public List<DeliveryHistory> getHistory() {
+        return history;
+    }
+
+    public void setHistory(List<DeliveryHistory> history) {
+        this.history = history;
+    }
+
+    // Getters e Setters para campos formatados
     public String getFormattedCreationDate() {
         return formattedCreationDate;
     }
@@ -209,9 +282,6 @@ public class Delivery {
         return "Delivery{" +
                 "id=" + id +
                 ", trackingCode='" + trackingCode + '\'' +
-                ", status=" + status +
-                ", creationDate=" + creationDate +
-                ", deliveryDate=" + deliveryDate +
                 ", senderId=" + senderId +
                 ", recipientId=" + recipientId +
                 ", originAddressId=" + originAddressId +
@@ -220,6 +290,11 @@ public class Delivery {
                 ", freightValue=" + freightValue +
                 ", totalWeightKg=" + totalWeightKg +
                 ", totalVolumeM3=" + totalVolumeM3 +
+                ", status=" + status +
+                ", observations='" + observations + '\'' +
+                ", creationDate=" + creationDate +
+                ", deliveryDate=" + deliveryDate +
+                ", reasonNotDelivered='" + reasonNotDelivered + '\'' +
                 ", updatedAt=" + updatedAt +
                 '}';
     }

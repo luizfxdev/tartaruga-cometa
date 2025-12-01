@@ -2,9 +2,9 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<t:header title="Editar Cliente">
+<t:header title="${client != null && client.id != null ? 'Editar Cliente' : 'Novo Cliente'}">
     <div class="page-header">
-        <h2>Editar Cliente</h2>
+        <h2>${client != null && client.id != null ? 'Editar Cliente' : 'Novo Cliente'}</h2>
     </div>
 
     <c:if test="${not empty sessionScope.error}">
@@ -14,49 +14,51 @@
         <c:remove var="error" scope="session"/>
     </c:if>
 
-    <form method="POST" action="${pageContext.request.contextPath}/clients/save">
-        <input type="hidden" name="id" value="${client.id}">
+    <form method="POST" action="${pageContext.request.contextPath}/clients/save" class="form">
+        <c:if test="${client != null && client.id != null}">
+            <input type="hidden" name="id" value="${client.id}">
+        </c:if>
 
         <div class="form-group">
             <label for="personType">Tipo de Pessoa *</label>
             <select id="personType" name="personType" required>
                 <option value="">Selecione...</option>
-                <option value="FISICA" ${client.personType.value == 'FISICA' ? 'selected' : ''}>Pessoa Física</option>
-                <option value="JURIDICA" ${client.personType.value == 'JURIDICA' ? 'selected' : ''}>Pessoa Jurídica</option>
+                <option value="FISICA" ${client != null && client.personType.name() == 'FISICA' ? 'selected' : ''}>Pessoa Física</option>
+                <option value="JURIDICA" ${client != null && client.personType.name() == 'JURIDICA' ? 'selected' : ''}>Pessoa Jurídica</option>
             </select>
         </div>
 
         <div class="form-group">
             <label for="document">Documento (CPF/CNPJ) *</label>
-            <input type="text" id="document" name="document" 
-                   value="${client.document}" 
-                   placeholder="000.000.000-00" required>
+            <input type="text" id="document" name="document"
+                   value="${client != null ? client.document : ''}"
+                   required placeholder="CPF ou CNPJ">
         </div>
 
         <div class="form-group">
-            <label for="name">Nome/Razão Social *</label>
-            <input type="text" id="name" name="name" 
-                   value="${client.name}" 
-                   placeholder="Nome completo ou razão social" required>
+            <label for="name">Nome / Razão Social *</label>
+            <input type="text" id="name" name="name"
+                   value="${client != null ? client.name : ''}"
+                   required placeholder="Nome Completo ou Razão Social">
         </div>
 
         <div class="form-group">
             <label for="email">Email</label>
-            <input type="email" id="email" name="email" 
-                   value="${client.email != null ? client.email : ''}" 
-                   placeholder="email@example.com">
+            <input type="email" id="email" name="email"
+                   value="${client != null ? client.email : ''}"
+                   placeholder="email@exemplo.com">
         </div>
 
         <div class="form-group">
             <label for="phone">Telefone</label>
-            <input type="tel" id="phone" name="phone" 
-                   value="${client.phone != null ? client.phone : ''}" 
+            <input type="text" id="phone" name="phone"
+                   value="${client != null ? client.phone : ''}"
                    placeholder="(11) 99999-9999">
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-success">Salvar Alterações</button>
-            <a href="${pageContext.request.contextPath}/clients/view/${client.id}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-success">Salvar</button>
+            <a href="${pageContext.request.contextPath}/clients/" class="btn btn-secondary">Cancelar</a>
         </div>
     </form>
 

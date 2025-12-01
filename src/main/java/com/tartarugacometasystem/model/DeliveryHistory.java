@@ -5,17 +5,19 @@ import java.time.LocalDateTime;
 public class DeliveryHistory {
     private Integer id;
     private Integer deliveryId;
-    private DeliveryStatus previousStatus; // NOVO CAMPO: Status anterior da entrega
-    private DeliveryStatus newStatus; // NOVO CAMPO: Novo status da entrega (substitui 'status')
-    private LocalDateTime changeDate; // NOVO CAMPO: Data e hora da mudança de status
+    private DeliveryStatus previousStatus;
+    private DeliveryStatus newStatus;
+    private LocalDateTime changeDate;
     private String observations;
-    private String user; // Usuário que realizou a mudança
-    private String location; // NOVO CAMPO: Localização no momento da mudança (opcional)
-    private LocalDateTime createdAt; // Mantido para registro de criação do histórico em si
+    private String user;
+    private String location;
+    private LocalDateTime createdAt;
 
     // Campos formatados para exibição no JSP
     private String formattedChangeDate;
     private String formattedCreatedAt;
+    private String formattedPreviousStatus;  // NOVO
+    private String formattedNewStatus;  // NOVO
 
     // Construtor padrão
     public DeliveryHistory() {
@@ -30,8 +32,8 @@ public class DeliveryHistory {
         this.observations = observations;
         this.user = user;
         this.location = location;
-        this.changeDate = LocalDateTime.now(); // Define a data da mudança automaticamente
-        this.createdAt = LocalDateTime.now(); // Define a data de criação do registro de histórico
+        this.changeDate = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
     }
 
     // Construtor completo (com IDs e datas)
@@ -136,6 +138,23 @@ public class DeliveryHistory {
 
     public void setFormattedCreatedAt(String formattedCreatedAt) {
         this.formattedCreatedAt = formattedCreatedAt;
+    }
+
+    // NOVOS: Getters e Setters para formattedPreviousStatus e formattedNewStatus
+    public String getFormattedPreviousStatus() {
+        return formattedPreviousStatus;
+    }
+
+    public void setFormattedPreviousStatus(String formattedPreviousStatus) {
+        this.formattedPreviousStatus = formattedPreviousStatus;
+    }
+
+    public String getFormattedNewStatus() {
+        return formattedNewStatus;
+    }
+
+    public void setFormattedNewStatus(String formattedNewStatus) {
+        this.formattedNewStatus = formattedNewStatus;
     }
 
     @Override

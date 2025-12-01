@@ -15,6 +15,7 @@ public class Client {
     // Campos formatados para exibição no JSP
     private String formattedCreatedAt;
     private String formattedUpdatedAt;
+    private String formattedPersonType; // NOVO: Campo formatado para o tipo de pessoa
 
     // Construtor padrão
     public Client() {
@@ -121,6 +122,15 @@ public class Client {
 
     public void setFormattedUpdatedAt(String formattedUpdatedAt) {
         this.formattedUpdatedAt = formattedUpdatedAt;
+    }
+
+    // NOVO: Getter e Setter para formattedPersonType
+    public String getFormattedPersonType() {
+        return formattedPersonType;
+    }
+
+    public void setFormattedPersonType(String formattedPersonType) {
+        this.formattedPersonType = formattedPersonType;
     }
 
     @Override
