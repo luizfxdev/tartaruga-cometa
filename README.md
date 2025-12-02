@@ -285,6 +285,9 @@ Resposta esperada: `HTTP/1.1 200`
 # Executar testes
 ./gradlew test
 
+# Build e executa a aplicação no Tomcat embarcado via Gretty
+./gradlew tomcatRunWar
+
 # Ver logs do Tomcat
 sudo tail -f /var/lib/tomcat10/logs/catalina.out
 
@@ -374,4 +377,5 @@ Sistema de Gerenciamento de Entregas
 
 ⬆ Voltar ao topo
 </div>
+
 
