@@ -273,7 +273,7 @@ public class DeliveryServlet extends HttpServlet {
 
     private void searchDeliveries(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
-        String searchTerm = request.getParameter("searchTerm");
+        String searchTerm = request.getParameter("query");
         List<Delivery> deliveries = deliveryService.search(searchTerm);
         request.setAttribute("deliveries", deliveries);
         request.setAttribute("searchTerm", searchTerm); // Mantém o termo de busca no campo de busca

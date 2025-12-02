@@ -113,7 +113,7 @@ public class ClientServlet extends HttpServlet {
 
     private void searchClients(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
-        String searchTerm = request.getParameter("query"); // O parâmetro de busca geralmente é "query" ou "searchTerm"
+        String searchTerm = request.getParameter("q");// O parâmetro de busca geralmente é "query" ou "searchTerm"
         List<Client> clients = clientService.search(searchTerm); // CORRIGIDO: Chamada para search()
         request.setAttribute("clients", clients);
         request.getRequestDispatcher("/pages/clients/list.jsp").forward(request, response);
