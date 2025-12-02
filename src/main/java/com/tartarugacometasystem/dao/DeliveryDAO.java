@@ -25,27 +25,53 @@ public class DeliveryDAO {
      */
     public Delivery save(Delivery delivery) throws SQLException {
         String sql = "INSERT INTO delivery (tracking_code, sender_id, recipient_id, origin_address_id, destination_address_id, " +
-                      "total_value, freight_value, total_weight_kg, total_volume_m3, status, observations, delivery_date, reason_not_delivered) " +
-                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                     "total_value, freight_value, total_weight_kg, total_volume_m3, status, observations, delivery_date, reason_not_delivered) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? AS delivery_status_enum), ?, ?, ?)"; // Status já corrigido
+
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
             conn = DatabaseConfig.getConnection();
             pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
             pstmt.setString(1, delivery.getTrackingCode());
-            pstmt.setInt(2, delivery.getSenderId());
-            pstmt.setInt(3, delivery.getRecipientId());
-            pstmt.setInt(4, delivery.getOriginAddressId());
-            pstmt.setInt(5, delivery.getDestinationAddressId());
+
+            // --- CORREÇÃO AQUI para sender_id, recipient_id, origin_address_id, destination_address_id ---
+            if (delivery.getSenderId() != null) {
+                pstmt.setInt(2, delivery.getSenderId());
+            } else {
+                pstmt.setNull(2, java.sql.Types.INTEGER);
+            }
+
+            if (delivery.getRecipientId() != null) {
+                pstmt.setInt(3, delivery.getRecipientId());
+            } else {
+                pstmt.setNull(3, java.sql.Types.INTEGER);
+            }
+
+            if (delivery.getOriginAddressId() != null) {
+                pstmt.setInt(4, delivery.getOriginAddressId());
+            } else {
+                pstmt.setNull(4, java.sql.Types.INTEGER);
+            }
+
+            if (delivery.getDestinationAddressId() != null) {
+                pstmt.setInt(5, delivery.getDestinationAddressId());
+            } else {
+                pstmt.setNull(5, java.sql.Types.INTEGER);
+            }
+            // --- FIM DA CORREÇÃO ---
+
             pstmt.setBigDecimal(6, delivery.getTotalValue());
             pstmt.setBigDecimal(7, delivery.getFreightValue());
             pstmt.setBigDecimal(8, delivery.getTotalWeightKg());
             pstmt.setBigDecimal(9, delivery.getTotalVolumeM3());
-            pstmt.setString(10, delivery.getStatus().name());
+            pstmt.setString(10, delivery.getStatus().name()); // O CAST na SQL já cuida da conversão para enum
             pstmt.setString(11, delivery.getObservations());
             pstmt.setTimestamp(12, delivery.getDeliveryDate() != null ? Timestamp.valueOf(delivery.getDeliveryDate()) : null);
             pstmt.setString(13, delivery.getReasonNotDelivered());
+
             pstmt.executeUpdate();
 
             rs = pstmt.getGeneratedKeys();
@@ -96,26 +122,52 @@ public class DeliveryDAO {
     public void update(Delivery delivery) throws SQLException {
         String sql = "UPDATE delivery SET tracking_code = ?, sender_id = ?, recipient_id = ?, origin_address_id = ?, " +
                      "destination_address_id = ?, total_value = ?, freight_value = ?, total_weight_kg = ?, " +
-                     "total_volume_m3 = ?, status = ?, observations = ?, delivery_date = ?, reason_not_delivered = ? WHERE id = ?";
+                     "total_volume_m3 = ?, status = CAST(? AS delivery_status_enum), observations = ?, delivery_date = ?, reason_not_delivered = ? WHERE id = ?"; // Status já corrigido
+
         Connection conn = null;
         PreparedStatement pstmt = null;
         try {
             conn = DatabaseConfig.getConnection();
             pstmt = conn.prepareStatement(sql);
+
             pstmt.setString(1, delivery.getTrackingCode());
-            pstmt.setInt(2, delivery.getSenderId());
-            pstmt.setInt(3, delivery.getRecipientId());
-            pstmt.setInt(4, delivery.getOriginAddressId());
-            pstmt.setInt(5, delivery.getDestinationAddressId());
+
+            // --- CORREÇÃO AQUI para sender_id, recipient_id, origin_address_id, destination_address_id ---
+            if (delivery.getSenderId() != null) {
+                pstmt.setInt(2, delivery.getSenderId());
+            } else {
+                pstmt.setNull(2, java.sql.Types.INTEGER);
+            }
+
+            if (delivery.getRecipientId() != null) {
+                pstmt.setInt(3, delivery.getRecipientId());
+            } else {
+                pstmt.setNull(3, java.sql.Types.INTEGER);
+            }
+
+            if (delivery.getOriginAddressId() != null) {
+                pstmt.setInt(4, delivery.getOriginAddressId());
+            } else {
+                pstmt.setNull(4, java.sql.Types.INTEGER);
+            }
+
+            if (delivery.getDestinationAddressId() != null) {
+                pstmt.setInt(5, delivery.getDestinationAddressId());
+            } else {
+                pstmt.setNull(5, java.sql.Types.INTEGER);
+            }
+            // --- FIM DA CORREÇÃO ---
+
             pstmt.setBigDecimal(6, delivery.getTotalValue());
             pstmt.setBigDecimal(7, delivery.getFreightValue());
             pstmt.setBigDecimal(8, delivery.getTotalWeightKg());
             pstmt.setBigDecimal(9, delivery.getTotalVolumeM3());
-            pstmt.setString(10, delivery.getStatus().name());
+            pstmt.setString(10, delivery.getStatus().name()); // O CAST na SQL já cuida da conversão para enum
             pstmt.setString(11, delivery.getObservations());
             pstmt.setTimestamp(12, delivery.getDeliveryDate() != null ? Timestamp.valueOf(delivery.getDeliveryDate()) : null);
             pstmt.setString(13, delivery.getReasonNotDelivered());
             pstmt.setInt(14, delivery.getId());
+
             pstmt.executeUpdate();
         } finally {
             DatabaseConfig.close(conn, pstmt);
@@ -181,7 +233,7 @@ public class DeliveryDAO {
         List<Delivery> deliveries = new ArrayList<>();
         String sql = "SELECT id, tracking_code, sender_id, recipient_id, origin_address_id, destination_address_id, " +
                      "total_value, freight_value, total_weight_kg, total_volume_m3, status, observations, creation_date, " +
-                     "updated_at, delivery_date, reason_not_delivered FROM delivery WHERE status = ?";
+                     "updated_at, delivery_date, reason_not_delivered FROM delivery WHERE status = CAST(? AS delivery_status_enum)"; // Status já corrigido
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -230,7 +282,7 @@ public class DeliveryDAO {
     }
 
     /**
-     * Implementa busca genérica por termo em tracking_code, status ou observations.
+     * Busca entregas que correspondem a um termo de busca em tracking_code, status ou observações.
      *
      * @param searchTerm O termo de busca.
      * @return Uma lista de entregas que correspondem ao termo de busca.
@@ -241,7 +293,7 @@ public class DeliveryDAO {
         String sql = "SELECT id, tracking_code, sender_id, recipient_id, origin_address_id, destination_address_id, " +
                      "total_value, freight_value, total_weight_kg, total_volume_m3, status, observations, creation_date, " +
                      "updated_at, delivery_date, reason_not_delivered FROM delivery " +
-                     "WHERE tracking_code ILIKE ? OR status ILIKE ? OR observations ILIKE ?";
+                     "WHERE tracking_code ILIKE ? OR CAST(status AS TEXT) ILIKE ? OR observations ILIKE ?"; // Status já corrigido
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -267,22 +319,42 @@ public class DeliveryDAO {
      * Mapeia um ResultSet para um objeto Delivery.
      *
      * @param rs O ResultSet.
-     * @return Um objeto Delivery.
+     * @return Um objeto Delivery preenchido.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
     private Delivery mapResultSetToDelivery(ResultSet rs) throws SQLException {
         Delivery delivery = new Delivery();
         delivery.setId(rs.getInt("id"));
         delivery.setTrackingCode(rs.getString("tracking_code"));
-        delivery.setSenderId(rs.getInt("sender_id"));
-        delivery.setRecipientId(rs.getInt("recipient_id"));
-        delivery.setOriginAddressId(rs.getInt("origin_address_id"));
-        delivery.setDestinationAddressId(rs.getInt("destination_address_id"));
+
+        // --- CORREÇÃO AQUI para ler IDs que podem ser NULL do banco de dados ---
+        int senderId = rs.getInt("sender_id");
+        if (!rs.wasNull()) {
+            delivery.setSenderId(senderId);
+        }
+
+        int recipientId = rs.getInt("recipient_id");
+        if (!rs.wasNull()) {
+            delivery.setRecipientId(recipientId);
+        }
+
+        int originAddressId = rs.getInt("origin_address_id");
+        if (!rs.wasNull()) {
+            delivery.setOriginAddressId(originAddressId);
+        }
+
+        int destinationAddressId = rs.getInt("destination_address_id");
+        if (!rs.wasNull()) {
+            delivery.setDestinationAddressId(destinationAddressId);
+        }
+        // --- FIM DA CORREÇÃO ---
+
         delivery.setTotalValue(rs.getBigDecimal("total_value"));
         delivery.setFreightValue(rs.getBigDecimal("freight_value"));
         delivery.setTotalWeightKg(rs.getBigDecimal("total_weight_kg"));
         delivery.setTotalVolumeM3(rs.getBigDecimal("total_volume_m3"));
-        delivery.setStatus(DeliveryStatus.fromValue(rs.getString("status")));
+        delivery.setStatus(DeliveryStatus.valueOf(rs.getString("status")));
+
         delivery.setObservations(rs.getString("observations"));
 
         Timestamp creationDateTimestamp = rs.getTimestamp("creation_date");

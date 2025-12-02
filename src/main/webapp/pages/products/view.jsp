@@ -2,6 +2,7 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ page import="com.tartarugacometasystem.util.DateFormatter" %> <%-- Importa a classe DateFormatter --%>
 
 <t:header title="Detalhes Completos do Produto">
     <div class="page-header">
@@ -40,6 +41,11 @@
         <h3>Especificações Físicas</h3>
 
         <div class="detail-row">
+            <label>Preço:</label>
+            <span><fmt:formatNumber value="${product.price}" type="currency" currencySymbol="R$ " minFractionDigits="2" maxFractionDigits="2"/></span>
+        </div>
+
+        <div class="detail-row">
             <label>Peso (kg):</label>
             <span><fmt:formatNumber value="${product.weightKg}" pattern="#,##0.00" /> kg</span>
         </div>
@@ -56,7 +62,12 @@
     </div>
 
     <div class="details-card">
-        <h3>Status</h3>
+        <h3>Estoque e Status</h3>
+
+        <div class="detail-row">
+            <label>Quantidade em Estoque:</label>
+            <span>${product.stockQuantity != null ? product.stockQuantity : '-'}</span>
+        </div>
 
         <div class="detail-row">
             <label>Situação:</label>
@@ -72,12 +83,12 @@
 
         <div class="detail-row">
             <label>Data de Criação:</label>
-            <span>${product.formattedCreationDate}</span>
+            <span>${product.createdAt != null ? DateFormatter.formatLocalDateTime(product.createdAt) : '-'}</span>
         </div>
 
         <div class="detail-row">
             <label>Última Atualização:</label>
-            <span>${product.formattedUpdatedDate != null ? product.formattedUpdatedDate : 'Nunca atualizado'}</span>
+            <span>${product.updatedAt != null ? DateFormatter.formatLocalDateTime(product.updatedAt) : 'Nunca atualizado'}</span>
         </div>
     </div>
 

@@ -2,6 +2,7 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ page import="com.tartarugacometasystem.util.DateFormatter" %> <%-- Importa a classe DateFormatter --%>
 
 <t:header title="Lista de Produtos">
     <div class="page-header">
@@ -40,12 +41,14 @@
                             <th>ID</th>
                             <th>Nome</th>
                             <th>Categoria</th>
+                            <th>Preço</th>
                             <th>Peso (kg)</th>
                             <th>Volume (m³)</th>
                             <th>Valor Declarado</th>
-                            <th>Status</th>
+                            <th>Ativo</th>
+                            <th>Estoque</th>
                             <th>Criado Em</th>
-                            <th>Última Atualização</th>
+                            <th>Atualizado Em</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
@@ -53,21 +56,31 @@
                         <c:forEach var="product" items="${products}">
                             <tr>
                                 <td>${product.id}</td>
-                                <td><a href="${pageContext.request.contextPath}/products/view/${product.id}">${product.name}</a></td>
-                                <td>${product.category != null && !product.category.isEmpty() ? product.category : '-'}</td>
-                                <td><fmt:formatNumber value="${product.weightKg}" pattern="#,##0.00" /></td>
-                                <td><fmt:formatNumber value="${product.volumeM3}" pattern="#,##0.00" /></td>
-                                <td><fmt:formatNumber value="${product.declaredValue}" type="currency" currencySymbol="R$ " minFractionDigits="2" maxFractionDigits="2"/></td>
+                                <td>${product.name}</td>
+                                <td>${product.category}</td>
+                                <td><fmt:formatNumber value="${product.price}" type="currency" currencySymbol="R$" minFractionDigits="2" maxFractionDigits="2"/></td>
+                                <td><fmt:formatNumber value="${product.weightKg}" pattern="#,##0.00"/></td>
+                                <td><fmt:formatNumber value="${product.volumeM3}" pattern="#,##0.00"/></td>
+                                <td><fmt:formatNumber value="${product.declaredValue}" type="currency" currencySymbol="R$" minFractionDigits="2" maxFractionDigits="2"/></td>
                                 <td>
-                                    <c:if test="${product.active}">
-                                        <span class="badge badge-success">Ativo</span>
-                                    </c:if>
-                                    <c:if test="${not product.active}">
-                                        <span class="badge badge-danger">Inativo</span>
-                                    </c:if>
+                                    <c:choose>
+                                        <c:when test="${product.active}">
+                                            <span class="badge bg-success">Sim</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="badge bg-danger">Não</span>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </td>
-                                <td>${product.formattedCreationDate}</td>
-                                <td>${product.formattedUpdatedDate != null ? product.formattedUpdatedDate : '-'}</td>
+                                <td>${product.stockQuantity}</td>
+                                <td>
+                                    <%-- Formata LocalDateTime usando o DateFormatter --%>
+                                    ${product.createdAt != null ? DateFormatter.formatLocalDateTime(product.createdAt) : '-'}
+                                </td>
+                                <td>
+                                    <%-- Formata LocalDateTime usando o DateFormatter --%>
+                                    ${product.updatedAt != null ? DateFormatter.formatLocalDateTime(product.updatedAt) : '-'}
+                                </td>
                                 <td>
                                     <div class="btn-group" role="group">
                                         <a href="${pageContext.request.contextPath}/products/view/${product.id}" class="btn btn-info btn-sm">Ver</a>

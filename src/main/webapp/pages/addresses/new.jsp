@@ -18,25 +18,27 @@
         <c:if test="${address != null && address.id != null}">
             <input type="hidden" name="id" value="${address.id}">
         </c:if>
-        
+
+        <%-- Lógica para o campo Cliente --%>
         <c:choose>
             <c:when test="${client != null}">
+                <%-- Cliente já definido (vindo de /addresses/new/{clientId} ou edição) --%>
                 <input type="hidden" name="clientId" value="${client.id}">
                 <div class="form-group">
-                    <label>Cliente</label>
-                    <input type="text" value="${client.name}" disabled class="form-control-plaintext">
+                    <label for="clientNameDisplay">Cliente</label>
+                    <input type="text" id="clientNameDisplay" value="${client.name} (${client.document})" disabled class="form-control-plaintext">
                 </div>
             </c:when>
-            <c:when test="${address != null && address.clientId != null}">
-                <input type="hidden" name="clientId" value="${address.clientId}">
-            </c:when>
             <c:otherwise>
+                <%-- Nenhuma cliente pré-selecionado, exibe o dropdown --%>
                 <div class="form-group">
-                    <label for="clientId">Cliente *</label>
-                    <select id="clientId" name="clientId" required>
-                        <option value="">Selecione um cliente...</option>
-                        <c:forEach var="c" items="${clients}">
-                            <option value="${c.id}">${c.name}</option>
+                    <label for="clientSelectForAddress">Cliente *</label>
+                    <select id="clientSelectForAddress" name="clientId" required>
+                        <option value="">Selecione o cliente</option>
+                        <c:forEach var="c" items="${allClients}"> <%-- AQUI: Usando allClients --%>
+                            <option value="${c.id}" ${address != null && address.clientId == c.id ? 'selected' : ''}>
+                                ${c.name} (${c.document})
+                            </option>
                         </c:forEach>
                     </select>
                 </div>
@@ -46,86 +48,78 @@
         <div class="form-group">
             <label for="addressType">Tipo de Endereço *</label>
             <select id="addressType" name="addressType" required>
-                <option value="">Selecione...</option>
-                <option value="RESIDENCIAL" ${address != null && address.addressType.name() == 'RESIDENCIAL' ? 'selected' : ''}>Residencial</option>
-                <option value="COMERCIAL" ${address != null && address.addressType.name() == 'COMERCIAL' ? 'selected' : ''}>Comercial</option>
-                <option value="INDUSTRIAL" ${address != null && address.addressType.name() == 'INDUSTRIAL' ? 'selected' : ''}>Industrial</option>
+                <option value="">Selecione o Tipo</option>
+                <c:forEach var="type" items="${addressTypes}">
+                    <option value="${type}" ${address != null && address.addressType == type ? 'selected' : ''}>
+                        ${type}
+                    </option>
+                </c:forEach>
             </select>
         </div>
 
         <div class="form-group">
-            <label for="street">Logradouro *</label>
-            <input type="text" id="street" name="street" 
-                         value="${address != null && address.street != null ? address.street : ''}" 
-                         required placeholder="Rua, Avenida, etc">
+            <label for="street">Rua *</label>
+            <input type="text" id="street" name="street"
+                   value="${address != null ? address.street : ''}" required>
         </div>
 
         <div class="form-row">
             <div class="form-group">
                 <label for="number">Número *</label>
-                <input type="text" id="number" name="number" 
-                             value="${address != null && address.number != null ? address.number : ''}" 
-                             required placeholder="123">
+                <input type="text" id="number" name="number"
+                       value="${address != null ? address.number : ''}" required>
             </div>
-
             <div class="form-group">
                 <label for="complement">Complemento</label>
-                <input type="text" id="complement" name="complement" 
-                             value="${address != null && address.complement != null ? address.complement : ''}" 
-                             placeholder="Apto 101, Bloco B">
+                <input type="text" id="complement" name="complement"
+                       value="${address != null ? address.complement : ''}">
             </div>
         </div>
 
         <div class="form-group">
             <label for="neighborhood">Bairro *</label>
-            <input type="text" id="neighborhood" name="neighborhood" 
-                         value="${address != null && address.neighborhood != null ? address.neighborhood : ''}" 
-                         required placeholder="Centro">
+            <input type="text" id="neighborhood" name="neighborhood"
+                   value="${address != null ? address.neighborhood : ''}" required>
         </div>
 
         <div class="form-row">
             <div class="form-group">
                 <label for="city">Cidade *</label>
-                <input type="text" id="city" name="city" 
-                             value="${address != null && address.city != null ? address.city : ''}" 
-                             required placeholder="São Paulo">
+                <input type="text" id="city" name="city"
+                       value="${address != null ? address.city : ''}" required>
             </div>
-
             <div class="form-group">
                 <label for="state">Estado *</label>
-                <input type="text" id="state" name="state" 
-                             value="${address != null && address.state != null ? address.state : ''}" 
-                             required placeholder="SP" maxlength="2">
+                <input type="text" id="state" name="state"
+                       value="${address != null ? address.state : ''}" required>
             </div>
         </div>
 
         <div class="form-row">
             <div class="form-group">
                 <label for="zipCode">CEP *</label>
-                <input type="text" id="zipCode" name="zipCode" 
-                             value="${address != null && address.zipCode != null ? address.zipCode : ''}" 
-                             required placeholder="00000-000" maxlength="9">
+                <input type="text" id="zipCode" name="zipCode"
+                       value="${address != null ? address.zipCode : ''}" required>
             </div>
-
             <div class="form-group">
                 <label for="country">País *</label>
-                <input type="text" id="country" name="country" 
-                             value="${address != null && address.country != null ? address.country : 'Brasil'}" 
-                             required placeholder="Brasil">
+                <input type="text" id="country" name="country"
+                       value="${address != null ? address.country : ''}" required>
             </div>
         </div>
 
         <div class="form-group">
             <label for="reference">Ponto de Referência</label>
-            <input type="text" id="reference" name="reference" 
-                         value="${address != null && address.reference != null ? address.reference : ''}" 
-                         placeholder="Próximo à padaria">
+            <input type="text" id="reference" name="reference"
+                   value="${address != null ? address.reference : ''}">
         </div>
 
-        <div class="form-group checkbox-group">
-            <input type="checkbox" id="isMain" name="isMain" value="true" 
+        <div class="form-group form-check">
+            <input type="checkbox" id="isMain" name="isMain" value="true"
                    ${address != null && address.isMain ? 'checked' : ''}>
-            <label for="isMain">Endereço Principal</label>
+            <label class="form-check-label" for="isMain">
+                Endereço Principal
+            </label>
         </div>
 
         <div class="form-actions">
@@ -143,6 +137,22 @@
             </c:choose>
         </div>
     </form>
+
+    <%-- Script para redirecionar ao selecionar cliente no dropdown --%>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const clientSelect = document.getElementById('clientSelectForAddress');
+            if (clientSelect) {
+                clientSelect.addEventListener('change', function() {
+                    const selectedClientId = this.value;
+                    if (selectedClientId) {
+                        // Redireciona para a URL /addresses/new/{clientId}
+                        window.location.href = '${pageContext.request.contextPath}/addresses/new/' + selectedClientId;
+                    }
+                });
+            }
+        });
+    </script>
 </t:header>
 
 <t:footer />

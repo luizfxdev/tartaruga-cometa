@@ -145,7 +145,8 @@
 
         <div class="detail-row">
             <label>Última Atualização:</label>
-            <span>${delivery.formattedUpdatedDate != null ? delivery.formattedUpdatedDate : 'Nunca atualizado'}</span>
+            <span>${delivery.formattedUpdatedAt != null ? delivery.formattedUpdatedAt : 'Nunca atualizado'}</span>
+
         </div>
     </div>
 

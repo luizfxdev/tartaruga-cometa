@@ -2,7 +2,6 @@ package com.tartarugacometasystem.controller;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,7 +12,7 @@ import com.tartarugacometasystem.service.AddressService;
 import com.tartarugacometasystem.service.ClientService;
 import com.tartarugacometasystem.util.Mapper;
 
-import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletException; // Importe o Mapper do pacote correto
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -112,21 +111,25 @@ public class AddressServlet extends HttpServlet {
             e.printStackTrace();
             request.getSession().setAttribute("error", e.getMessage());
 
+            // Ao redirecionar após erro de validação, precisamos repassar os dados
+            // para que o formulário possa ser preenchido novamente e o dropdown de clientes funcione.
             try {
-                String id = request.getParameter("id");
-                
-                if (id != null && !id.isEmpty() && id.matches("\\d+")) {
-                    // Está editando - redireciona para o formulário de edição
-                    response.sendRedirect(request.getContextPath() + "/addresses/edit/" + id);
-                } else {
-                    // Está criando novo - redireciona para o formulário de novo
-                    String clientId = request.getParameter("clientId");
-                    if (clientId != null && !clientId.isEmpty()) {
-                        response.sendRedirect(request.getContextPath() + "/addresses/new/" + clientId);
-                    } else {
-                        response.sendRedirect(request.getContextPath() + "/addresses/new");
-                    }
+                // Mapeia o endereço do request para preencher os campos do formulário
+                Address addressWithError = Mapper.mapToAddress(request); // Usa o Mapper corrigido
+                request.setAttribute("address", addressWithError);
+
+                // Carrega todos os clientes para o dropdown
+                request.setAttribute("allClients", clientService.getAllClients());
+                // Carrega os tipos de endereço
+                request.setAttribute("addressTypes", AddressType.values());
+
+                // Se o erro foi em um formulário de edição, tenta manter o cliente associado
+                if (addressWithError.getClientId() != null) {
+                    clientService.getClientById(addressWithError.getClientId())
+                                 .ifPresent(client -> request.setAttribute("client", client));
                 }
+
+                request.getRequestDispatcher("/pages/addresses/new.jsp").forward(request, response);
             } catch (Exception ex) {
                 System.err.println("❌ Erro ao redirecionar após erro de validação: " + ex.getMessage());
                 ex.printStackTrace();
@@ -137,17 +140,19 @@ public class AddressServlet extends HttpServlet {
 
     // SAVE (INSERT OR UPDATE)
     private void saveAddress(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException {
+            throws SQLException, IOException, ServletException {
 
-        String idStr = request.getParameter("id");
-        HashMap<String, String> params = new HashMap<>();
-        request.getParameterMap().forEach((k, v) -> params.put(k, v[0]));
+        // Não é mais necessário criar o HashMap aqui, o Mapper.mapToAddress(request) já faz isso
+        Address address = Mapper.mapToAddress(request); // Usa o Mapper corrigido
 
-        Address address = Mapper.mapToAddress(params);
+        // Validação do clientId no servidor ANTES de tentar salvar
+        if (address.getClientId() == null) {
+            throw new IllegalArgumentException("ID do cliente é obrigatório.");
+        }
 
-        if (idStr != null && !idStr.isEmpty() && idStr.matches("\\d+")) {
+        if (address.getId() != null) { // Verifica se o ID do endereço existe para UPDATE
             // UPDATE
-            System.out.println("✏️ Atualizando endereço ID: " + idStr);
+            System.out.println("✏️ Atualizando endereço ID: " + address.getId());
             addressService.updateAddress(address);
             System.out.println("✅ Endereço atualizado com sucesso");
         } else {
@@ -167,7 +172,7 @@ public class AddressServlet extends HttpServlet {
         System.out.println("📋 Listando todos os endereços");
         List<Address> addresses = addressService.getAllAddresses();
         System.out.println("📋 Total de endereços encontrados: " + addresses.size());
-        
+
         request.setAttribute("addresses", addresses);
         request.getRequestDispatcher("/pages/addresses/list.jsp")
                 .forward(request, response);
@@ -185,16 +190,16 @@ public class AddressServlet extends HttpServlet {
         }
 
         int clientId = Integer.parseInt(clientIdStr);
-        
+
         // Busca o cliente para exibir o nome
         Optional<Client> clientOpt = clientService.getClientById(clientId);
-        
+
         List<Address> addresses = addressService.getAddressesByClientId(clientId);
         System.out.println("📋 Total de endereços do cliente " + clientId + ": " + addresses.size());
 
         request.setAttribute("addresses", addresses);
         request.setAttribute("clientId", clientId);
-        
+
         if (clientOpt.isPresent()) {
             request.setAttribute("client", clientOpt.get());
         }
@@ -208,12 +213,12 @@ public class AddressServlet extends HttpServlet {
             throws SQLException, ServletException, IOException {
 
         System.out.println("📝 Exibindo formulário de novo endereço (sem cliente pré-selecionado)");
-        
+
         try {
-            List<Client> clients = clientService.getAllClients();
-            System.out.println("📝 Total de clientes carregados: " + (clients != null ? clients.size() : 0));
-            
-            request.setAttribute("clients", clients);
+            List<Client> allClients = clientService.getAllClients();
+            System.out.println("📝 Total de clientes carregados: " + (allClients != null ? allClients.size() : 0));
+
+            request.setAttribute("allClients", allClients);
             request.setAttribute("addressTypes", AddressType.values());
 
             request.getRequestDispatcher("/pages/addresses/new.jsp")
@@ -247,7 +252,9 @@ public class AddressServlet extends HttpServlet {
 
         try {
             request.setAttribute("client", clientOpt.get());
+            request.setAttribute("clientId", clientId);
             request.setAttribute("addressTypes", AddressType.values());
+            request.setAttribute("allClients", clientService.getAllClients()); // Garante que allClients esteja disponível para o dropdown caso o usuário queira mudar
 
             request.getRequestDispatcher("/pages/addresses/new.jsp")
                     .forward(request, response);
@@ -286,43 +293,10 @@ public class AddressServlet extends HttpServlet {
             request.setAttribute("client", clientOpt.get());
         }
         request.setAttribute("addressTypes", AddressType.values());
+        request.setAttribute("allClients", clientService.getAllClients()); // Garante que allClients esteja disponível para o dropdown
 
         request.getRequestDispatcher("/pages/addresses/new.jsp")
                 .forward(request, response);
-    }
-
-    // INSERT
-    private void insertAddress(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException {
-
-        System.out.println("➕ Inserindo novo endereço");
-        
-        HashMap<String, String> params = new HashMap<>();
-        request.getParameterMap().forEach((k, v) -> params.put(k, v[0]));
-
-        Address address = Mapper.mapToAddress(params);
-        addressService.createAddress(address);
-        
-        System.out.println("✅ Endereço inserido com sucesso");
-
-        response.sendRedirect(request.getContextPath() + "/addresses/client/" + address.getClientId());
-    }
-
-    // UPDATE
-    private void updateAddress(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException {
-
-        System.out.println("✏️ Atualizando endereço");
-        
-        HashMap<String, String> params = new HashMap<>();
-        request.getParameterMap().forEach((k, v) -> params.put(k, v[0]));
-
-        Address address = Mapper.mapToAddress(params);
-        addressService.updateAddress(address);
-        
-        System.out.println("✅ Endereço atualizado com sucesso");
-
-        response.sendRedirect(request.getContextPath() + "/addresses/client/" + address.getClientId());
     }
 
     // DELETE
@@ -339,13 +313,13 @@ public class AddressServlet extends HttpServlet {
         }
 
         int id = Integer.parseInt(idStr);
-        
+
         // Pega o clientId antes de deletar
         Optional<Address> addressOpt = addressService.getAddressById(id);
         int clientId = addressOpt.isPresent() ? addressOpt.get().getClientId() : 0;
-        
+
         addressService.deleteAddress(id);
-        
+
         System.out.println("✅ Endereço deletado com sucesso: " + id);
 
         if (clientId > 0) {
@@ -381,7 +355,7 @@ public class AddressServlet extends HttpServlet {
         int clientId = addressOpt.get().getClientId();
 
         addressService.setMainAddress(clientId, addressId);
-        
+
         System.out.println("✅ Endereço " + addressId + " definido como principal para cliente " + clientId);
 
         response.sendRedirect(request.getContextPath() + "/addresses/client/" + clientId);

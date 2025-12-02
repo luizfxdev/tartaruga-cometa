@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %> <%-- Adicionado para formatação de números --%>
 
 <t:header title="${product != null ? 'Editar Produto' : 'Novo Produto'}">
     <div class="page-header">
@@ -21,8 +22,8 @@
 
         <div class="form-group">
             <label for="name">Nome do Produto *</label>
-            <input type="text" id="name" name="name" 
-                   value="${product != null && product.name != null ? product.name : ''}" 
+            <input type="text" id="name" name="name"
+                   value="${product != null && product.name != null ? product.name : ''}"
                    required placeholder="Nome do produto">
         </div>
 
@@ -34,38 +35,56 @@
         <div class="form-row">
             <div class="form-group">
                 <label for="category">Categoria *</label>
-                <input type="text" id="category" name="category" 
-                       value="${product != null && product.category != null ? product.category : ''}" 
+                <input type="text" id="category" name="category"
+                       value="${product != null && product.category != null ? product.category : ''}"
                        required placeholder="Categoria">
             </div>
 
+            <%-- NOVO CAMPO: Preço --%>
             <div class="form-group">
-                <label for="weightKg">Peso (kg) *</label>
-                <input type="number" id="weightKg" name="weightKg" step="0.01"
-                       value="${product != null && product.weightKg != null ? product.weightKg : ''}" 
+                <label for="price">Preço (R$) *</label>
+                <input type="number" id="price" name="price" step="0.01"
+                       value="${product != null && product.price != null ? product.price : ''}"
                        required placeholder="0.00">
             </div>
         </div>
 
         <div class="form-row">
             <div class="form-group">
-                <label for="volumeM3">Volume (m³) *</label>
-                <input type="number" id="volumeM3" name="volumeM3" step="0.01"
-                       value="${product != null && product.volumeM3 != null ? product.volumeM3 : ''}" 
+                <label for="weightKg">Peso (Kg) *</label>
+                <input type="number" id="weightKg" name="weightKg" step="0.01"
+                       value="${product != null && product.weightKg != null ? product.weightKg : ''}"
                        required placeholder="0.00">
             </div>
 
             <div class="form-group">
+                <label for="volumeM3">Volume (m³) *</label>
+                <input type="number" id="volumeM3" name="volumeM3" step="0.01"
+                       value="${product != null && product.volumeM3 != null ? product.volumeM3 : ''}"
+                       required placeholder="0.00">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
                 <label for="declaredValue">Valor Declarado (R$) *</label>
                 <input type="number" id="declaredValue" name="declaredValue" step="0.01"
-                       value="${product != null && product.declaredValue != null ? product.declaredValue : ''}" 
+                       value="${product != null && product.declaredValue != null ? product.declaredValue : ''}"
                        required placeholder="0.00">
+            </div>
+
+            <%-- NOVO CAMPO: Quantidade em Estoque --%>
+            <div class="form-group">
+                <label for="stockQuantity">Quantidade em Estoque *</label>
+                <input type="number" id="stockQuantity" name="stockQuantity"
+                       value="${product != null && product.stockQuantity != null ? product.stockQuantity : ''}"
+                       required placeholder="0">
             </div>
         </div>
 
         <div class="form-group">
             <label for="active">
-                <input type="checkbox" id="active" name="active" value="true" 
+                <input type="checkbox" id="active" name="active" value="true"
                        ${product != null && product.active ? 'checked' : ''}>
                 Ativo
             </label>

@@ -22,7 +22,7 @@ public class Address {
     // NOVO: Campo para associação com Cliente
     private Client client;
 
-    // Campos formatados para exibição no JSP
+    // Campos formatados para exibição no JSP (RESTAURADOS)
     private String formattedAddress;
     private String formattedCreatedAt;
     private String formattedUpdatedAt;
@@ -199,6 +199,7 @@ public class Address {
         this.client = client;
     }
 
+    // Getters e Setters para campos formatados (RESTAURADOS)
     public String getFormattedAddress() {
         return formattedAddress;
     }

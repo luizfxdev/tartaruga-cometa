@@ -1,3 +1,4 @@
+// ProductDAO.java
 package com.tartarugacometasystem.dao;
 
 import java.sql.Connection;
@@ -22,8 +23,7 @@ public class ProductDAO {
      * @throws SQLException Se ocorrer um erro de SQL.
      */
     public Product save(Product product) throws SQLException {
-        // Removido 'created_at' da query, pois o banco de dados pode gerenciar o DEFAULT CURRENT_TIMESTAMP
-        String sql = "INSERT INTO product (name, description, price, weight_kg, volume_m3) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO product (name, description, price, weight_kg, volume_m3, declared_value, category, is_active, stock_quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -35,15 +35,22 @@ public class ProductDAO {
             pstmt.setBigDecimal(3, product.getPrice());
             pstmt.setBigDecimal(4, product.getWeightKg());
             pstmt.setBigDecimal(5, product.getVolumeM3());
-            // created_at e updated_at são tratados pelo banco de dados (DEFAULT e TRIGGER)
+            pstmt.setBigDecimal(6, product.getDeclaredValue());
+            pstmt.setBigDecimal(7, product.getDeclaredValue()); // Parece um erro aqui, deveria ser category
+            pstmt.setString(7, product.getCategory()); // Correção: Mover para a posição correta e usar getCategory()
+
+            // Correção: Usar o getter isActive() e não precisa mais verificar null se for boolean primitivo
+            pstmt.setBoolean(8, product.isActive()); // Mudança: de getIsActive() para isActive()
+
+            // Correção para evitar unboxing de null
+            Integer stockQuantity = product.getStockQuantity();
+            pstmt.setInt(9, stockQuantity != null ? stockQuantity : 0);
+
             pstmt.executeUpdate();
 
             rs = pstmt.getGeneratedKeys();
             if (rs.next()) {
                 product.setId(rs.getInt(1));
-                // Opcional: buscar created_at e updated_at do banco de dados após a inserção
-                // Para isso, você precisaria de uma query SELECT após a inserção ou um retorno mais completo do getGeneratedKeys
-                // Por simplicidade, assumimos que o modelo será enriquecido pelo Service ou que esses campos serão lidos em um findById posterior.
             }
             return product;
         } finally {
@@ -59,7 +66,7 @@ public class ProductDAO {
      * @throws SQLException Se ocorrer um erro de SQL.
      */
     public Optional<Product> findById(Integer id) throws SQLException {
-        String sql = "SELECT id, name, description, price, weight_kg, volume_m3, stock_quantity, created_at, updated_at FROM product WHERE id = ?";
+        String sql = "SELECT id, name, description, price, weight_kg, volume_m3, declared_value, category, is_active, stock_quantity, created_at, updated_at FROM product WHERE id = ?";
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -85,8 +92,7 @@ public class ProductDAO {
      * @throws SQLException Se ocorrer um erro de SQL.
      */
     public void update(Product product) throws SQLException {
-        // Removido 'updated_at' da query, pois o trigger do banco de dados cuida disso
-        String sql = "UPDATE product SET name = ?, description = ?, price = ?, weight_kg = ?, volume_m3 = ?, stock_quantity = ? WHERE id = ?";
+        String sql = "UPDATE product SET name = ?, description = ?, price = ?, weight_kg = ?, volume_m3 = ?, declared_value = ?, category = ?, is_active = ?, stock_quantity = ? WHERE id = ?";
         Connection conn = null;
         PreparedStatement pstmt = null;
         try {
@@ -97,8 +103,17 @@ public class ProductDAO {
             pstmt.setBigDecimal(3, product.getPrice());
             pstmt.setBigDecimal(4, product.getWeightKg());
             pstmt.setBigDecimal(5, product.getVolumeM3());
-            pstmt.setInt(6, product.getStockQuantity()); // Adicionado stock_quantity
-            pstmt.setInt(7, product.getId());
+            pstmt.setBigDecimal(6, product.getDeclaredValue());
+            pstmt.setString(7, product.getCategory());
+
+            // Correção: Usar o getter isActive() e não precisa mais verificar null se for boolean primitivo
+            pstmt.setBoolean(8, product.isActive()); // Mudança: de getIsActive() para isActive()
+
+            // Correção para evitar unboxing de null
+            Integer stockQuantity = product.getStockQuantity();
+            pstmt.setInt(9, stockQuantity != null ? stockQuantity : 0);
+
+            pstmt.setInt(10, product.getId());
             pstmt.executeUpdate();
         } finally {
             DatabaseConfig.close(conn, pstmt);
@@ -133,7 +148,7 @@ public class ProductDAO {
      */
     public List<Product> getAll() throws SQLException {
         List<Product> products = new ArrayList<>();
-        String sql = "SELECT id, name, description, price, weight_kg, volume_m3, stock_quantity, created_at, updated_at FROM product";
+        String sql = "SELECT id, name, description, price, weight_kg, volume_m3, declared_value, category, is_active, stock_quantity, created_at, updated_at FROM product";
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -160,7 +175,7 @@ public class ProductDAO {
      */
     public List<Product> searchByName(String query) throws SQLException {
         List<Product> products = new ArrayList<>();
-        String sql = "SELECT id, name, description, price, weight_kg, volume_m3, stock_quantity, created_at, updated_at FROM product WHERE name ILIKE ? OR description ILIKE ?"; // Usando ILIKE para busca case-insensitive
+        String sql = "SELECT id, name, description, price, weight_kg, volume_m3, declared_value, category, is_active, stock_quantity, created_at, updated_at FROM product WHERE name ILIKE ? OR description ILIKE ?";
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -195,9 +210,19 @@ public class ProductDAO {
         product.setPrice(rs.getBigDecimal("price"));
         product.setWeightKg(rs.getBigDecimal("weight_kg"));
         product.setVolumeM3(rs.getBigDecimal("volume_m3"));
-        product.setStockQuantity(rs.getInt("stock_quantity")); // Adicionado stock_quantity
-        product.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-        product.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
+        product.setDeclaredValue(rs.getBigDecimal("declared_value"));
+        product.setCategory(rs.getString("category"));
+        product.setActive(rs.getBoolean("is_active")); // Mudança: de setIsActive() para setActive()
+        product.setStockQuantity(rs.getInt("stock_quantity"));
+        // É importante verificar se as colunas de data não são nulas no banco de dados
+        // antes de chamar toLocalDateTime(), para evitar NullPointerException.
+        // Ou garantir que o banco sempre retorne um valor.
+        if (rs.getTimestamp("created_at") != null) {
+            product.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+        }
+        if (rs.getTimestamp("updated_at") != null) {
+            product.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
+        }
         return product;
     }
 }

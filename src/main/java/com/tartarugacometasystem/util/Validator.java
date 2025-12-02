@@ -5,9 +5,6 @@ import java.util.regex.Pattern;
 public class Validator {
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
-    // Corrigido: Regex para telefone brasileiro com DDD opcional
-    // Formatos aceitos: (11) 98765-4321, 11 98765-4321, 1198765-4321, 98765-4321
-    private static final Pattern PHONE_PATTERN = Pattern.compile("^\\(?\\d{2}\\)?\\s?\\d{4,5}-?\\d{4}$");
     private static final Pattern CEP_PATTERN = Pattern.compile("^\\d{5}-?\\d{3}$");
 
     // Método para validar e-mail
@@ -23,16 +20,45 @@ public class Validator {
         if (phone == null || phone.trim().isEmpty()) {
             return false;
         }
-        return PHONE_PATTERN.matcher(phone).matches();
+
+        // Remove todos os caracteres não numéricos
+        String cleanedPhone = phone.replaceAll("[^\\d]", "");
+
+        // Verifica se tem 10 ou 11 dígitos
+        if (cleanedPhone.length() < 10 || cleanedPhone.length() > 11) {
+            return false;
+        }
+
+        // Valida prefixo 9 em celulares de 11 dígitos
+        if (cleanedPhone.length() == 11 && cleanedPhone.charAt(2) != '9') {
+            return false;
+        }
+
+        // DDD válido (não iniciando com 0)
+        if (cleanedPhone.charAt(0) == '0') {
+            return false;
+        }
+
+        // Impede números com todos dígitos iguais
+        if (cleanedPhone.matches("(\\d)\\1{" + (cleanedPhone.length() - 1) + "}")) {
+            return false;
+        }
+
+        return true;
     }
 
     // Método para validar CPF
     public static boolean isValidCPF(String cpf) {
-        if (cpf == null || !cpf.matches("\\d{11}")) {
+        if (cpf == null) {
             return false;
         }
 
-        // Verifica se todos os dígitos são iguais (ex: 111.111.111-11)
+        cpf = cpf.replaceAll("[^\\d]", "");
+
+        if (cpf.length() != 11) {
+            return false;
+        }
+
         if (cpf.matches("(\\d)\\1{10}")) {
             return false;
         }
@@ -45,19 +71,42 @@ public class Validator {
 
     // Método para validar CNPJ
     public static boolean isValidCNPJ(String cnpj) {
-        if (cnpj == null || !cnpj.matches("\\d{14}")) {
+        if (cnpj == null) {
             return false;
         }
 
-        // Verifica se todos os dígitos são iguais (ex: 11.111.111/1111-11)
+        cnpj = cnpj.replaceAll("[^\\d]", "");
+
+        if (cnpj.length() != 14) {
+            return false;
+        }
+
         if (cnpj.matches("(\\d)\\1{13}")) {
             return false;
         }
 
-        char firstDigit = calculateCNPJDigit(cnpj.substring(0, 12), 5);
-        char secondDigit = calculateCNPJDigit(cnpj.substring(0, 12) + firstDigit, 6);
+        int[] pesosDV1 = {5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2};
+        int[] pesosDV2 = {6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2};
 
-        return cnpj.charAt(12) == firstDigit && cnpj.charAt(13) == secondDigit;
+        int soma = 0;
+        for (int i = 0; i < 12; i++) {
+            soma += (cnpj.charAt(i) - '0') * pesosDV1[i];
+        }
+        int resultado = soma % 11;
+        int dv1 = (resultado < 2) ? 0 : (11 - resultado);
+
+        if (dv1 != (cnpj.charAt(12) - '0')) {
+            return false;
+        }
+
+        soma = 0;
+        for (int i = 0; i < 13; i++) {
+            soma += (cnpj.charAt(i) - '0') * pesosDV2[i];
+        }
+        resultado = soma % 11;
+        int dv2 = (resultado < 2) ? 0 : (11 - resultado);
+
+        return dv2 == (cnpj.charAt(13) - '0');
     }
 
     public static boolean isValidZipCode(String zipCode) {
@@ -78,15 +127,6 @@ public class Validator {
         int sum = 0;
         for (int i = 0; i < sequence.length(); i++) {
             sum += Character.getNumericValue(sequence.charAt(i)) * (weight - i);
-        }
-        int remainder = sum % 11;
-        return remainder < 2 ? '0' : (char) ('0' + (11 - remainder));
-    }
-
-    private static char calculateCNPJDigit(String sequence, int weight) {
-        int sum = 0;
-        for (int i = 0; i < sequence.length(); i++) {
-            sum += Character.getNumericValue(sequence.charAt(i)) * (weight - (i % 6));
         }
         int remainder = sum % 11;
         return remainder < 2 ? '0' : (char) ('0' + (11 - remainder));

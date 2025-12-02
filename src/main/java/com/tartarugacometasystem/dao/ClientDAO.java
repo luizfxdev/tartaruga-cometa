@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp; // Manter para mapResultSetToClient
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +25,7 @@ public class ClientDAO {
      */
     public Client save(Client client) throws SQLException {
         // created_at é gerenciado pelo DEFAULT CURRENT_TIMESTAMP no schema.sql
-        String sql = "INSERT INTO client (name, document, email, phone, person_type) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO client (name, document, email, phone, person_type) VALUES (?, ?, ?, ?, ?::person_type_enum)";
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -36,7 +36,7 @@ public class ClientDAO {
             pstmt.setString(2, client.getDocument());
             pstmt.setString(3, client.getEmail());
             pstmt.setString(4, client.getPhone());
-            pstmt.setString(5, client.getPersonType().name()); // Salva o nome do enum
+            pstmt.setString(5, client.getPersonType().name()); // Salva o nome do enum (INDIVIDUAL ou LEGAL_ENTITY)
             // updated_at é tratado por trigger, não precisa ser definido aqui para INSERT
             pstmt.executeUpdate();
 
@@ -85,7 +85,7 @@ public class ClientDAO {
      */
     public void update(Client client) throws SQLException {
         // updated_at é tratado por trigger, não precisa ser definido aqui explicitamente
-        String sql = "UPDATE client SET name = ?, document = ?, email = ?, phone = ?, person_type = ? WHERE id = ?";
+        String sql = "UPDATE client SET name = ?, document = ?, email = ?, phone = ?, person_type = ?::person_type_enum WHERE id = ?";
         Connection conn = null;
         PreparedStatement pstmt = null;
         try {
@@ -95,7 +95,7 @@ public class ClientDAO {
             pstmt.setString(2, client.getDocument());
             pstmt.setString(3, client.getEmail());
             pstmt.setString(4, client.getPhone());
-            pstmt.setString(5, client.getPersonType().name()); // Salva o nome do enum
+            pstmt.setString(5, client.getPersonType().name()); // Salva o nome do enum (INDIVIDUAL ou LEGAL_ENTITY)
             pstmt.setInt(6, client.getId());
             pstmt.executeUpdate();
         } finally {
