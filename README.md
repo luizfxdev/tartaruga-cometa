@@ -1,7 +1,7 @@
 # 🐢 Tartaruga Cometa - Sistema de Gerenciamento de Entregas
 
 ![Java](https://img.shields.io/badge/Java-1.8-orange?style=flat-square&logo=java)
-![Jakarta EE](https://img.shields.io/badge/Jakarta%20EE-6.0-blue?style=flat-square)
+![Jakarta EE](https://img.shields.io/badge/Jakarta%20EE-9-blue?style=flat-square)
 ![Tomcat](https://img.shields.io/badge/Tomcat-10-yellow?style=flat-square&logo=apache-tomcat)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-blue?style=flat-square&logo=postgresql)
 ![Gradle](https://img.shields.io/badge/Gradle-8.0+-green?style=flat-square&logo=gradle)
@@ -377,5 +377,6 @@ Sistema de Gerenciamento de Entregas
 
 ⬆ Voltar ao topo
 </div>
+
 
 
