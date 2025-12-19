@@ -233,17 +233,6 @@ O script `start.sh` irá:
 
 ---
 
-## 👨‍💻 Autor
-
-**Luiz Felipe de Oliveira**
-
-[![GitHub](https://img.shields.io/badge/GitHub-luizfxdev-181717?style=for-the-badge&logo=github)](https://github.com/luizfxdev)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-luizfxdev-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/luizfxdev)
-[![Portfolio](https://img.shields.io/badge/Portfolio-luizfxdev.com.br-FF6B6B?style=for-the-badge&logo=google-chrome&logoColor=white)](https://luizfxdev.com.br)
-
----
-
-
 <div align="center">
 
 ### 🐢 Tartaruga Cometa
@@ -255,5 +244,6 @@ O script `start.sh` irá:
 [⬆ Voltar ao topo](#-tartaruga-cometa---sistema-de-gerenciamento-de-entregas)
 
 </div>
+
 
 
