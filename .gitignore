@@ -7,8 +7,6 @@
 .gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
 gradle-app.setting
 .gradletasknamecache
 
@@ -33,7 +31,6 @@ replay_pid*
 *.iml
 *.ipr
 out/
-.idea_modules/
 
 # Eclipse
 .classpath
@@ -41,14 +38,6 @@ out/
 .settings/
 .metadata/
 bin/
-tmp/
-*.tmp
-*.bak
-*.swp
-*~.nib
-local.properties
-.loadpath
-.recommenders
 
 # NetBeans
 /nbproject/private/
@@ -63,26 +52,22 @@ local.properties
 .history/
 
 # ============ TOMCAT ============
-# Diretórios de deploy do Tomcat
 /tomcat/
 /tomcat.*/
 RUNNING_PID
 
 # ============ LOGS ============
 logs/
-*.log
 log/
+*.log
 *.log.*
-/logs/
 
 # ============ DATABASE ============
-# Arquivos de configuração com senhas (manter template)
+# Arquivos reais com senha
 database.properties
 !database.properties.example
 *.db
 *.sqlite
-
-# Backups de banco
 *.sql.backup
 *.dump
 backup/
@@ -111,33 +96,29 @@ $RECYCLE.BIN/
 .Trash-*
 .nfs*
 
-# ============ ARQUIVOS TEMPORÁRIOS ============
+# ============ TEMPORÁRIOS ============
 *.tmp
 *.temp
-temp/
 tmp/
+temp/
 
 # ============ DEPENDÊNCIAS ============
 /node_modules/
 /lib/
 
-# ============ COMPILAÇÃO ============
+# ============ COMPILAÇÃO EXTRA ============
 target/
 classes/
-out/
 
 # ============ TESTES ============
 test-output/
-*.test
 coverage/
 
 # ============ DOCUMENTAÇÃO ============
-# Manter docs/ mas ignorar arquivos gerados
 docs/generated/
 *.pdf.backup
 
 # ============ SEGURANÇA ============
-# Nunca commitar dados sensíveis
 *.key
 *.pem
 *.p12
@@ -149,12 +130,11 @@ credentials/
 .env.*.local
 
 # ============ UPLOADS ============
-# Diretório de uploads de usuários
 uploads/
 files/
 attachments/
 
 # ============ BUILD ESPECÍFICO ============
-# Artefatos específicos do projeto
 *.war.original
 dependency-reduced-pom.xml
+.gradle/
