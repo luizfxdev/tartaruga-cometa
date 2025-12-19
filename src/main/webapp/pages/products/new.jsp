@@ -1,11 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %> <%-- Adicionado para formatação de números --%>
 
-<t:header title="${product != null ? 'Editar Produto' : 'Novo Produto'}">
+<t:header title="${product != null && product.id != null ? 'Editar Produto' : 'Novo Produto'}">
     <div class="page-header">
-        <h2>${product != null ? 'Editar Produto' : 'Novo Produto'}</h2>
+        <h2>${product != null && product.id != null ? 'Editar Produto' : 'Novo Produto'}</h2>
     </div>
 
     <c:if test="${not empty sessionScope.error}">
@@ -40,7 +39,6 @@
                        required placeholder="Categoria">
             </div>
 
-            <%-- NOVO CAMPO: Preço --%>
             <div class="form-group">
                 <label for="price">Preço (R$) *</label>
                 <input type="number" id="price" name="price" step="0.01"
@@ -73,7 +71,6 @@
                        required placeholder="0.00">
             </div>
 
-            <%-- NOVO CAMPO: Quantidade em Estoque --%>
             <div class="form-group">
                 <label for="stockQuantity">Quantidade em Estoque *</label>
                 <input type="number" id="stockQuantity" name="stockQuantity"
@@ -83,7 +80,7 @@
         </div>
 
         <div class="form-group">
-            <label for="active">
+            <label>
                 <input type="checkbox" id="active" name="active" value="true"
                        ${product != null && product.active ? 'checked' : ''}>
                 Ativo
@@ -91,8 +88,8 @@
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-success">Salvar</button>
-            <a href="${pageContext.request.contextPath}/products/" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="custom-btn btn-success">Salvar</button>
+            <a href="${pageContext.request.contextPath}/products/" class="custom-btn btn-secondary">Cancelar</a>
         </div>
     </form>
 </t:header>

@@ -17,39 +17,17 @@ public class ClientService {
         this.clientDAO = new ClientDAO();
     }
 
-    /**
-     * Cria um novo cliente.
-     *
-     * @param client O objeto Client a ser criado.
-     * @return O objeto Client criado com o ID.
-     * @throws SQLException            Se ocorrer um erro de SQL.
-     * @throws IllegalArgumentException Se o cliente for inválido.
-     */
     public Client createClient(Client client) throws SQLException {
         validateClient(client);
         return clientDAO.save(client);
     }
 
-    /**
-     * Busca um cliente pelo ID.
-     *
-     * @param id O ID do cliente.
-     * @return Um Optional contendo o Client se encontrado, ou Optional.empty().
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
     public Optional<Client> getClientById(Integer id) throws SQLException {
         Optional<Client> client = clientDAO.findById(id);
         client.ifPresent(this::enrichClient);
         return client;
     }
 
-    /**
-     * Atualiza um cliente existente.
-     *
-     * @param client O objeto Client a ser atualizado.
-     * @throws SQLException            Se ocorrer um erro de SQL.
-     * @throws IllegalArgumentException Se o cliente for inválido ou não existir.
-     */
     public void updateClient(Client client) throws SQLException {
         if (client.getId() == null) {
             throw new IllegalArgumentException("ID do cliente é obrigatório para atualização.");
@@ -62,51 +40,27 @@ public class ClientService {
         clientDAO.update(client);
     }
 
-    /**
-     * Deleta um cliente pelo ID.
-     *
-     * @param id O ID do cliente a ser deletado.
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
     public void deleteClient(Integer id) throws SQLException {
         clientDAO.delete(id);
     }
 
-    /**
-     * Busca todos os clientes, enriquecendo-os com dados formatados.
-     *
-     * @return Uma lista de todos os clientes.
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
     public List<Client> getAllClients() throws SQLException {
         List<Client> clients = clientDAO.getAll();
         clients.forEach(this::enrichClient);
         return clients;
     }
 
-    /**
-     * Busca clientes por termo de busca (nome, documento, email), enriquecendo-os com dados formatados.
-     *
-     * @param searchTerm O termo de busca.
-     * @return Uma lista de clientes que correspondem à busca.
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
-    public List<Client> search(String searchTerm) throws SQLException { // Renomeado de searchClientsByName
-        List<Client> clients = clientDAO.search(searchTerm); // Chama o novo método search do DAO
+    public List<Client> search(String searchTerm) throws SQLException {
+        List<Client> clients = clientDAO.search(searchTerm);
         clients.forEach(this::enrichClient);
         return clients;
     }
 
-    /**
-     * Valida os campos de um cliente.
-     *
-     * @param client O objeto Client a ser validado.
-     * @throws IllegalArgumentException Se algum campo for inválido.
-     */
     private void validateClient(Client client) {
         if (client.getName() == null || client.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Nome do cliente é obrigatório.");
         }
+        
         if (client.getDocument() == null || client.getDocument().trim().isEmpty()) {
             throw new IllegalArgumentException("Documento do cliente é obrigatório.");
         }
@@ -126,26 +80,21 @@ public class ClientService {
             }
         }
 
-        if (client.getEmail() == null || client.getEmail().trim().isEmpty()) {
-            throw new IllegalArgumentException("Email do cliente é obrigatório.");
-        }
-        if (!Validator.isValidEmail(client.getEmail())) { // Usando Validator
-            throw new IllegalArgumentException("Email inválido.");
+        // Email é OPCIONAL - só valida se preenchido
+        if (client.getEmail() != null && !client.getEmail().trim().isEmpty()) {
+            if (!Validator.isValidEmail(client.getEmail())) {
+                throw new IllegalArgumentException("Email inválido.");
+            }
         }
 
-        if (client.getPhone() == null || client.getPhone().trim().isEmpty()) {
-            throw new IllegalArgumentException("Telefone do cliente é obrigatório.");
-        }
-        if (!Validator.isValidPhone(client.getPhone())) { // Usando Validator
-            throw new IllegalArgumentException("Telefone inválido.");
+        // Telefone é OPCIONAL - só valida se preenchido
+        if (client.getPhone() != null && !client.getPhone().trim().isEmpty()) {
+            if (!Validator.isValidPhone(client.getPhone())) {
+                throw new IllegalArgumentException("Telefone inválido.");
+            }
         }
     }
 
-    /**
-     * Enriquecer um objeto Client com dados formatados.
-     *
-     * @param client O objeto Client a ser enriquecido.
-     */
     private void enrichClient(Client client) {
         if (client == null) return;
 
@@ -155,7 +104,6 @@ public class ClientService {
         if (client.getUpdatedAt() != null) {
             client.setFormattedUpdatedAt(DateFormatter.formatLocalDateTime(client.getUpdatedAt()));
         }
-        // NOVO: Define o tipo de pessoa formatado
         if (client.getPersonType() != null) {
             client.setFormattedPersonType(client.getPersonType().getLabel());
         }
