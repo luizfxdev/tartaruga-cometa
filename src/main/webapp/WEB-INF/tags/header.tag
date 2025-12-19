@@ -1,46 +1,52 @@
 <%@ tag language="java" pageEncoding="UTF-8"%>
 <%@ attribute name="title" required="true" type="java.lang.String"%>
-
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title} - Tartaruga Cometa</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main.css">
+
+    <c:set var="currentURI" value="${pageContext.request.requestURI}" />
+    <c:set var="contextPath" value="${pageContext.request.contextPath}" />
+    
+    <c:if test="${fn:endsWith(currentURI, '/index.jsp') or fn:endsWith(currentURI, '/')}">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pages/home.css">
+    </c:if>
 </head>
 <body>
     <nav class="navbar">
-        <div class="container">
-            <div class="navbar-brand">
-                <a href="${pageContext.request.contextPath}/">
-                    <h1>🐢 Tartaruga Cometa</h1>
-                </a>
+        <div class="navbar-container">
+            <a href="${pageContext.request.contextPath}/" class="navbar-brand">
+                <img 
+                    id="navbar-logo-img" 
+                    src="${pageContext.request.contextPath}/assets/logolight.png" 
+                    alt="Tartaruga Cometa Logo" 
+                    class="navbar-logo-img"
+                    data-light-logo="${pageContext.request.contextPath}/assets/logolight.png"
+                    data-dark-logo="${pageContext.request.contextPath}/assets/logodark.png"
+                >
+                <span id="navbar-title" class="navbar-title">Tartaruga Cometa</span>
+            </a>
+            <div class="navbar-actions">
+                <button id="theme-toggle" class="theme-toggle" title="Alternar tema">
+                    <span id="sun-icon" class="theme-icon">☀️</span>
+                    <span id="moon-icon" class="theme-icon active">🌙</span>
+                </button>
             </div>
-            <ul class="navbar-menu">
-                <li><a href="${pageContext.request.contextPath}/clients/">Clientes</a></li>
-                <li><a href="${pageContext.request.contextPath}/products/">Produtos</a></li>
-                <li><a href="${pageContext.request.contextPath}/addresses/">Endereços</a></li>
-                <li><a href="${pageContext.request.contextPath}/deliveries/">Entregas</a></li>
-            </ul>
         </div>
     </nav>
-
     <div class="container">
-        <% if (request.getSession().getAttribute("success") != null) { %>
-            <div class="alert alert-success">
-                <%= request.getSession().getAttribute("success") %>
-                <% request.getSession().removeAttribute("success"); %>
-            </div>
-        <% } %>
-
-        <% if (request.getSession().getAttribute("error") != null) { %>
-            <div class="alert alert-danger">
-                <%= request.getSession().getAttribute("error") %>
-                <% request.getSession().removeAttribute("error"); %>
-            </div>
-        <% } %>
-
-        <!-- ESTA LINHA ESTAVA FALTANDO! -->
         <jsp:doBody/>
     </div>
+    <script src="${pageContext.request.contextPath}/js/theme-toggle.js"></script>
+    <script src="${pageContext.request.contextPath}/js/masks.js"></script>
+    <script src="${pageContext.request.contextPath}/js/validation.js"></script>
+</body>
+</html>

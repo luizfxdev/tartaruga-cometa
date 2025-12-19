@@ -1,0 +1,64 @@
+/* ============================================
+   FOOTER - Tartaruga Cometa
+   ============================================ */
+
+.footer,
+footer {
+  background: var(--surface, #ffffff);
+  border-top: 1px solid var(--border, #e5e7eb);
+  padding: 1.5rem 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.footer-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.footer-text,
+footer p {
+  font-size: 0.95rem;
+  color: var(--text, #1F2937);
+  margin: 0;
+  transition: all 0.3s ease;
+}
+
+/* ============ DARK MODE ============ */
+[data-theme="dark"] .footer,
+[data-theme="dark"] footer {
+  background: #0c0f15;
+  border-top-color: #1e2530;
+}
+
+[data-theme="dark"] .footer-text,
+[data-theme="dark"] footer p,
+[data-theme="dark"] footer {
+  color: #ababab;
+}
+
+.footer a,
+footer a {
+  color: var(--primary, #10b981);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.footer a:hover,
+footer a:hover {
+  color: var(--primary-hover, #059669);
+  text-decoration: underline;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 768px) {
+  .footer,
+  footer {
+    padding: 1rem;
+  }
+  
+  .footer-text,
+  footer p {
+    font-size: 0.875rem;
+  }
+}
