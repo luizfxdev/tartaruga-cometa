@@ -1,26 +1,43 @@
 # 🐢 Tartaruga Cometa - Sistema de Gerenciamento de Entregas
 
-![Java](https://img.shields.io/badge/Java-1.8-orange?style=flat-square&logo=java)
+![Java](https://img.shields.io/badge/Java-11-orange?style=flat-square&logo=java)
 ![Jakarta EE](https://img.shields.io/badge/Jakarta%20EE-9-blue?style=flat-square)
 ![Tomcat](https://img.shields.io/badge/Tomcat-10-yellow?style=flat-square&logo=apache-tomcat)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-blue?style=flat-square&logo=postgresql)
 ![Gradle](https://img.shields.io/badge/Gradle-8.0+-green?style=flat-square&logo=gradle)
+![Version](https://img.shields.io/badge/Version-2.0-success?style=flat-square)
 ![Status](https://img.shields.io/badge/Status-Ativo-success?style=flat-square)
 
 ## 📋 Descrição do Projeto
 
-Sistema web completo para gerenciamento e rastreamento de entregas de uma transportadora. Desenvolvido com Jakarta EE, Servlet API e PostgreSQL, permitindo controle total de clientes, endereços, produtos e entregas com histórico de status.
+Sistema web completo para gerenciamento e rastreamento de entregas de uma transportadora. Desenvolvido com Jakarta EE, Servlet API e PostgreSQL, com frontend moderno e responsivo utilizando arquitetura CSS modular e tema claro/escuro.
+
+**Versão 2.0** - Focada em melhorias de UI/UX, padronização visual e experiência do usuário.
+
+---
 
 ## 🎯 Funcionalidades Principais
 
-✅ Gerenciamento de Clientes (Pessoa Física e Jurídica)  
-✅ Cadastro de Endereços com tipo e endereço principal  
-✅ Catálogo de Produtos com peso e volume  
-✅ Sistema de Entregas com rastreamento  
-✅ Histórico de Status de Entregas  
-✅ Busca e Filtros Avançados  
-✅ Autenticação de Sessão  
-✅ Encoding UTF-8 em toda aplicação
+### Gerenciamento Completo
+✅ **Clientes** - Cadastro de Pessoa Física e Jurídica  
+✅ **Endereços** - Múltiplos endereços por cliente com tipo e principal  
+✅ **Produtos** - Catálogo com peso, volume e valor declarado  
+✅ **Entregas** - Sistema completo de rastreamento  
+✅ **Histórico** - Tracking de status de cada entrega  
+
+### Interface e Usabilidade
+✅ **Design Moderno** - Interface limpa e profissional  
+✅ **Tema Claro/Escuro** - Alternância de temas (em desenvolvimento)  
+✅ **Responsivo** - Adaptável para desktop, tablet e mobile  
+✅ **Busca Avançada** - Filtros em todas as listagens  
+✅ **Feedback Visual** - Alerts, badges e estados de hover  
+
+### Segurança e Performance
+✅ **Autenticação de Sessão**  
+✅ **Encoding UTF-8** em toda aplicação  
+✅ **Connection Pool** - HikariCP para otimização  
+✅ **Validação de Dados** - Client-side e Server-side  
+
 
 ## 📊 Diagrama de Entidade-Relacionamento (DER)
 
@@ -57,326 +74,186 @@ Sistema web completo para gerenciamento e rastreamento de entregas de uma transp
                     └──────────────────┘
 ```
 
-## 🏗️ Estrutura do Projeto
+## 🆕 Novidades da Versão 2.0
 
+### 🎨 Refinamento Visual Completo
+
+#### Tabelas Legíveis e Organizadas
+- Grid system moderno com breakpoints responsivos
+- Hierarquia visual clara com cores e espaçamentos otimizados
+- Hover states e feedback interativo
+- Badges coloridos para status e tipos
+
+#### Padronização de Componentes
+- Botões unificados (`.custom-btn`) em todo o sistema
+- Cards compactos para visualização de detalhes
+- Formulários consistentes com validação visual
+- Breadcrumb navigation em todas as páginas de listagem
+
+#### Arquitetura CSS Modular
 ```
-tartaruga-cometa/
-├── src/
-│   ├── main/
-│   │   ├── java/com/tartarugacometasystem/
-│   │   │   ├── config/
-│   │   │   │   └── ApplicationListener.java
-│   │   │   ├── controller/
-│   │   │   │   ├── AddressServlet.java
-│   │   │   │   ├── ClientServlet.java
-│   │   │   │   ├── DeliveryServlet.java
-│   │   │   │   └── ProductServlet.java
-│   │   │   ├── filter/
-│   │   │   │   └── EncodingFilter.java
-│   │   │   ├── model/
-│   │   │   │   ├── Address.java
-│   │   │   │   ├── Client.java
-│   │   │   │   ├── Delivery.java
-│   │   │   │   ├── DeliveryHistory.java
-│   │   │   │   ├── Product.java
-│   │   │   │   ├── AddressType.java
-│   │   │   │   ├── DeliveryStatus.java
-│   │   │   │   └── PersonType.java
-│   │   │   ├── service/
-│   │   │   │   ├── AddressService.java
-│   │   │   │   ├── ClientService.java
-│   │   │   │   ├── DeliveryService.java
-│   │   │   │   └── ProductService.java
-│   │   │   ├── repository/
-│   │   │   │   ├── AddressRepository.java
-│   │   │   │   ├── ClientRepository.java
-│   │   │   │   ├── DeliveryRepository.java
-│   │   │   │   └── ProductRepository.java
-│   │   │   ├── util/
-│   │   │   │   ├── ConnectionPool.java
-│   │   │   │   └── Mapper.java
-│   │   │   └── exception/
-│   │   │       └── DatabaseException.java
-│   │   └── webapp/
-│   │       ├── WEB-INF/
-│   │       │   └── web.xml
-│   │       ├── pages/
-│   │       │   ├── addresses/
-│   │       │   ├── clients/
-│   │       │   ├── deliveries/
-│   │       │   └── products/
-│   │       ├── css/
-│   │       ├── js/
-│   │       ├── images/
-│   │       ├── index.jsp
-│   │       └── error.jsp
-│   └── test/
-│       └── java/com/tartarugacometasystem/
-├── database/
-│   └── schema.sql
-├── gradle/
-├── build.gradle
-├── gradlew
-├── gradlew.bat
-├── README.md
-├── requirements.md
-├── api-endpoints.md
-├── database-schema.md
-└── use-cases.md
+css/
+├── base/          # Reset, variáveis, tipografia, alerts
+├── components/    # Botões, cards, forms, tables, modals
+├── layout/        # Header, footer, grid, breadcrumb
+├── pages/         # Home, login, dashboard, details
+├── themes/        # Light/Dark (em desenvolvimento)
+└── main.css       # Import central
 ```
 
-## 🔧 Tecnologias Utilizadas
+### 📱 Melhorias de UX
 
-| Tecnologia | Versão | Propósito |
-|------------|--------|-----------|
-| Java | 1.8 | Linguagem Principal |
-| Jakarta EE | 6.0 | Framework Web |
-| Apache Tomcat | 10 | Servidor de Aplicação |
-| PostgreSQL | 15+ | Banco de Dados |
-| Gradle | 8.0+ | Gerenciador de Build |
-| JDBC | - | Acesso ao Banco |
-| JSP | - | Camada de Apresentação |
+- **Navigation Menu** - Menu hexagonal na página inicial
+- **Stats Dashboard** - Métricas em tempo real (∞ Entregas, 100% Satisfação, 150+ Rotas)
+- **Details View** - Layout em grid compacto para informações
+- **Form Actions** - Botões de ação sempre visíveis
+- **Search Bars** - Busca em tempo real em todas as listagens
 
-## 📦 Dependências Principais
+---
 
-```gradle
-dependencies {
-    implementation 'jakarta.servlet:jakarta.servlet-api:6.0.0'
-    implementation 'org.postgresql:postgresql:42.7.1'
-    implementation 'com.zaxxer:HikariCP:5.0.1'
-    testImplementation 'junit:junit:4.13.2'
-}
-```
-
-## 🚀 Instalação e Configuração
+## 🚀 Instalação Rápida
 
 ### Pré-requisitos
 
-- Java 11+ instalado
-- PostgreSQL 15+ instalado e rodando
-- Apache Tomcat 10+ instalado
-- Git instalado
+- ✅ Java 11+ instalado
+- ✅ PostgreSQL 15+ instalado e rodando
+- ✅ Apache Tomcat 10+ instalado
+- ✅ Git instalado
 
-### 1️⃣ Clonar o Repositório
+### Instalação Automática (Recomendado)
 
 ```bash
+# 1. Clonar o repositório
 git clone https://github.com/luizfxdev/tartaruga-cometa.git
 cd tartaruga-cometa
+
+# 2. Configurar variáveis (edite se necessário)
+nano src/main/java/com/tartarugacometasystem/util/ConnectionPool.java
+
+# 3. Executar script de inicialização
+chmod +x start.sh
+./start.sh
 ```
 
-### 2️⃣ Configurar Banco de Dados
+O script `start.sh` irá:
+1. ✅ Criar o banco de dados PostgreSQL
+2. ✅ Executar o schema SQL
+3. ✅ Compilar a aplicação com Gradle
+4. ✅ Gerar o arquivo WAR
+5. ✅ Fazer o deploy no Tomcat
+6. ✅ Iniciar o servidor
 
-**Criar Banco de Dados**
-```bash
-psql -U postgres -c "CREATE DATABASE tartaruga_cometa;"
-```
-
-**Executar Script SQL**
-```bash
-psql -U postgres -d tartaruga_cometa -f database/schema.sql
-```
-
-**Verificar Criação das Tabelas**
-```bash
-psql -U postgres -d tartaruga_cometa -c "\dt"
-```
-
-### 3️⃣ Configurar Variáveis de Conexão
-
-Edite o arquivo `src/main/java/com/tartarugacometasystem/util/ConnectionPool.java`:
-
-```java
-// Altere estas variáveis conforme seu ambiente
-private static final String DB_URL = "jdbc:postgresql://localhost:5432/tartaruga_cometa";
-private static final String DB_USER = "postgres";
-private static final String DB_PASSWORD = "sua_senha";
-private static final int POOL_SIZE = 10;
-```
-
-### 4️⃣ Build da Aplicação
-
-```bash
-./gradlew clean build
-```
-
-O arquivo WAR será gerado em: `build/libs/tartaruga-cometa.war`
-
-### 5️⃣ Deploy no Tomcat
-
-**Parar o Tomcat**
-```bash
-sudo service tomcat10 stop
-```
-
-**Limpar Deployment Anterior**
-```bash
-sudo rm -rf /var/lib/tomcat10/webapps/tartaruga-cometa*
-sudo rm -rf /var/lib/tomcat10/work/Catalina/localhost/tartaruga-cometa
-```
-
-**Copiar WAR**
-```bash
-sudo cp build/libs/tartaruga-cometa.war /var/lib/tomcat10/webapps/
-```
-
-**Iniciar o Tomcat**
-```bash
-sudo service tomcat10 start
-```
-
-**Aguardar Inicialização**
-```bash
-sleep 15
-```
-
-**Verificar Deploy**
-```bash
-curl -I http://localhost:8080/tartaruga-cometa/
-```
-Resposta esperada: `HTTP/1.1 200`
+---
 
 ## 🌐 Acesso à Aplicação
 
 **URL Principal:** http://localhost:8080/tartaruga-cometa/
 
-### Endpoints Principais
+### Páginas Principais
 
-- **Clientes:** http://localhost:8080/tartaruga-cometa/clients/
-- **Endereços:** http://localhost:8080/tartaruga-cometa/addresses/
-- **Produtos:** http://localhost:8080/tartaruga-cometa/products/
-- **Entregas:** http://localhost:8080/tartaruga-cometa/deliveries/
+| Módulo | URL | Descrição |
+|--------|-----|-----------|
+| 🏠 **Home** | `/` | Dashboard com menu hexagonal |
+| 👥 **Clientes** | `/clients/` | Gerenciamento de clientes |
+| 📍 **Endereços** | `/addresses/` | Cadastro de endereços |
+| 📦 **Produtos** | `/products/` | Catálogo de produtos |
+| 🚚 **Entregas** | `/deliveries/` | Rastreamento de entregas |
 
-## ✅ Testes Realizados
+### Funcionalidades em Desenvolvimento
 
-### Testes de Build
-✅ Compilação com Java 1.8 bem-sucedida  
-✅ Geração do WAR sem erros  
-✅ Resolução de conflitos Jakarta EE vs javax.servlet
-
-### Testes de Deploy
-✅ Deploy no Tomcat 10 bem-sucedido  
-✅ Aplicação respondendo HTTP 200  
-✅ Sessão criada com cookie TARTARUGACOMETASESSION  
-✅ Encoding UTF-8 funcionando
-
-### Testes de Funcionalidade
-✅ Servlets carregando corretamente  
-✅ Filter de encoding aplicado  
-✅ Listener da aplicação inicializando  
-✅ Páginas JSP renderizando
-
-### Testes de Banco de Dados
-✅ Conexão com PostgreSQL estabelecida  
-✅ Pool de conexões HikariCP funcionando  
-✅ Tabelas criadas conforme schema.sql  
-✅ Relacionamentos entre tabelas validados
-
-## 📝 Comandos Úteis
-
-### Desenvolvimento
-
-```bash
-# Build limpo
-./gradlew clean build
-
-# Build sem testes
-./gradlew build -x test
-
-# Executar testes
-./gradlew test
-
-# Build e executa a aplicação no Tomcat embarcado via Gretty
-./gradlew tomcatRunWar
-
-# Ver logs do Tomcat
-sudo tail -f /var/lib/tomcat10/logs/catalina.out
-
-# Verificar status do Tomcat
-sudo service tomcat10 status
-
-# Reiniciar Tomcat
-sudo service tomcat10 restart
-```
-
-### Banco de Dados
-
-```bash
-# Conectar ao banco
-psql -U postgres -d tartaruga_cometa
-
-# Listar tabelas
-\dt
-
-# Ver estrutura de uma tabela
-\d clients
-
-# Executar query
-SELECT * FROM clients;
-
-# Sair
-\q
-```
-
-## 📥 Download
-
-### Arquivo WAR Executável
-
-O arquivo WAR está disponível em:
-
-- **[Releases do GitHub](https://github.com/seu-usuario/tartaruga-cometa/releases)** - Versão mais recente
-- **Build Local**: `build/libs/tartaruga-cometa.war` (após executar `./gradlew build`)
-
-**Tamanho:** ~5MB
-**Versão:** 1.0.0
-**Data:** 27 de Novembro de 2025
+🔄 **Em andamento:**
+- ⏳ Theme Toggle (Claro/Escuro)
+- ⏳ Menu "Sobre"
+- ⏳ Menu "Rastrear"
+- ⏳ Menu "Serviços"
+- ⏳ Menu "Unidades"
+- ⏳ Menu "Cotação"
+- ⏳ Menu "Contato"
 
 ---
 
-## 📚 Documentação Adicional
+## ✅ Changelog v2.0
 
-- [API Endpoints](api-endpoints.md) - Documentação completa de endpoints
-- [Requirements](requirements.md) - Requisitos funcionais e não-funcionais
+### 🎨 Melhorias de UI/UX
+
+#### Tabelas
+- ✅ Grid system responsivo
+- ✅ Hover states com feedback visual
+- ✅ Badges coloridos para status
+- ✅ Alinhamento otimizado
+
+#### Botões
+- ✅ Padronização `.custom-btn`
+- ✅ Estados hover/active/disabled
+- ✅ Ícones integrados
+
+#### Formulários
+- ✅ Layout em grid (.form-row)
+- ✅ Validação visual
+- ✅ Placeholders informativos
+- ✅ Labels consistentes
+
+#### Detalhes (View)
+- ✅ Cards compactos
+- ✅ Grid layout 2 colunas
+- ✅ Hierarquia visual clara
+- ✅ Links para entidades relacionadas
+
+### 📐 Arquitetura
+
+- ✅ CSS modular (8 categorias)
+- ✅ Breadcrumb componentizado
+- ✅ Header/Footer tags
+- ✅ Main.css centralizado
+
+### 🐛 Correções
+
+- ✅ EL expression errors
+- ✅ Theme toggle funcional
+- ✅ Logo switching
+- ✅ Posicionamento hexágonos (4 cima, 3 baixo)
+- ✅ Encoding UTF-8
 
 ---
 
 ## 👨‍💻 Autor
 
 **Luiz Felipe de Oliveira**
-- GitHub: [@luizfxdev](https://github.com/luizfxdev)
-- LinkedIn: [in/luizfxdev](https://www.linkedin.com/in/luizfxdev)
-- Portfólio: [luizfxdev.com.br](https://luizfxdev.com.br)
+
+- 🌐 GitHub: [@luizfxdev](https://github.com/luizfxdev)
+- 💼 LinkedIn: [in/luizfxdev](https://www.linkedin.com/in/luizfxdev)
+- 🌍 Portfólio: [luizfxdev.com.br](https://luizfxdev.com.br)
 
 ---
 
-> Projeto desenvolvido como parte da Trilha de Aceleração proposta pela **GW Sistemas**.
+## 🙏 Agradecimentos
+
+> Projeto desenvolvido como parte da **Trilha de Aceleração** proposta pela **GW Sistemas**.
+
 
 ---
 
-## 📄 Licença
+## 👨‍💻 Autor
 
-Este projeto está sob a licença MIT.
+**Luiz Felipe de Oliveira**
 
-## 🔗 Links Importantes
-
-- [Repositório GitHub](https://github.com/luizfxdev/tartaruga-cometa)
-- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
-- [Jakarta EE Documentation](https://jakarta.ee/specifications/)
-- [Apache Tomcat Documentation](https://tomcat.apache.org/tomcat-10.0-doc/)
-
-
+[![GitHub](https://img.shields.io/badge/GitHub-luizfxdev-181717?style=for-the-badge&logo=github)](https://github.com/luizfxdev)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-luizfxdev-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/luizfxdev)
+[![Portfolio](https://img.shields.io/badge/Portfolio-luizfxdev.com.br-FF6B6B?style=for-the-badge&logo=google-chrome&logoColor=white)](https://luizfxdev.com.br)
 
 ---
 
 
 <div align="center">
-🐢 Tartaruga Cometa - 
-Sistema de Gerenciamento de Entregas
+
+### 🐢 Tartaruga Cometa
+
+**Posso parecer lenta, mas entrego com precisão em cada rota.**
+
+[![Version](https://img.shields.io/badge/version-2.0-green)](https://github.com/luizfxdev/tartaruga-cometa/releases)
+
+[⬆ Voltar ao topo](#-tartaruga-cometa---sistema-de-gerenciamento-de-entregas)
 
 </div>
-<div align="center">
-
-⬆ Voltar ao topo
-</div>
-
 
 
