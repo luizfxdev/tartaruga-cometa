@@ -7,19 +7,16 @@
 // ========================================
 // MÁSCARA DE CPF
 // ========================================
-
-/**
- * Aplica máscara de CPF (000.000.000-00)
- * @param {HTMLInputElement} input - Elemento input
- */
 function aplicarMascaraCPF(input) {
-    input.addEventListener('input', function(e) {
+    // Removendo event listeners anteriores para evitar duplicação
+    if (input._cpfMaskHandler) {
+        input.removeEventListener('input', input._cpfMaskHandler);
+    }
+    const handler = function(e) {
         let valor = e.target.value.replace(/\D/g, '');
-
         if (valor.length > 11) {
             valor = valor.substring(0, 11);
         }
-
         if (valor.length <= 3) {
             e.target.value = valor;
         } else if (valor.length <= 6) {
@@ -29,25 +26,24 @@ function aplicarMascaraCPF(input) {
         } else {
             e.target.value = valor.substring(0, 3) + '.' + valor.substring(3, 6) + '.' + valor.substring(6, 9) + '-' + valor.substring(9);
         }
-    });
+    };
+    input.addEventListener('input', handler);
+    input._cpfMaskHandler = handler; // Armazena o handler para remoção futura
 }
 
 // ========================================
 // MÁSCARA DE CNPJ
 // ========================================
-
-/**
- * Aplica máscara de CNPJ (00.000.000/0000-00)
- * @param {HTMLInputElement} input - Elemento input
- */
 function aplicarMascaraCNPJ(input) {
-    input.addEventListener('input', function(e) {
+    // Removendo event listeners anteriores para evitar duplicação
+    if (input._cnpjMaskHandler) {
+        input.removeEventListener('input', input._cnpjMaskHandler);
+    }
+    const handler = function(e) {
         let valor = e.target.value.replace(/\D/g, '');
-
         if (valor.length > 14) {
             valor = valor.substring(0, 14);
         }
-
         if (valor.length <= 2) {
             e.target.value = valor;
         } else if (valor.length <= 5) {
@@ -59,54 +55,48 @@ function aplicarMascaraCNPJ(input) {
         } else {
             e.target.value = valor.substring(0, 2) + '.' + valor.substring(2, 5) + '.' + valor.substring(5, 8) + '/' + valor.substring(8, 12) + '-' + valor.substring(12);
         }
-    });
+    };
+    input.addEventListener('input', handler);
+    input._cnpjMaskHandler = handler; // Armazena o handler para remoção futura
 }
 
 // ========================================
 // MÁSCARA DE DOCUMENTO (CPF OU CNPJ)
 // ========================================
-
-/**
- * Aplica máscara de documento baseado no tipo de pessoa
- * @param {HTMLInputElement} documentInput - Elemento input do documento
- * @param {HTMLSelectElement} personTypeSelect - Elemento select do tipo de pessoa
- */
 function aplicarMascaraDocumento(documentInput, personTypeSelect) {
-    personTypeSelect.addEventListener('change', function() {
-        documentInput.value = '';
-        if (this.value === 'PF') {
-            documentInput.placeholder = '000.000.000-00';
-            aplicarMascaraCPF(documentInput);
-        } else if (this.value === 'PJ') {
-            documentInput.placeholder = '00.000.000/0000-00';
-            aplicarMascaraCNPJ(documentInput);
-        }
-    });
+    // Remove qualquer máscara anterior aplicada ao documentInput
+    if (documentInput._cpfMaskHandler) {
+        documentInput.removeEventListener('input', documentInput._cpfMaskHandler);
+        documentInput._cpfMaskHandler = null;
+    }
+    if (documentInput._cnpjMaskHandler) {
+        documentInput.removeEventListener('input', documentInput._cnpjMaskHandler);
+        documentInput._cnpjMaskHandler = null;
+    }
 
-    // Aplica máscara inicial se houver tipo selecionado
-    if (personTypeSelect.value === 'PF') {
+    const currentPersonType = personTypeSelect.value;
+    documentInput.value = ''; // Limpa o campo ao mudar o tipo
+
+    if (currentPersonType === 'INDIVIDUAL') {
+        documentInput.placeholder = '000.000.000-00';
         aplicarMascaraCPF(documentInput);
-    } else if (personTypeSelect.value === 'PJ') {
+    } else if (currentPersonType === 'LEGAL_ENTITY') {
+        documentInput.placeholder = '00.000.000/0000-00';
         aplicarMascaraCNPJ(documentInput);
+    } else {
+        documentInput.placeholder = '000.000.000-00 ou 00.000.000/0000-00'; // Placeholder genérico
     }
 }
 
 // ========================================
 // MÁSCARA DE CEP
 // ========================================
-
-/**
- * Aplica máscara de CEP (00000-000)
- * @param {HTMLInputElement} input - Elemento input
- */
 function aplicarMascaraCEP(input) {
     input.addEventListener('input', function(e) {
         let valor = e.target.value.replace(/\D/g, '');
-
         if (valor.length > 8) {
             valor = valor.substring(0, 8);
         }
-
         if (valor.length <= 5) {
             e.target.value = valor;
         } else {
@@ -118,19 +108,12 @@ function aplicarMascaraCEP(input) {
 // ========================================
 // MÁSCARA DE TELEFONE
 // ========================================
-
-/**
- * Aplica máscara de telefone ((00) 99999-9999)
- * @param {HTMLInputElement} input - Elemento input
- */
 function aplicarMascaraTelefone(input) {
     input.addEventListener('input', function(e) {
         let valor = e.target.value.replace(/\D/g, '');
-
         if (valor.length > 11) {
             valor = valor.substring(0, 11);
         }
-
         if (valor.length <= 2) {
             e.target.value = valor;
         } else if (valor.length <= 7) {
@@ -144,45 +127,33 @@ function aplicarMascaraTelefone(input) {
 // ========================================
 // MÁSCARA DE MOEDA
 // ========================================
-
-/**
- * Aplica máscara de moeda (R$ 0.000,00)
- * @param {HTMLInputElement} input - Elemento input
- */
 function aplicarMascaraMoeda(input) {
     input.addEventListener('input', function(e) {
         let valor = e.target.value.replace(/\D/g, '');
-
-        // Converte para número com 2 casas decimais
-        valor = (parseInt(valor) / 100).toFixed(2);
-
-        // Formata como moeda
-        e.target.value = valor.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        valor = parseInt(valor) / 100;
+        e.target.value = valor.toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
     });
-
+    
     input.addEventListener('blur', function(e) {
-        if (e.target.value === '') {
+        if (e.target.value === '' || e.target.value === '0,00') {
             e.target.value = '0,00';
         }
     });
 }
 
+
 // ========================================
 // MÁSCARA DE ESTADO (UF)
 // ========================================
-
-/**
- * Aplica máscara de estado (2 letras maiúsculas)
- * @param {HTMLInputElement} input - Elemento input
- */
 function aplicarMascaraEstado(input) {
     input.addEventListener('input', function(e) {
         let valor = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
-
         if (valor.length > 2) {
             valor = valor.substring(0, 2);
         }
-
         e.target.value = valor;
     });
 }
@@ -190,24 +161,37 @@ function aplicarMascaraEstado(input) {
 // ========================================
 // INICIALIZAÇÃO DE MÁSCARAS
 // ========================================
-
-/**
- * Inicializa todas as máscaras ao carregar a página
- */
 document.addEventListener('DOMContentLoaded', function() {
-    // Máscara de CPF
+    // Máscara de CPF (se houver inputs específicos com data-type="cpf")
     const cpfInputs = document.querySelectorAll('input[id="document"][data-type="cpf"]');
     cpfInputs.forEach(input => aplicarMascaraCPF(input));
 
-    // Máscara de CNPJ
+    // Máscara de CNPJ (se houver inputs específicos com data-type="cnpj")
     const cnpjInputs = document.querySelectorAll('input[id="document"][data-type="cnpj"]');
     cnpjInputs.forEach(input => aplicarMascaraCNPJ(input));
 
     // Máscara de Documento (com seletor de tipo)
     const personTypeSelect = document.querySelector('#personType');
     const documentInput = document.querySelector('#document');
+
     if (personTypeSelect && documentInput) {
+        // Aplica a máscara inicial baseada no valor atual do select
         aplicarMascaraDocumento(documentInput, personTypeSelect);
+
+        // Adiciona o listener para mudança no tipo de pessoa
+        personTypeSelect.addEventListener('change', function() {
+            aplicarMascaraDocumento(documentInput, personTypeSelect);
+            // Dispara um evento 'input' para re-aplicar a máscara se já houver um valor
+            // e garantir que a formatação seja imediata após a mudança de tipo.
+            const event = new Event('input', { bubbles: true });
+            documentInput.dispatchEvent(event);
+        });
+
+        // Dispara um evento 'input' no carregamento para formatar o valor inicial, se houver
+        if (documentInput.value) {
+            const event = new Event('input', { bubbles: true });
+            documentInput.dispatchEvent(event);
+        }
     }
 
     // Máscara de CEP
@@ -234,21 +218,10 @@ document.addEventListener('DOMContentLoaded', function() {
 // ========================================
 // FUNÇÕES AUXILIARES
 // ========================================
-
-/**
- * Remove máscara de um valor
- * @param {string} valor - Valor com máscara
- * @returns {string} - Valor sem máscara
- */
 function removerMascara(valor) {
     return valor.replace(/\D/g, '');
 }
 
-/**
- * Formata um número como moeda brasileira
- * @param {number} valor - Valor a ser formatado
- * @returns {string} - Valor formatado
- */
 function formatarMoeda(valor) {
     return valor.toLocaleString('pt-BR', {
         style: 'currency',
@@ -256,11 +229,6 @@ function formatarMoeda(valor) {
     });
 }
 
-/**
- * Formata uma data para o padrão brasileiro
- * @param {Date} data - Data a ser formatada
- * @returns {string} - Data formatada (dd/mm/yyyy)
- */
 function formatarData(data) {
     const dia = String(data.getDate()).padStart(2, '0');
     const mes = String(data.getMonth() + 1).padStart(2, '0');
@@ -268,11 +236,6 @@ function formatarData(data) {
     return `${dia}/${mes}/${ano}`;
 }
 
-/**
- * Formata uma data e hora para o padrão brasileiro
- * @param {Date} data - Data a ser formatada
- * @returns {string} - Data e hora formatadas (dd/mm/yyyy hh:mm:ss)
- */
 function formatarDataHora(data) {
     const dia = String(data.getDate()).padStart(2, '0');
     const mes = String(data.getMonth() + 1).padStart(2, '0');

@@ -3,11 +3,9 @@ package com.tartarugacometasystem.util;
 import java.util.regex.Pattern;
 
 public class Validator {
-
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
     private static final Pattern CEP_PATTERN = Pattern.compile("^\\d{5}-?\\d{3}$");
 
-    // Método para validar e-mail
     public static boolean isValidEmail(String email) {
         if (email == null || email.trim().isEmpty()) {
             return false;
@@ -15,76 +13,47 @@ public class Validator {
         return EMAIL_PATTERN.matcher(email).matches();
     }
 
-    // Método para validar telefone
     public static boolean isValidPhone(String phone) {
         if (phone == null || phone.trim().isEmpty()) {
             return false;
         }
-
-        // Remove todos os caracteres não numéricos
         String cleanedPhone = phone.replaceAll("[^\\d]", "");
-
-        // Verifica se tem 10 ou 11 dígitos
         if (cleanedPhone.length() < 10 || cleanedPhone.length() > 11) {
             return false;
         }
-
-        // Valida prefixo 9 em celulares de 11 dígitos
-        if (cleanedPhone.length() == 11 && cleanedPhone.charAt(2) != '9') {
-            return false;
-        }
-
-        // DDD válido (não iniciando com 0)
         if (cleanedPhone.charAt(0) == '0') {
             return false;
         }
-
-        // Impede números com todos dígitos iguais
-        if (cleanedPhone.matches("(\\d)\\1{" + (cleanedPhone.length() - 1) + "}")) {
-            return false;
-        }
-
         return true;
     }
 
-    // Método para validar CPF
     public static boolean isValidCPF(String cpf) {
         if (cpf == null) {
             return false;
         }
-
         cpf = cpf.replaceAll("[^\\d]", "");
-
         if (cpf.length() != 11) {
             return false;
         }
-
         if (cpf.matches("(\\d)\\1{10}")) {
             return false;
         }
-
         char firstDigit = calculateCPFDigit(cpf.substring(0, 9), 10);
         char secondDigit = calculateCPFDigit(cpf.substring(0, 9) + firstDigit, 11);
-
         return cpf.charAt(9) == firstDigit && cpf.charAt(10) == secondDigit;
     }
 
-    // Método para validar CNPJ
     public static boolean isValidCNPJ(String cnpj) {
         if (cnpj == null) {
             return false;
         }
-
         cnpj = cnpj.replaceAll("[^\\d]", "");
-
         if (cnpj.length() != 14) {
             return false;
         }
-
         if (cnpj.matches("(\\d)\\1{13}")) {
             return false;
         }
-
         int[] pesosDV1 = {5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2};
         int[] pesosDV2 = {6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2};
 
@@ -94,7 +63,6 @@ public class Validator {
         }
         int resultado = soma % 11;
         int dv1 = (resultado < 2) ? 0 : (11 - resultado);
-
         if (dv1 != (cnpj.charAt(12) - '0')) {
             return false;
         }
@@ -105,7 +73,6 @@ public class Validator {
         }
         resultado = soma % 11;
         int dv2 = (resultado < 2) ? 0 : (11 - resultado);
-
         return dv2 == (cnpj.charAt(13) - '0');
     }
 

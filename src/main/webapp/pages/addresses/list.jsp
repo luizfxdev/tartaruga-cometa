@@ -12,20 +12,22 @@
 </c:choose>
 
 <t:header title="${pageTitle}">
+    <t:breadcrumb />
+
     <div class="page-header">
         <h2>${pageTitle}</h2>
-        <div>
+        <div class="btn-group">
             <c:choose>
                 <c:when test="${client != null}">
-                    <a href="${pageContext.request.contextPath}/addresses/new/${client.id}" class="btn btn-primary">Novo Endereço</a>
-                    <a href="${pageContext.request.contextPath}/clients/view/${client.id}" class="btn btn-secondary">Voltar ao Cliente</a>
+                    <a href="${pageContext.request.contextPath}/addresses/new/${client.id}" class="custom-btn btn-primary">+ Novo Endereço</a>
+                    <a href="${pageContext.request.contextPath}/clients/view/${client.id}" class="custom-btn btn-secondary">Voltar ao Cliente</a>
                 </c:when>
                 <c:when test="${clientId != null}">
-                    <a href="${pageContext.request.contextPath}/addresses/new/${clientId}" class="btn btn-primary">Novo Endereço</a>
-                    <a href="${pageContext.request.contextPath}/clients/view/${clientId}" class="btn btn-secondary">Voltar ao Cliente</a>
+                    <a href="${pageContext.request.contextPath}/addresses/new/${clientId}" class="custom-btn btn-primary">+ Novo Endereço</a>
+                    <a href="${pageContext.request.contextPath}/clients/view/${clientId}" class="custom-btn btn-secondary">Voltar ao Cliente</a>
                 </c:when>
                 <c:otherwise>
-                    <a href="${pageContext.request.contextPath}/addresses/new" class="btn btn-primary">Novo Endereço</a>
+                    <a href="${pageContext.request.contextPath}/addresses/new" class="custom-btn btn-primary">+ Novo Endereço</a>
                 </c:otherwise>
             </c:choose>
         </div>
@@ -37,6 +39,7 @@
         </div>
         <c:remove var="success" scope="session"/>
     </c:if>
+    
     <c:if test="${not empty sessionScope.error}">
         <div class="alert alert-danger">
             ${sessionScope.error}
@@ -46,8 +49,8 @@
 
     <c:choose>
         <c:when test="${not empty addresses}">
-            <div class="table-responsive">
-                <table class="table table-striped">
+            <div class="table-container">
+                <table class="table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -82,20 +85,18 @@
                                     </c:choose>
                                 </td>
                                 <td>
-                                    <div class="actions">
-                                        <a href="${pageContext.request.contextPath}/addresses/edit/${address.id}" class="btn btn-warning btn-sm">Editar</a>
+                                    <div class="btn-group">
+                                        <a href="${pageContext.request.contextPath}/addresses/edit/${address.id}" class="custom-btn btn-warning btn-sm">Editar</a>
                                         <c:if test="${not address.isMain}">
                                             <a href="${pageContext.request.contextPath}/addresses/set-principal/${address.id}" 
-                                               class="btn btn-info btn-sm"
+                                               class="custom-btn btn-info btn-sm"
                                                onclick="return confirm('Definir como endereço principal?')">
                                                 Principal
                                             </a>
                                         </c:if>
-                                        <a href="${pageContext.request.contextPath}/addresses/delete/${address.id}" 
-                                           class="btn btn-danger btn-sm" 
-                                           onclick="return confirm('Tem certeza que deseja deletar este endereço?')">
-                                            Deletar
-                                        </a>
+                                        <form method="POST" action="${pageContext.request.contextPath}/addresses/delete/${address.id}" style="display:inline;">
+                                            <button type="submit" class="custom-btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja deletar este endereço?')">Deletar</button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -109,13 +110,13 @@
                 Nenhum endereço encontrado.
                 <c:choose>
                     <c:when test="${client != null}">
-                        <a href="${pageContext.request.contextPath}/addresses/new/${client.id}" class="btn btn-primary">Criar novo endereço</a>
+                        <a href="${pageContext.request.contextPath}/addresses/new/${client.id}" style="color: var(--primary); font-weight: 600;">Criar novo endereço</a>
                     </c:when>
                     <c:when test="${clientId != null}">
-                        <a href="${pageContext.request.contextPath}/addresses/new/${clientId}" class="btn btn-primary">Criar novo endereço</a>
+                        <a href="${pageContext.request.contextPath}/addresses/new/${clientId}" style="color: var(--primary); font-weight: 600;">Criar novo endereço</a>
                     </c:when>
                     <c:otherwise>
-                        <a href="${pageContext.request.contextPath}/addresses/new" class="btn btn-primary">Criar novo endereço</a>
+                        <a href="${pageContext.request.contextPath}/addresses/new" style="color: var(--primary); font-weight: 600;">Criar novo endereço</a>
                     </c:otherwise>
                 </c:choose>
             </div>
@@ -124,4 +125,3 @@
 </t:header>
 
 <t:footer />
-

@@ -80,7 +80,7 @@ public class ClientServlet extends HttpServlet {
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setAttribute("personTypes", PersonType.values()); // Envia os tipos de pessoa para o JSP
+        request.setAttribute("personTypes", PersonType.values());
         request.getRequestDispatcher("/pages/clients/new.jsp").forward(request, response);
     }
 
@@ -91,7 +91,7 @@ public class ClientServlet extends HttpServlet {
 
         if (client.isPresent()) {
             request.setAttribute("client", client.get());
-            request.setAttribute("personTypes", PersonType.values()); // Envia os tipos de pessoa para o JSP
+            request.setAttribute("personTypes", PersonType.values());
             request.getRequestDispatcher("/pages/clients/new.jsp").forward(request, response);
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -113,8 +113,8 @@ public class ClientServlet extends HttpServlet {
 
     private void searchClients(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
-        String searchTerm = request.getParameter("q");// O parâmetro de busca geralmente é "query" ou "searchTerm"
-        List<Client> clients = clientService.search(searchTerm); // CORRIGIDO: Chamada para search()
+        String searchTerm = request.getParameter("q");
+        List<Client> clients = clientService.search(searchTerm);
         request.setAttribute("clients", clients);
         request.getRequestDispatcher("/pages/clients/list.jsp").forward(request, response);
     }
@@ -123,7 +123,21 @@ public class ClientServlet extends HttpServlet {
             throws SQLException, IOException, ServletException {
         HashMap<String, String> params = new HashMap<>();
         request.getParameterMap().forEach((key, value) -> params.put(key, value[0]));
-        Client client = Mapper.mapToClient(params); // Usar Mapper
+        
+        System.out.println("===== PARÂMETROS RECEBIDOS =====");
+        params.forEach((k, v) -> System.out.println(k + " = [" + v + "]"));
+        System.out.println("================================");
+        
+        Client client = Mapper.mapToClient(params);
+        
+        System.out.println("===== CLIENTE MAPEADO =====");
+        System.out.println("ID: " + client.getId());
+        System.out.println("Nome: [" + client.getName() + "]");
+        System.out.println("Documento: [" + client.getDocument() + "]");
+        System.out.println("Email: [" + client.getEmail() + "]");
+        System.out.println("Telefone: [" + client.getPhone() + "]");
+        System.out.println("PersonType: " + client.getPersonType());
+        System.out.println("===========================");
 
         try {
             if (client.getId() == null) {
@@ -135,9 +149,9 @@ public class ClientServlet extends HttpServlet {
             }
             response.sendRedirect(request.getContextPath() + "/clients/");
         } catch (IllegalArgumentException e) {
+            System.out.println("ERRO DE VALIDAÇÃO: " + e.getMessage());
             request.getSession().setAttribute("error", e.getMessage());
-            // Recarrega dados para o formulário em caso de erro
-            request.setAttribute("client", client); // Mantém os dados preenchidos
+            request.setAttribute("client", client);
             request.setAttribute("personTypes", PersonType.values());
             request.getRequestDispatcher("/pages/clients/new.jsp").forward(request, response);
         }
@@ -157,7 +171,7 @@ public class ClientServlet extends HttpServlet {
             try {
                 return Integer.parseInt(parts[parts.length - 1]);
             } catch (NumberFormatException e) {
-                return null; // Ou lançar uma exceção específica
+                return null;
             }
         }
         return null;

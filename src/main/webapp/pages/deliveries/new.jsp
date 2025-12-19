@@ -2,9 +2,9 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<t:header title="${delivery != null ? 'Editar Entrega' : 'Nova Entrega'}">
+<t:header title="${delivery != null && delivery.id != null ? 'Editar Entrega' : 'Nova Entrega'}">
     <div class="page-header">
-        <h2>${delivery != null ? 'Editar Entrega' : 'Nova Entrega'}</h2>
+        <h2>${delivery != null && delivery.id != null ? 'Editar Entrega' : 'Nova Entrega'}</h2>
     </div>
 
     <c:if test="${not empty sessionScope.error}">
@@ -15,12 +15,15 @@
     </c:if>
 
     <form method="POST" action="${pageContext.request.contextPath}/deliveries/save" class="form">
-        <input type="hidden" name="id" value="${delivery != null ? delivery.id : ''}">
+        <c:if test="${delivery != null && delivery.id != null}">
+            <input type="hidden" name="id" value="${delivery.id}">
+        </c:if>
 
         <div class="form-group">
             <label for="trackingCode">Código de Rastreio *</label>
             <input type="text" id="trackingCode" name="trackingCode"
-                        value="${delivery != null ? delivery.trackingCode : ''}" required>
+                   value="${delivery != null ? delivery.trackingCode : ''}" 
+                   placeholder="Código de rastreio" required>
         </div>
 
         <div class="form-row">
@@ -79,13 +82,15 @@
             <div class="form-group">
                 <label for="totalValue">Valor Total (R$) *</label>
                 <input type="number" id="totalValue" name="totalValue" step="0.01"
-                            value="${delivery != null ? delivery.totalValue : ''}" required>
+                       value="${delivery != null ? delivery.totalValue : ''}" 
+                       placeholder="0.00" required>
             </div>
 
             <div class="form-group">
                 <label for="freightValue">Valor do Frete (R$) *</label>
                 <input type="number" id="freightValue" name="freightValue" step="0.01"
-                            value="${delivery != null ? delivery.freightValue : ''}" required>
+                       value="${delivery != null ? delivery.freightValue : ''}" 
+                       placeholder="0.00" required>
             </div>
         </div>
 
@@ -93,13 +98,15 @@
             <div class="form-group">
                 <label for="totalWeightKg">Peso Total (kg) *</label>
                 <input type="number" id="totalWeightKg" name="totalWeightKg" step="0.01"
-                            value="${delivery != null ? delivery.totalWeightKg : ''}" required>
+                       value="${delivery != null ? delivery.totalWeightKg : ''}" 
+                       placeholder="0.00" required>
             </div>
 
             <div class="form-group">
                 <label for="totalVolumeM3">Volume Total (m³) *</label>
                 <input type="number" id="totalVolumeM3" name="totalVolumeM3" step="0.01"
-                            value="${delivery != null ? delivery.totalVolumeM3 : ''}" required>
+                       value="${delivery != null ? delivery.totalVolumeM3 : ''}" 
+                       placeholder="0.00" required>
             </div>
         </div>
 
@@ -117,16 +124,15 @@
 
         <div class="form-group">
             <label for="observations">Observações</label>
-            <textarea id="observations" name="observations" rows="4">${delivery != null && delivery.observations != null ? delivery.observations : ''}</textarea>
+            <textarea id="observations" name="observations" rows="4" placeholder="Observações sobre a entrega">${delivery != null && delivery.observations != null ? delivery.observations : ''}</textarea>
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-success">Salvar</button>
-            <a href="${pageContext.request.contextPath}/deliveries/" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="custom-btn btn-success">Salvar</button>
+            <a href="${pageContext.request.contextPath}/deliveries/" class="custom-btn btn-secondary">Cancelar</a>
         </div>
     </form>
 
-    <%-- Script para filtrar endereços dinamicamente com base no remetente/destinatário --%>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const shipperSelect = document.getElementById('shipperId');
@@ -134,9 +140,6 @@
             const originAddressSelect = document.getElementById('originAddressId');
             const destinationAddressSelect = document.getElementById('destinationAddressId');
 
-            // Armazena todas as opções de endereço para filtragem (usando data-client-id)
-            // É importante clonar as opções *antes* de manipulá-las para preservar o estado original,
-            // especialmente se a página for carregada com um delivery existente.
             const allOriginAddressOptions = Array.from(originAddressSelect.options).filter(opt => opt.value !== '');
             const allDestinationAddressOptions = Array.from(destinationAddressSelect.options).filter(opt => opt.value !== '');
 
@@ -150,7 +153,6 @@
                         const optionClientId = option.getAttribute('data-client-id');
                         if (optionClientId && parseInt(optionClientId) === parseInt(clientId)) {
                             const clonedOption = option.cloneNode(true);
-                            // Preserva a seleção se for um formulário de edição
                             if (selectedAddressId && parseInt(clonedOption.value) === parseInt(selectedAddressId)) {
                                 clonedOption.selected = true;
                             }
@@ -169,33 +171,23 @@
                 }
             }
 
-            // Event listener para o Remetente
             if (shipperSelect) {
                 shipperSelect.addEventListener('change', function() {
-                    const selectedShipperId = this.value;
-                    // Ao mudar o remetente, limpa a seleção anterior do endereço de origem
-                    filterAddresses(originAddressSelect, allOriginAddressOptions, selectedShipperId, null);
+                    filterAddresses(originAddressSelect, allOriginAddressOptions, this.value, null);
                 });
             }
 
-            // Event listener para o Destinatário
             if (recipientSelect) {
                 recipientSelect.addEventListener('change', function() {
-                    const selectedRecipientId = this.value;
-                    // Ao mudar o destinatário, limpa a seleção anterior do endereço de destino
-                    filterAddresses(destinationAddressSelect, allDestinationAddressOptions, selectedRecipientId, null);
+                    filterAddresses(destinationAddressSelect, allDestinationAddressOptions, this.value, null);
                 });
             }
 
-            // Chama a filtragem inicial ao carregar a página, se houver valores pré-selecionados
-            // Isso é crucial para o modo de edição
             if (shipperSelect && shipperSelect.value) {
-                // Passa o ID do endereço de origem já selecionado (se houver) para que ele seja mantido
-                filterAddresses(originAddressSelect, allOriginAddressOptions, shipperSelect.value, "${delivery.originAddressId}");
+                filterAddresses(originAddressSelect, allOriginAddressOptions, shipperSelect.value, "${delivery != null ? delivery.originAddressId : ''}");
             }
             if (recipientSelect && recipientSelect.value) {
-                // Passa o ID do endereço de destino já selecionado (se houver) para que ele seja mantido
-                filterAddresses(destinationAddressSelect, allDestinationAddressOptions, recipientSelect.value, "${delivery.destinationAddressId}");
+                filterAddresses(destinationAddressSelect, allDestinationAddressOptions, recipientSelect.value, "${delivery != null ? delivery.destinationAddressId : ''}");
             }
         });
     </script>

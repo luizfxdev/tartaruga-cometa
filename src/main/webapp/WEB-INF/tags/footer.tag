@@ -1,5 +1,5 @@
 <%@ tag description="Footer Template" pageEncoding="UTF-8"%>
-    </div> <!-- Fecha o container do header -->
+    </div>
 
     <footer class="footer">
         <div class="footer-content">
@@ -7,4 +7,3 @@
         </div>
     </footer>
 </body>
-</html>

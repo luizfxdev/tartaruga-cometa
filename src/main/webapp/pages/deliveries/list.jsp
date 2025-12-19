@@ -4,11 +4,11 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <t:header title="Lista de Entregas">
+    <t:breadcrumb />
+
     <div class="page-header">
         <h2>Entregas</h2>
-        <div>
-            <a href="${pageContext.request.contextPath}/deliveries/new" class="btn btn-primary">Nova Entrega</a>
-        </div>
+        <a href="${pageContext.request.contextPath}/deliveries/new" class="custom-btn btn-primary">+ Nova Entrega</a>
     </div>
 
     <c:if test="${not empty sessionScope.success}">
@@ -25,10 +25,10 @@
         <c:remove var="error" scope="session"/>
     </c:if>
 
-    <div class="search-bar">
+    <div class="search-box">
         <form action="${pageContext.request.contextPath}/deliveries/search" method="GET">
-            <input type="text" name="query" placeholder="Buscar por código, status, observações..." value="${param.query}">
-            <button type="submit" class="btn btn-info">Buscar</button>
+            <input type="text" name="query" placeholder="Buscar por código, status..." value="${param.query}">
+            <button type="submit" class="custom-btn btn-info">Buscar</button>
         </form>
     </div>
 
@@ -51,7 +51,7 @@
                         <c:forEach var="delivery" items="${deliveries}">
                             <tr>
                                 <td>${delivery.id}</td>
-                                <td>${delivery.trackingCode}</td>
+                                <td><strong>${delivery.trackingCode}</strong></td>
                                 <td>${delivery.sender != null ? delivery.sender.name : 'N/A'}</td>
                                 <td>${delivery.recipient != null ? delivery.recipient.name : 'N/A'}</td>
                                 <td>
@@ -78,11 +78,11 @@
                                 </td>
                                 <td>${delivery.formattedCreationDate}</td>
                                 <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="${pageContext.request.contextPath}/deliveries/view/${delivery.id}" class="btn btn-info btn-sm">Ver</a>
-                                        <a href="${pageContext.request.contextPath}/deliveries/edit/${delivery.id}" class="btn btn-warning btn-sm">Editar</a>
+                                    <div class="btn-group">
+                                        <a href="${pageContext.request.contextPath}/deliveries/view/${delivery.id}" class="custom-btn btn-info btn-sm">Ver</a>
+                                        <a href="${pageContext.request.contextPath}/deliveries/edit/${delivery.id}" class="custom-btn btn-warning btn-sm">Editar</a>
                                         <form method="POST" action="${pageContext.request.contextPath}/deliveries/delete/${delivery.id}" style="display:inline;">
-                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja deletar esta entrega? Isso também removerá o histórico.')">Deletar</button>
+                                            <button type="submit" class="custom-btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja deletar esta entrega?')">Deletar</button>
                                         </form>
                                     </div>
                                 </td>
@@ -94,7 +94,7 @@
         </c:when>
         <c:otherwise>
             <div class="alert alert-info">
-                Nenhuma entrega encontrada. <a href="${pageContext.request.contextPath}/deliveries/new">Criar nova entrega</a>
+                Nenhuma entrega encontrada. <a href="${pageContext.request.contextPath}/deliveries/new" style="color: var(--primary); font-weight: 600;">Criar nova entrega</a>
             </div>
         </c:otherwise>
     </c:choose>

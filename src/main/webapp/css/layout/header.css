@@ -1,0 +1,132 @@
+/* ============================================
+   HEADER / NAVBAR - Tartaruga Cometa
+   ============================================ */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.navbar-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.navbar-brand:hover {
+  opacity: 0.9;
+}
+
+.navbar-logo-img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  transition: var(--transition);
+}
+
+.navbar-brand:hover .navbar-logo-img {
+  transform: scale(1.05);
+}
+
+.navbar-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text);
+  transition: var(--transition);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* ============ THEME TOGGLE ============ */
+.theme-toggle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--surface-hover);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 1.5rem;
+  color: var(--text);
+}
+
+.theme-toggle:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  transform: rotate(180deg);
+}
+
+.theme-icon {
+  display: none;
+  line-height: 1;
+}
+
+.theme-icon.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 768px) {
+  .navbar-container {
+    padding: 1rem;
+  }
+  
+  .navbar-logo-img {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .navbar-title {
+    font-size: 1.25rem;
+  }
+  
+  .theme-toggle {
+    width: 45px;
+    height: 45px;
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-logo-img {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .navbar-title {
+    font-size: 1.1rem;
+  }
+  
+  .theme-toggle {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+  }
+}

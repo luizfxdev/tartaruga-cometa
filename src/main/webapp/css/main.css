@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* Base */
+@import 'base/reset.css';
+@import 'base/variables.css';
+@import 'base/typography.css';
+@import 'base/alerts.css';
+
+/* Components */
+@import 'components/buttons.css';
+@import 'components/details.css';
+@import 'components/forms.css';
+@import 'components/tables.css';
+@import 'components/modals.css';
+
+/* Layout */
+@import 'layout/header.css';
+@import 'layout/footer.css';
+@import 'layout/grid.css';
+@import 'layout/breadcrumb.css';
+
+
+/* Pages */
+
+@import 'pages/login.css';
+@import 'pages/dashboard.css';
+
+/* Themes */
+@import 'themes/light.css';
+@import 'themes/dark.css';
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-hover);
+}
+
+/* Seleção de texto */
+::selection {
+  background-color: var(--primary);
+  color: white;
+}
+
+/* Container principal */
+.container {
+  flex: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Page header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.page-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Search box */
+.search-box {
+  margin-bottom: 2rem;
+}
+
+.search-box form {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.search-box input[type="text"],
+.search-box input[type="search"] {
+  flex: 1;
+  min-width: 250px;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: var(--transition);
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .page-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .search-box input {
+    width: 100%;
+  }
+}
