@@ -12,7 +12,7 @@ import java.util.Optional;
 
 import com.tartarugacometasystem.config.DatabaseConfig;
 import com.tartarugacometasystem.model.Client;
-import com.tartarugacometasystem.model.PersonType;
+import br.com.tartarugacometa.enums.TipoPessoa;
 
 public class ClientDAO {
 
@@ -195,7 +195,7 @@ public class ClientDAO {
         client.setDocument(rs.getString("document"));
         client.setEmail(rs.getString("email"));
         client.setPhone(rs.getString("phone"));
-        client.setPersonType(PersonType.fromValue(rs.getString("person_type"))); // Converte String para PersonType
+        client.setPersonType(TipoPessoa.fromValue(rs.getString("person_type"))); // Converte String para TipoPessoa
 
         // created_at e updated_at são lidos do banco de dados
         Timestamp createdAtTimestamp = rs.getTimestamp("created_at");

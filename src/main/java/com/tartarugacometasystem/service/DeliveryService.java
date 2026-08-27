@@ -9,7 +9,7 @@ import com.tartarugacometasystem.dao.DeliveryDAO;
 import com.tartarugacometasystem.dao.DeliveryHistoryDAO;
 import com.tartarugacometasystem.model.Delivery;
 import com.tartarugacometasystem.model.DeliveryHistory;
-import com.tartarugacometasystem.model.DeliveryStatus;
+import br.com.tartarugacometa.enums.StatusEntrega;
 import com.tartarugacometasystem.util.DateFormatter;
 
 public class DeliveryService {
@@ -37,7 +37,7 @@ public class DeliveryService {
         validateDelivery(delivery);
         delivery.setCreationDate(LocalDateTime.now()); // Definir data de criação
         delivery.setUpdatedAt(LocalDateTime.now());    // Definir data de atualização inicial
-        delivery.setStatus(DeliveryStatus.PENDING);    // Status inicial
+        delivery.setStatus(StatusEntrega.PENDENTE);    // Status inicial
 
         Delivery createdDelivery = deliveryDAO.save(delivery);
 
@@ -45,7 +45,7 @@ public class DeliveryService {
         DeliveryHistory historyEntry = new DeliveryHistory();
         historyEntry.setDeliveryId(createdDelivery.getId());
         historyEntry.setPreviousStatus(null); // Não havia status anterior
-        historyEntry.setNewStatus(DeliveryStatus.PENDING);
+        historyEntry.setNewStatus(StatusEntrega.PENDENTE);
         historyEntry.setChangeDate(LocalDateTime.now());
         historyEntry.setLocation("Sistema"); // Ou a localização inicial
         deliveryHistoryDAO.save(historyEntry);
@@ -141,7 +141,7 @@ public class DeliveryService {
      * @return Uma lista de entregas com o status especificado.<br>
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public List<Delivery> getDeliveriesByStatus(DeliveryStatus status) throws SQLException {
+    public List<Delivery> getDeliveriesByStatus(StatusEntrega status) throws SQLException {
         List<Delivery> deliveries = deliveryDAO.findByStatus(status);
         deliveries.forEach(this::enrichDelivery); // Enriquecer cada entrega na lista
         return deliveries;
@@ -173,7 +173,7 @@ public class DeliveryService {
      * @throws SQLException             Se ocorrer um erro de banco de dados.
      * @throws IllegalArgumentException Se o ID for inválido, o status for nulo, ou a transição de status for inválida.
      */
-    public void updateDeliveryStatus(Integer id, DeliveryStatus newStatus, String reasonNotDelivered, String updatedBy) throws SQLException {
+    public void updateDeliveryStatus(Integer id, StatusEntrega newStatus, String reasonNotDelivered, String updatedBy) throws SQLException {
         if (id == null || newStatus == null) {
             throw new IllegalArgumentException("ID da entrega e novo status não podem ser nulos.");
         }
@@ -183,21 +183,21 @@ public class DeliveryService {
             throw new IllegalArgumentException("Entrega com ID " + id + " não encontrada.");
         }
         Delivery delivery = deliveryOpt.get();
-        DeliveryStatus oldStatus = delivery.getStatus();
+        StatusEntrega oldStatus = delivery.getStatus();
 
         // Validações de transição de status
-        if (oldStatus == DeliveryStatus.DELIVERED && newStatus != DeliveryStatus.DELIVERED) {
+        if (oldStatus == StatusEntrega.ENTREGUE && newStatus != StatusEntrega.ENTREGUE) {
             throw new IllegalArgumentException("Entrega já está no status 'Entregue'. Não pode ser alterada para outro status.");
         }
-        if (oldStatus == DeliveryStatus.CANCELED && newStatus != DeliveryStatus.CANCELED) {
+        if (oldStatus == StatusEntrega.CANCELADA && newStatus != StatusEntrega.CANCELADA) {
             throw new IllegalArgumentException("Entrega cancelada não pode ser alterada para outro status.");
         }
 
         // Lógica específica para cada novo status
-        if (newStatus == DeliveryStatus.DELIVERED) {
+        if (newStatus == StatusEntrega.ENTREGUE) {
             delivery.setDeliveryDate(LocalDateTime.now());
             delivery.setReasonNotDelivered(null); // Limpa o motivo se for entregue
-        } else if (newStatus == DeliveryStatus.NOT_PERFORMED) {
+        } else if (newStatus == StatusEntrega.NAO_REALIZADA) {
             if (reasonNotDelivered == null || reasonNotDelivered.trim().isEmpty()) {
                 throw new IllegalArgumentException("O motivo da não entrega é obrigatório para o status 'Não Realizada'.");
             }
@@ -221,7 +221,7 @@ public class DeliveryService {
         historyEntry.setNewStatus(newStatus);
         historyEntry.setChangeDate(LocalDateTime.now());
         historyEntry.setLocation(updatedBy); // Usar 'updatedBy' como localização ou criar um campo específico
-        if (newStatus == DeliveryStatus.NOT_PERFORMED && reasonNotDelivered != null) {
+        if (newStatus == StatusEntrega.NAO_REALIZADA && reasonNotDelivered != null) {
             historyEntry.setObservations("Motivo: " + reasonNotDelivered);
         }
         deliveryHistoryDAO.save(historyEntry);
@@ -321,10 +321,10 @@ public class DeliveryService {
                 history.forEach(h -> {
                     h.setFormattedChangeDate(DateFormatter.formatLocalDateTime(h.getChangeDate()));
                     if (h.getPreviousStatus() != null) {
-                        h.setFormattedPreviousStatus(h.getPreviousStatus().getLabel());
+                        h.setFormattedPreviousStatus(h.getPreviousStatus().getRotulo());
                     }
                     if (h.getNewStatus() != null) {
-                        h.setFormattedNewStatus(h.getNewStatus().getLabel());
+                        h.setFormattedNewStatus(h.getNewStatus().getRotulo());
                     }
                 });
                 delivery.setHistory(history);

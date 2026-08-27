@@ -1,12 +1,13 @@
 package com.tartarugacometasystem.model;
 
 import java.time.LocalDateTime;
+import br.com.tartarugacometa.enums.StatusEntrega;
 
 public class DeliveryHistory {
     private Integer id;
     private Integer deliveryId;
-    private DeliveryStatus previousStatus;
-    private DeliveryStatus newStatus;
+    private StatusEntrega previousStatus;
+    private StatusEntrega newStatus;
     private LocalDateTime changeDate;
     private String observations;
     private String user;
@@ -24,7 +25,7 @@ public class DeliveryHistory {
     }
 
     // Construtor completo (sem IDs e datas)
-    public DeliveryHistory(Integer deliveryId, DeliveryStatus previousStatus, DeliveryStatus newStatus,
+    public DeliveryHistory(Integer deliveryId, StatusEntrega previousStatus, StatusEntrega newStatus,
                            String observations, String user, String location) {
         this.deliveryId = deliveryId;
         this.previousStatus = previousStatus;
@@ -37,7 +38,7 @@ public class DeliveryHistory {
     }
 
     // Construtor completo (com IDs e datas)
-    public DeliveryHistory(Integer id, Integer deliveryId, DeliveryStatus previousStatus, DeliveryStatus newStatus,
+    public DeliveryHistory(Integer id, Integer deliveryId, StatusEntrega previousStatus, StatusEntrega newStatus,
                            LocalDateTime changeDate, String observations, String user, String location,
                            LocalDateTime createdAt) {
         this.id = id;
@@ -68,19 +69,19 @@ public class DeliveryHistory {
         this.deliveryId = deliveryId;
     }
 
-    public DeliveryStatus getPreviousStatus() {
+    public StatusEntrega getPreviousStatus() {
         return previousStatus;
     }
 
-    public void setPreviousStatus(DeliveryStatus previousStatus) {
+    public void setPreviousStatus(StatusEntrega previousStatus) {
         this.previousStatus = previousStatus;
     }
 
-    public DeliveryStatus getNewStatus() {
+    public StatusEntrega getNewStatus() {
         return newStatus;
     }
 
-    public void setNewStatus(DeliveryStatus newStatus) {
+    public void setNewStatus(StatusEntrega newStatus) {
         this.newStatus = newStatus;
     }
 

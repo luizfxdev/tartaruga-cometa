@@ -12,7 +12,7 @@ import java.util.Optional;
 
 import com.tartarugacometasystem.config.DatabaseConfig;
 import com.tartarugacometasystem.model.Address;
-import com.tartarugacometasystem.model.AddressType;
+import br.com.tartarugacometa.enums.TipoEndereco;
 
 public class AddressDAO {
 
@@ -257,7 +257,7 @@ public class AddressDAO {
         address.setZipCode(rs.getString("zip_code"));
         address.setCountry(rs.getString("country"));
         address.setIsMain(rs.getBoolean("is_main"));
-        address.setAddressType(AddressType.fromValue(rs.getString("address_type"))); // Converte String para enum
+        address.setAddressType(TipoEndereco.fromValue(rs.getString("address_type"))); // Converte String para enum
         address.setReference(rs.getString("reference"));
 
         Timestamp createdAtTimestamp = rs.getTimestamp("created_at");

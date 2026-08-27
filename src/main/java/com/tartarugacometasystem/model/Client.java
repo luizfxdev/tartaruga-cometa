@@ -1,6 +1,7 @@
 package com.tartarugacometasystem.model;
 
 import java.time.LocalDateTime;
+import br.com.tartarugacometa.enums.TipoPessoa;
 
 public class Client {
     private Integer id;
@@ -8,7 +9,7 @@ public class Client {
     private String document; // CPF ou CNPJ
     private String email;
     private String phone;
-    private PersonType personType; // Tipo de pessoa (Física/Jurídica)
+    private TipoPessoa personType; // Tipo de pessoa (Física/Jurídica)
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -22,7 +23,7 @@ public class Client {
     }
 
     // Construtor completo (sem IDs e datas)
-    public Client(String name, String document, String email, String phone, PersonType personType) {
+    public Client(String name, String document, String email, String phone, TipoPessoa personType) {
         this.name = name;
         this.document = document;
         this.email = email;
@@ -31,7 +32,7 @@ public class Client {
     }
 
     // Construtor completo (com IDs e datas)
-    public Client(Integer id, String name, String document, String email, String phone, PersonType personType,
+    public Client(Integer id, String name, String document, String email, String phone, TipoPessoa personType,
                   LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
@@ -84,11 +85,11 @@ public class Client {
         this.phone = phone;
     }
 
-    public PersonType getPersonType() {
+    public TipoPessoa getPersonType() {
         return personType;
     }
 
-    public void setPersonType(PersonType personType) {
+    public void setPersonType(TipoPessoa personType) {
         this.personType = personType;
     }
 

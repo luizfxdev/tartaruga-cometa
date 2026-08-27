@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.tartarugacometasystem.model.Address;
-import com.tartarugacometasystem.model.AddressType;
+import br.com.tartarugacometa.enums.TipoEndereco;
 import com.tartarugacometasystem.model.Client;
 import com.tartarugacometasystem.service.AddressService;
 import com.tartarugacometasystem.service.ClientService;
@@ -121,7 +121,7 @@ public class AddressServlet extends HttpServlet {
                 // Carrega todos os clientes para o dropdown
                 request.setAttribute("allClients", clientService.getAllClients());
                 // Carrega os tipos de endereço
-                request.setAttribute("addressTypes", AddressType.values());
+                request.setAttribute("addressTypes", TipoEndereco.values());
 
                 // Se o erro foi em um formulário de edição, tenta manter o cliente associado
                 if (addressWithError.getClientId() != null) {
@@ -219,7 +219,7 @@ public class AddressServlet extends HttpServlet {
             System.out.println("📝 Total de clientes carregados: " + (allClients != null ? allClients.size() : 0));
 
             request.setAttribute("allClients", allClients);
-            request.setAttribute("addressTypes", AddressType.values());
+            request.setAttribute("addressTypes", TipoEndereco.values());
 
             request.getRequestDispatcher("/pages/addresses/new.jsp")
                     .forward(request, response);
@@ -253,7 +253,7 @@ public class AddressServlet extends HttpServlet {
         try {
             request.setAttribute("client", clientOpt.get());
             request.setAttribute("clientId", clientId);
-            request.setAttribute("addressTypes", AddressType.values());
+            request.setAttribute("addressTypes", TipoEndereco.values());
             request.setAttribute("allClients", clientService.getAllClients()); // Garante que allClients esteja disponível para o dropdown caso o usuário queira mudar
 
             request.getRequestDispatcher("/pages/addresses/new.jsp")
@@ -292,7 +292,7 @@ public class AddressServlet extends HttpServlet {
         if (clientOpt.isPresent()) {
             request.setAttribute("client", clientOpt.get());
         }
-        request.setAttribute("addressTypes", AddressType.values());
+        request.setAttribute("addressTypes", TipoEndereco.values());
         request.setAttribute("allClients", clientService.getAllClients()); // Garante que allClients esteja disponível para o dropdown
 
         request.getRequestDispatcher("/pages/addresses/new.jsp")

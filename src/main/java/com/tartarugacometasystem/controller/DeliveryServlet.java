@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.tartarugacometasystem.model.Delivery;
-import com.tartarugacometasystem.model.DeliveryStatus;
+import br.com.tartarugacometa.enums.StatusEntrega;
 import com.tartarugacometasystem.service.AddressService;
 import com.tartarugacometasystem.service.ClientService;
 import com.tartarugacometasystem.service.DeliveryService;
@@ -125,7 +125,7 @@ public class DeliveryServlet extends HttpServlet {
                 request.setAttribute("delivery", Mapper.mapToDelivery(request));
                 request.setAttribute("allClients", clientService.getAllClients());
                 request.setAttribute("allAddresses", addressService.getAllAddresses());
-                request.setAttribute("deliveryStatuses", DeliveryStatus.values());
+                request.setAttribute("deliveryStatuses", StatusEntrega.values());
                 request.getRequestDispatcher("/pages/deliveries/new.jsp").forward(request, response);
             } catch (SQLException ex) {
                 System.err.println("Erro ao preparar formulário após erro de validação: " + ex.getMessage());
@@ -152,7 +152,7 @@ public class DeliveryServlet extends HttpServlet {
             throws SQLException, ServletException, IOException {
         request.setAttribute("allClients", clientService.getAllClients());
         request.setAttribute("allAddresses", addressService.getAllAddresses());
-        request.setAttribute("deliveryStatuses", DeliveryStatus.values());
+        request.setAttribute("deliveryStatuses", StatusEntrega.values());
         request.getRequestDispatcher("/pages/deliveries/new.jsp").forward(request, response);
     }
 
@@ -171,7 +171,7 @@ public class DeliveryServlet extends HttpServlet {
             request.setAttribute("delivery", delivery.get());
             request.setAttribute("allClients", clientService.getAllClients());
             request.setAttribute("allAddresses", addressService.getAllAddresses());
-            request.setAttribute("deliveryStatuses", DeliveryStatus.values());
+            request.setAttribute("deliveryStatuses", StatusEntrega.values());
             request.getRequestDispatcher("/pages/deliveries/new.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "Entrega não encontrada para edição com o ID: " + id);
@@ -241,7 +241,7 @@ public class DeliveryServlet extends HttpServlet {
         try {
             // O campo 'reasonNotDelivered' não é aplicável aqui, então passamos null.
             // O campo 'updatedBy' é "Sistema" conforme seu código.
-            deliveryService.updateDeliveryStatus(id, DeliveryStatus.DELIVERED, null, "Sistema");
+            deliveryService.updateDeliveryStatus(id, StatusEntrega.ENTREGUE, null, "Sistema");
             request.getSession().setAttribute("message", "Entrega marcada como entregue com sucesso!");
             response.sendRedirect(request.getContextPath() + "/deliveries/view/" + id);
         } catch (IllegalArgumentException e) {
@@ -262,7 +262,7 @@ public class DeliveryServlet extends HttpServlet {
             return;
         }
         try {
-            deliveryService.updateDeliveryStatus(id, DeliveryStatus.NOT_PERFORMED, reason, "Sistema");
+            deliveryService.updateDeliveryStatus(id, StatusEntrega.NAO_REALIZADA, reason, "Sistema");
             request.getSession().setAttribute("message", "Entrega marcada como não entregue com sucesso!");
             response.sendRedirect(request.getContextPath() + "/deliveries/view/" + id);
         } catch (IllegalArgumentException e) {

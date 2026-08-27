@@ -1,7 +1,7 @@
 package com.tartarugacometasystem.dao;
 
 import com.tartarugacometasystem.model.Delivery;
-import com.tartarugacometasystem.model.DeliveryStatus;
+import br.com.tartarugacometa.enums.StatusEntrega;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,7 +24,7 @@ public class DeliveryDAOTest {
         testDelivery.setRecipientId(2);
         testDelivery.setOriginAddressId(1);
         testDelivery.setDestinationAddressId(2);
-        testDelivery.setStatus(DeliveryStatus.PENDENTE);
+        testDelivery.setStatus(StatusEntrega.PENDENTE);
         testDelivery.setTotalValue(100.00);
         testDelivery.setFreightValue(25.00);
         testDelivery.setTotalWeightKg(5.5);
@@ -57,12 +57,12 @@ public class DeliveryDAOTest {
     public void testUpdateDelivery() {
         try {
             deliveryDAO.create(testDelivery);
-            testDelivery.setStatus(DeliveryStatus.EM_TRANSITO);
+            testDelivery.setStatus(StatusEntrega.EM_TRANSITO);
             deliveryDAO.update(testDelivery);
 
             Optional<Delivery> updated = deliveryDAO.getById(testDelivery.getId());
             assertTrue(updated.isPresent());
-            assertEquals(DeliveryStatus.EM_TRANSITO, updated.get().getStatus());
+            assertEquals(StatusEntrega.EM_TRANSITO, updated.get().getStatus());
         } catch (Exception e) {
             fail("Não deveria lançar exceção: " + e.getMessage());
         }

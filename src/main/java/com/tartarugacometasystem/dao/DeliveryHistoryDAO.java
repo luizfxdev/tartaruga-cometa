@@ -11,7 +11,7 @@ import java.util.List;
 
 import com.tartarugacometasystem.config.DatabaseConfig;
 import com.tartarugacometasystem.model.DeliveryHistory;
-import com.tartarugacometasystem.model.DeliveryStatus;
+import br.com.tartarugacometa.enums.StatusEntrega;
 
 public class DeliveryHistoryDAO {
 
@@ -109,10 +109,10 @@ public class DeliveryHistoryDAO {
         history.setDeliveryId(rs.getInt("delivery_id"));
 
         String previousStatusStr = rs.getString("previous_status");
-        history.setPreviousStatus(previousStatusStr != null ? DeliveryStatus.fromValue(previousStatusStr) : null);
+        history.setPreviousStatus(previousStatusStr != null ? StatusEntrega.fromValue(previousStatusStr) : null);
 
         String newStatusStr = rs.getString("new_status");
-        history.setNewStatus(newStatusStr != null ? DeliveryStatus.fromValue(newStatusStr) : null);
+        history.setNewStatus(newStatusStr != null ? StatusEntrega.fromValue(newStatusStr) : null);
 
         Timestamp changeDateTimestamp = rs.getTimestamp("change_date");
         history.setChangeDate(changeDateTimestamp != null ? changeDateTimestamp.toLocalDateTime() : null);

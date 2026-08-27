@@ -1,7 +1,7 @@
 package com.tartarugacometasystem.dao;
 
 import com.tartarugacometasystem.model.Address;
-import com.tartarugacometasystem.model.AddressType;
+import br.com.tartarugacometa.enums.TipoEndereco;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,7 +25,7 @@ public class AddressDAOTest {
         testAddress.setCity("São Paulo");
         testAddress.setState("SP");
         testAddress.setZipCode("01234-567");
-        testAddress.setAddressType(AddressType.COMERCIAL);
+        testAddress.setAddressType(TipoEndereco.COMERCIAL);
         testAddress.setIsPrincipal(false);
     }
 

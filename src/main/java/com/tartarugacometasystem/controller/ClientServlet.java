@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.tartarugacometasystem.model.Client;
-import com.tartarugacometasystem.model.PersonType;
+import br.com.tartarugacometa.enums.TipoPessoa;
 import com.tartarugacometasystem.service.ClientService;
 import com.tartarugacometasystem.util.Mapper;
 
@@ -80,7 +80,7 @@ public class ClientServlet extends HttpServlet {
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setAttribute("personTypes", PersonType.values());
+        request.setAttribute("personTypes", TipoPessoa.values());
         request.getRequestDispatcher("/pages/clients/new.jsp").forward(request, response);
     }
 
@@ -91,7 +91,7 @@ public class ClientServlet extends HttpServlet {
 
         if (client.isPresent()) {
             request.setAttribute("client", client.get());
-            request.setAttribute("personTypes", PersonType.values());
+            request.setAttribute("personTypes", TipoPessoa.values());
             request.getRequestDispatcher("/pages/clients/new.jsp").forward(request, response);
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -136,7 +136,7 @@ public class ClientServlet extends HttpServlet {
         System.out.println("Documento: [" + client.getDocument() + "]");
         System.out.println("Email: [" + client.getEmail() + "]");
         System.out.println("Telefone: [" + client.getPhone() + "]");
-        System.out.println("PersonType: " + client.getPersonType());
+        System.out.println("TipoPessoa: " + client.getPersonType());
         System.out.println("===========================");
 
         try {
@@ -152,7 +152,7 @@ public class ClientServlet extends HttpServlet {
             System.out.println("ERRO DE VALIDAÇÃO: " + e.getMessage());
             request.getSession().setAttribute("error", e.getMessage());
             request.setAttribute("client", client);
-            request.setAttribute("personTypes", PersonType.values());
+            request.setAttribute("personTypes", TipoPessoa.values());
             request.getRequestDispatcher("/pages/clients/new.jsp").forward(request, response);
         }
     }

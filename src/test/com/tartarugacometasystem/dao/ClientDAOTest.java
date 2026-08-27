@@ -1,7 +1,7 @@
 package com.tartarugacometasystem.dao;
 
 import com.tartarugacometasystem.model.Client;
-import com.tartarugacometasystem.model.PersonType;
+import br.com.tartarugacometa.enums.TipoPessoa;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,7 +19,7 @@ public class ClientDAOTest {
     public void setUp() {
         clientDAO = new ClientDAO();
         testClient = new Client();
-        testClient.setPersonType(PersonType.FISICA);
+        testClient.setPersonType(TipoPessoa.FISICA);
         testClient.setDocument("12345678901");
         testClient.setName("João Silva");
         testClient.setEmail("joao@example.com");

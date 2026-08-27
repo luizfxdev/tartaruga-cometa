@@ -1,4 +1,5 @@
 package com.tartarugacometasystem.model;
+import br.com.tartarugacometa.enums.StatusEntrega;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,7 +16,7 @@ public class Delivery {
     private BigDecimal freightValue;
     private BigDecimal totalWeightKg;
     private BigDecimal totalVolumeM3;
-    private DeliveryStatus status;
+    private StatusEntrega status;
     private String observations;
     private LocalDateTime creationDate;
     private LocalDateTime deliveryDate; // Data de entrega efetiva
@@ -41,7 +42,7 @@ public class Delivery {
     // Construtor completo (sem IDs e datas)
     public Delivery(String trackingCode, Integer senderId, Integer recipientId, Integer originAddressId,
                     Integer destinationAddressId, BigDecimal totalValue, BigDecimal freightValue,
-                    BigDecimal totalWeightKg, BigDecimal totalVolumeM3, DeliveryStatus status,
+                    BigDecimal totalWeightKg, BigDecimal totalVolumeM3, StatusEntrega status,
                     String observations, LocalDateTime deliveryDate, String reasonNotDelivered) {
         this.trackingCode = trackingCode;
         this.senderId = senderId;
@@ -61,7 +62,7 @@ public class Delivery {
     // Construtor completo (com IDs e datas)
     public Delivery(Integer id, String trackingCode, Integer senderId, Integer recipientId, Integer originAddressId,
                     Integer destinationAddressId, BigDecimal totalValue, BigDecimal freightValue,
-                    BigDecimal totalWeightKg, BigDecimal totalVolumeM3, DeliveryStatus status,
+                    BigDecimal totalWeightKg, BigDecimal totalVolumeM3, StatusEntrega status,
                     String observations, LocalDateTime creationDate, LocalDateTime deliveryDate,
                     String reasonNotDelivered, LocalDateTime updatedAt) {
         this.id = id;
@@ -163,11 +164,11 @@ public class Delivery {
         this.totalVolumeM3 = totalVolumeM3;
     }
 
-    public DeliveryStatus getStatus() {
+    public StatusEntrega getStatus() {
         return status;
     }
 
-    public void setStatus(DeliveryStatus status) {
+    public void setStatus(StatusEntrega status) {
         this.status = status;
     }
 

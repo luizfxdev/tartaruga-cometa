@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.Optional;
 
 import com.tartarugacometasystem.model.Address;
-import com.tartarugacometasystem.model.AddressType;
+import br.com.tartarugacometa.enums.TipoEndereco;
 import com.tartarugacometasystem.model.Client;
 import com.tartarugacometasystem.model.Delivery;
-import com.tartarugacometasystem.model.DeliveryStatus;
-import com.tartarugacometasystem.model.PersonType;
+import br.com.tartarugacometa.enums.StatusEntrega;
+import br.com.tartarugacometa.enums.TipoPessoa;
 import com.tartarugacometasystem.model.Product;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,9 +55,9 @@ public class Mapper {
                 .filter(s -> !s.trim().isEmpty())
                 .map(s -> {
                     try {
-                        return AddressType.valueOf(s.trim().toUpperCase());
+                        return TipoEndereco.valueOf(s.trim().toUpperCase());
                     } catch (IllegalArgumentException e) {
-                        System.err.println("Erro ao converter tipo de endereço: '" + s + "' para AddressType. " + e.getMessage());
+                        System.err.println("Erro ao converter tipo de endereço: '" + s + "' para TipoEndereco. " + e.getMessage());
                         return null;
                     }
                 })
@@ -162,9 +162,9 @@ public class Mapper {
                 .filter(s -> !s.trim().isEmpty())
                 .map(s -> {
                     try {
-                        return PersonType.valueOf(s.trim().toUpperCase());
+                        return TipoPessoa.valueOf(s.trim().toUpperCase());
                     } catch (IllegalArgumentException e) {
-                        System.err.println("Erro ao converter tipo de pessoa: '" + s + "' para PersonType. " + e.getMessage());
+                        System.err.println("Erro ao converter tipo de pessoa: '" + s + "' para TipoPessoa. " + e.getMessage());
                         return null;
                     }
                 })
@@ -402,9 +402,9 @@ public class Mapper {
                 .filter(s -> !s.trim().isEmpty())
                 .map(s -> {
                     try {
-                        return DeliveryStatus.valueOf(s.trim().toUpperCase());
+                        return StatusEntrega.valueOf(s.trim().toUpperCase());
                     } catch (IllegalArgumentException e) {
-                        System.err.println("Erro ao converter status da entrega: '" + s + "' para DeliveryStatus. " + e.getMessage());
+                        System.err.println("Erro ao converter status da entrega: '" + s + "' para StatusEntrega. " + e.getMessage());
                         return null;
                     }
                 })

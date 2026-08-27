@@ -2,7 +2,7 @@ package com.tartarugacometasystem.service;
 
 import com.tartarugacometasystem.dao.ClientDAO;
 import com.tartarugacometasystem.model.Client;
-import com.tartarugacometasystem.model.PersonType;
+import br.com.tartarugacometa.enums.TipoPessoa;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -33,7 +33,7 @@ class ClientServiceTest {
 
         testClient = new Client();
         testClient.setId(1);
-        testClient.setPersonType(PersonType.FISICA);
+        testClient.setPersonType(TipoPessoa.FISICA);
         testClient.setDocument("12345678901");
         testClient.setName("João Silva");
         testClient.setEmail("joao@example.com");

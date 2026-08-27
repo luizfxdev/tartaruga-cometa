@@ -12,7 +12,7 @@ import java.util.Optional;
 
 import com.tartarugacometasystem.config.DatabaseConfig;
 import com.tartarugacometasystem.model.Delivery;
-import com.tartarugacometasystem.model.DeliveryStatus;
+import br.com.tartarugacometa.enums.StatusEntrega;
 
 public class DeliveryDAO {
 
@@ -229,7 +229,7 @@ public class DeliveryDAO {
      * @return Uma lista de entregas com o status especificado.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public List<Delivery> findByStatus(DeliveryStatus status) throws SQLException {
+    public List<Delivery> findByStatus(StatusEntrega status) throws SQLException {
         List<Delivery> deliveries = new ArrayList<>();
         String sql = "SELECT id, tracking_code, sender_id, recipient_id, origin_address_id, destination_address_id, " +
                      "total_value, freight_value, total_weight_kg, total_volume_m3, status, observations, creation_date, " +
@@ -353,7 +353,7 @@ public class DeliveryDAO {
         delivery.setFreightValue(rs.getBigDecimal("freight_value"));
         delivery.setTotalWeightKg(rs.getBigDecimal("total_weight_kg"));
         delivery.setTotalVolumeM3(rs.getBigDecimal("total_volume_m3"));
-        delivery.setStatus(DeliveryStatus.valueOf(rs.getString("status")));
+        delivery.setStatus(StatusEntrega.valueOf(rs.getString("status")));
 
         delivery.setObservations(rs.getString("observations"));
 

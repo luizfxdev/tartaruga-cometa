@@ -1,11 +1,12 @@
 package com.tartarugacometasystem.model;
 
 import java.time.LocalDateTime;
+import br.com.tartarugacometa.enums.TipoEndereco;
 
 public class Address {
     private Integer id;
     private Integer clientId;
-    private AddressType addressType;
+    private TipoEndereco addressType;
     private String street;
     private String number;
     private String complement;
@@ -32,7 +33,7 @@ public class Address {
     }
 
     // Construtor completo (sem IDs e datas)
-    public Address(Integer clientId, AddressType addressType, String street, String number, String complement, String neighborhood,
+    public Address(Integer clientId, TipoEndereco addressType, String street, String number, String complement, String neighborhood,
                    String city, String state, String zipCode, String country, String reference, Boolean isMain) {
         this.clientId = clientId;
         this.addressType = addressType;
@@ -49,7 +50,7 @@ public class Address {
     }
 
     // Construtor completo (com IDs e datas)
-    public Address(Integer id, Integer clientId, AddressType addressType, String street, String number, String complement, String neighborhood,
+    public Address(Integer id, Integer clientId, TipoEndereco addressType, String street, String number, String complement, String neighborhood,
                    String city, String state, String zipCode, String country, String reference, Boolean isMain,
                    LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
@@ -86,11 +87,11 @@ public class Address {
         this.clientId = clientId;
     }
 
-    public AddressType getAddressType() {
+    public TipoEndereco getAddressType() {
         return addressType;
     }
 
-    public void setAddressType(AddressType addressType) {
+    public void setAddressType(TipoEndereco addressType) {
         this.addressType = addressType;
     }
 

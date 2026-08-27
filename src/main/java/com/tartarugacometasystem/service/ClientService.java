@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import com.tartarugacometasystem.dao.ClientDAO;
 import com.tartarugacometasystem.model.Client;
-import com.tartarugacometasystem.model.PersonType;
+import br.com.tartarugacometa.enums.TipoPessoa;
 import com.tartarugacometasystem.util.DateFormatter;
 import com.tartarugacometasystem.util.Validator;
 
@@ -70,11 +70,11 @@ public class ClientService {
         }
 
         // Validação de documento baseada no tipo de pessoa
-        if (client.getPersonType() == PersonType.INDIVIDUAL) {
+        if (client.getPersonType() == TipoPessoa.FISICA) {
             if (!Validator.isValidCPF(client.getDocument())) {
                 throw new IllegalArgumentException("CPF inválido.");
             }
-        } else if (client.getPersonType() == PersonType.LEGAL_ENTITY) {
+        } else if (client.getPersonType() == TipoPessoa.JURIDICA) {
             if (!Validator.isValidCNPJ(client.getDocument())) {
                 throw new IllegalArgumentException("CNPJ inválido.");
             }
@@ -105,7 +105,7 @@ public class ClientService {
             client.setFormattedUpdatedAt(DateFormatter.formatLocalDateTime(client.getUpdatedAt()));
         }
         if (client.getPersonType() != null) {
-            client.setFormattedPersonType(client.getPersonType().getLabel());
+            client.setFormattedPersonType(client.getPersonType().getRotulo());
         }
     }
 }

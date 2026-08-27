@@ -2,7 +2,7 @@ package com.tartarugacometasystem.service;
 
 import com.tartarugacometasystem.dao.DeliveryDAO;
 import com.tartarugacometasystem.model.Delivery;
-import com.tartarugacometasystem.model.DeliveryStatus;
+import br.com.tartarugacometa.enums.StatusEntrega;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -38,7 +38,7 @@ class DeliveryServiceTest {
         testDelivery.setRecipientId(2);
         testDelivery.setOriginAddressId(1);
         testDelivery.setDestinationAddressId(2);
-        testDelivery.setStatus(DeliveryStatus.PENDENTE);
+        testDelivery.setStatus(StatusEntrega.PENDENTE);
         testDelivery.setTotalValue(100.00);
         testDelivery.setFreightValue(25.00);
         testDelivery.setTotalWeightKg(5.5);
@@ -98,8 +98,8 @@ class DeliveryServiceTest {
     @DisplayName("Deve retornar entregas por status")
     void testGetDeliverieesNotThrow(() -> {
             List<Delivery> deliveries = Arrays.asList(testDelivery);
-            when(deliveryDAO.getByStatus(DeliveryStatus.PENDENTE)).thenReturn(deliveries);
-            List<Delivery> result = deliveryService.getDeliveriesByStatus(DeliveryStatus.PENDENTE);
+            when(deliveryDAO.getByStatus(StatusEntrega.PENDENTE)).thenReturn(deliveries);
+            List<Delivery> result = deliveryService.getDeliveriesByStatus(StatusEntrega.PENDENTE);
             assertNotNull(result);
             assertTrue(result.size() > 0);
         });
@@ -109,7 +109,7 @@ class DeliveryServiceTest {
     @DisplayName("Deve atualizar status da entrega")
     void testUpdateDeliveryStatus() {
         assertDoesNotThrow(() -> {
-            deliveryService.updateDeliveryStatus(1, DeliveryStatus.EM_TRANSITO, "Em rota", "SYSTEM");
+            deliveryService.updateDeliveryStatus(1, StatusEntrega.EM_TRANSITO, "Em rota", "SYSTEM");
         });
     }
 
