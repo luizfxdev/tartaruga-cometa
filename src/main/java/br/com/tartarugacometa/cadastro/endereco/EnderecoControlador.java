@@ -129,7 +129,7 @@ public class EnderecoControlador extends HttpServlet {
                                  .ifPresent(client -> request.setAttribute("client", client));
                 }
 
-                request.getRequestDispatcher("/pages/addresses/new.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/views/cadastro/endereco/form.jsp").forward(request, response);
             } catch (Exception ex) {
                 System.err.println("❌ Erro ao redirecionar após erro de validação: " + ex.getMessage());
                 ex.printStackTrace();
@@ -174,7 +174,7 @@ public class EnderecoControlador extends HttpServlet {
         System.out.println("📋 Total de endereços encontrados: " + addresses.size());
 
         request.setAttribute("addresses", addresses);
-        request.getRequestDispatcher("/pages/addresses/list.jsp")
+        request.getRequestDispatcher("/WEB-INF/views/cadastro/endereco/lista.jsp")
                 .forward(request, response);
     }
 
@@ -204,7 +204,7 @@ public class EnderecoControlador extends HttpServlet {
             request.setAttribute("client", clientOpt.get());
         }
 
-        request.getRequestDispatcher("/pages/addresses/list.jsp")
+        request.getRequestDispatcher("/WEB-INF/views/cadastro/endereco/lista.jsp")
                 .forward(request, response);
     }
 
@@ -221,7 +221,7 @@ public class EnderecoControlador extends HttpServlet {
             request.setAttribute("allClients", allClients);
             request.setAttribute("addressTypes", TipoEndereco.values());
 
-            request.getRequestDispatcher("/pages/addresses/new.jsp")
+            request.getRequestDispatcher("/WEB-INF/views/cadastro/endereco/form.jsp")
                     .forward(request, response);
         } catch (Exception e) {
             System.err.println("❌ Erro ao carregar formulário de novo endereço: " + e.getMessage());
@@ -256,7 +256,7 @@ public class EnderecoControlador extends HttpServlet {
             request.setAttribute("addressTypes", TipoEndereco.values());
             request.setAttribute("allClients", clientService.getAllClients()); // Garante que allClients esteja disponível para o dropdown caso o usuário queira mudar
 
-            request.getRequestDispatcher("/pages/addresses/new.jsp")
+            request.getRequestDispatcher("/WEB-INF/views/cadastro/endereco/form.jsp")
                     .forward(request, response);
         } catch (Exception e) {
             System.err.println("❌ Erro ao carregar formulário para cliente: " + e.getMessage());
@@ -295,7 +295,7 @@ public class EnderecoControlador extends HttpServlet {
         request.setAttribute("addressTypes", TipoEndereco.values());
         request.setAttribute("allClients", clientService.getAllClients()); // Garante que allClients esteja disponível para o dropdown
 
-        request.getRequestDispatcher("/pages/addresses/new.jsp")
+        request.getRequestDispatcher("/WEB-INF/views/cadastro/endereco/form.jsp")
                 .forward(request, response);
     }
 

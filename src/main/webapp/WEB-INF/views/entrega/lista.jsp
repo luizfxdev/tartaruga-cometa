@@ -81,8 +81,8 @@
                                     <div class="btn-group">
                                         <a href="${pageContext.request.contextPath}/deliveries/view/${delivery.id}" class="custom-btn btn-info btn-sm">Ver</a>
                                         <a href="${pageContext.request.contextPath}/deliveries/edit/${delivery.id}" class="custom-btn btn-warning btn-sm">Editar</a>
-                                        <form method="POST" action="${pageContext.request.contextPath}/deliveries/delete/${delivery.id}" style="display:inline;">
-                                            <button type="submit" class="custom-btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja deletar esta entrega?')">Deletar</button>
+                                        <form method="POST" action="${pageContext.request.contextPath}/deliveries/delete/${delivery.id}" style="display:inline;" data-confirmacao-exclusao>
+                                            <button type="submit" class="custom-btn btn-danger btn-sm" data-acao="excluir" data-mensagem="Tem certeza que deseja deletar esta entrega?">Deletar</button>
                                         </form>
                                     </div>
                                 </td>

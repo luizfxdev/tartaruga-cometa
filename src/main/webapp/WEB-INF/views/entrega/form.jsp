@@ -14,7 +14,9 @@
         <c:remove var="error" scope="session"/>
     </c:if>
 
-    <form method="POST" action="${pageContext.request.contextPath}/deliveries/save" class="form">
+    <form method="POST" action="${pageContext.request.contextPath}/deliveries/save" class="form" data-form="entrega"
+          data-origin-address-id="${delivery != null && delivery.originAddressId != null ? delivery.originAddressId : ''}"
+          data-destination-address-id="${delivery != null && delivery.destinationAddressId != null ? delivery.destinationAddressId : ''}">
         <c:if test="${delivery != null && delivery.id != null}">
             <input type="hidden" name="id" value="${delivery.id}">
         </c:if>
@@ -22,14 +24,14 @@
         <div class="form-group">
             <label for="trackingCode">Código de Rastreio *</label>
             <input type="text" id="trackingCode" name="trackingCode"
-                   value="${delivery != null ? delivery.trackingCode : ''}" 
+                   value="${delivery != null ? delivery.trackingCode : ''}"
                    placeholder="Código de rastreio" required>
         </div>
 
         <div class="form-row">
             <div class="form-group">
                 <label for="shipperId">Remetente (Nome) *</label>
-                <select id="shipperId" name="shipperId" required>
+                <select id="shipperId" name="shipperId" required data-select="remetente">
                     <option value="">Selecione o Remetente</option>
                     <c:forEach var="client" items="${allClients}">
                         <option value="${client.id}" ${delivery != null && delivery.senderId == client.id ? 'selected' : ''}>
@@ -41,7 +43,7 @@
 
             <div class="form-group">
                 <label for="recipientId">Destinatário (Nome) *</label>
-                <select id="recipientId" name="recipientId" required>
+                <select id="recipientId" name="recipientId" required data-select="destinatario">
                     <option value="">Selecione o Destinatário</option>
                     <c:forEach var="client" items="${allClients}">
                         <option value="${client.id}" ${delivery != null && delivery.recipientId == client.id ? 'selected' : ''}>
@@ -55,7 +57,7 @@
         <div class="form-row">
             <div class="form-group">
                 <label for="originAddressId">Endereço de Origem *</label>
-                <select id="originAddressId" name="originAddressId" required>
+                <select id="originAddressId" name="originAddressId" required data-select="endereco-origem">
                     <option value="">Selecione o Endereço de Origem</option>
                     <c:forEach var="address" items="${allAddresses}">
                         <option value="${address.id}" data-client-id="${address.clientId}" ${delivery != null && delivery.originAddressId == address.id ? 'selected' : ''}>
@@ -67,7 +69,7 @@
 
             <div class="form-group">
                 <label for="destinationAddressId">Endereço de Destino *</label>
-                <select id="destinationAddressId" name="destinationAddressId" required>
+                <select id="destinationAddressId" name="destinationAddressId" required data-select="endereco-destino">
                     <option value="">Selecione o Endereço de Destino</option>
                     <c:forEach var="address" items="${allAddresses}">
                         <option value="${address.id}" data-client-id="${address.clientId}" ${delivery != null && delivery.destinationAddressId == address.id ? 'selected' : ''}>
@@ -133,64 +135,8 @@
         </div>
     </form>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const shipperSelect = document.getElementById('shipperId');
-            const recipientSelect = document.getElementById('recipientId');
-            const originAddressSelect = document.getElementById('originAddressId');
-            const destinationAddressSelect = document.getElementById('destinationAddressId');
-
-            const allOriginAddressOptions = Array.from(originAddressSelect.options).filter(opt => opt.value !== '');
-            const allDestinationAddressOptions = Array.from(destinationAddressSelect.options).filter(opt => opt.value !== '');
-
-            function filterAddresses(selectElement, allOptions, clientId, selectedAddressId) {
-                const placeholder = selectElement.id === 'originAddressId' ? 'Endereço de Origem' : 'Endereço de Destino';
-                selectElement.innerHTML = '<option value="">Selecione o ' + placeholder + '</option>';
-
-                let hasOptions = false;
-                if (clientId) {
-                    allOptions.forEach(option => {
-                        const optionClientId = option.getAttribute('data-client-id');
-                        if (optionClientId && parseInt(optionClientId) === parseInt(clientId)) {
-                            const clonedOption = option.cloneNode(true);
-                            if (selectedAddressId && parseInt(clonedOption.value) === parseInt(selectedAddressId)) {
-                                clonedOption.selected = true;
-                            }
-                            selectElement.appendChild(clonedOption);
-                            hasOptions = true;
-                        }
-                    });
-
-                    if (!hasOptions) {
-                        const noOptionElement = document.createElement('option');
-                        noOptionElement.value = '';
-                        noOptionElement.textContent = 'Nenhum endereço encontrado para este cliente';
-                        noOptionElement.disabled = true;
-                        selectElement.appendChild(noOptionElement);
-                    }
-                }
-            }
-
-            if (shipperSelect) {
-                shipperSelect.addEventListener('change', function() {
-                    filterAddresses(originAddressSelect, allOriginAddressOptions, this.value, null);
-                });
-            }
-
-            if (recipientSelect) {
-                recipientSelect.addEventListener('change', function() {
-                    filterAddresses(destinationAddressSelect, allDestinationAddressOptions, this.value, null);
-                });
-            }
-
-            if (shipperSelect && shipperSelect.value) {
-                filterAddresses(originAddressSelect, allOriginAddressOptions, shipperSelect.value, "${delivery != null ? delivery.originAddressId : ''}");
-            }
-            if (recipientSelect && recipientSelect.value) {
-                filterAddresses(destinationAddressSelect, allDestinationAddressOptions, recipientSelect.value, "${delivery != null ? delivery.destinationAddressId : ''}");
-            }
-        });
-    </script>
+    <script src="${pageContext.request.contextPath}/static/js/entrega-filtro-endereco.js" defer></script>
+    <script src="${pageContext.request.contextPath}/static/js/confirmacao.js" defer></script>
 </t:header>
 
 <t:footer />

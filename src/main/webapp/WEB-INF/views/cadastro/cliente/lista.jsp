@@ -65,8 +65,8 @@
                                     <div class="btn-group">
                                         <a href="${pageContext.request.contextPath}/clients/view/${client.id}" class="custom-btn btn-info btn-sm">Ver</a>
                                         <a href="${pageContext.request.contextPath}/clients/edit/${client.id}" class="custom-btn btn-warning btn-sm">Editar</a>
-                                        <form method="POST" action="${pageContext.request.contextPath}/clients/delete/${client.id}" style="display:inline;">
-                                            <button type="submit" class="custom-btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja deletar este cliente?')">Deletar</button>
+                                        <form method="POST" action="${pageContext.request.contextPath}/clients/delete/${client.id}" style="display:inline;" data-confirmacao-exclusao>
+                                            <button type="submit" class="custom-btn btn-danger btn-sm" data-acao="excluir" data-mensagem="Tem certeza que deseja deletar este cliente?">Deletar</button>
                                         </form>
                                     </div>
                                 </td>

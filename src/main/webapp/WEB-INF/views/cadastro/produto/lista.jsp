@@ -80,8 +80,8 @@
                                     <div class="btn-group">
                                         <a href="${pageContext.request.contextPath}/products/view/${product.id}" class="custom-btn btn-info btn-sm">Ver</a>
                                         <a href="${pageContext.request.contextPath}/products/edit/${product.id}" class="custom-btn btn-warning btn-sm">Editar</a>
-                                        <form action="${pageContext.request.contextPath}/products/delete/${product.id}" method="POST" style="display:inline;">
-                                            <button type="submit" class="custom-btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja deletar este produto?')">Deletar</button>
+                                        <form action="${pageContext.request.contextPath}/products/delete/${product.id}" method="POST" style="display:inline;" data-confirmacao-exclusao>
+                                            <button type="submit" class="custom-btn btn-danger btn-sm" data-acao="excluir" data-mensagem="Tem certeza que deseja deletar este produto?">Deletar</button>
                                         </form>
                                     </div>
                                 </td>

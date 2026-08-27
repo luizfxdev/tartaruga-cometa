@@ -74,12 +74,12 @@ public class ProdutoControlador extends HttpServlet {
             throws SQLException, ServletException, IOException {
         List<Produto> products = productService.getAllProducts();
         request.setAttribute("products", products);
-        request.getRequestDispatcher("/pages/products/list.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/cadastro/produto/lista.jsp").forward(request, response);
     }
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("/pages/products/new.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/cadastro/produto/form.jsp").forward(request, response);
     }
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response, String pathInfo)
@@ -89,7 +89,7 @@ public class ProdutoControlador extends HttpServlet {
 
         if (product.isPresent()) {
             request.setAttribute("product", product.get());
-            request.getRequestDispatcher("/pages/products/new.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/cadastro/produto/form.jsp").forward(request, response);
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -102,7 +102,7 @@ public class ProdutoControlador extends HttpServlet {
 
         if (product.isPresent()) {
             request.setAttribute("product", product.get());
-            request.getRequestDispatcher("/pages/products/view.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/cadastro/produto/detalhe.jsp").forward(request, response);
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -126,7 +126,7 @@ public class ProdutoControlador extends HttpServlet {
         } catch (IllegalArgumentException e) {
             request.getSession().setAttribute("error", e.getMessage());
             request.setAttribute("product", product); // Mantém os dados preenchidos
-            request.getRequestDispatcher("/pages/products/new.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/cadastro/produto/form.jsp").forward(request, response);
         }
     }
 
@@ -143,7 +143,7 @@ public class ProdutoControlador extends HttpServlet {
         String searchTerm = request.getParameter("query");
         List<Produto> products = productService.searchProductsByName(searchTerm);
         request.setAttribute("products", products);
-        request.getRequestDispatcher("/pages/products/list.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/cadastro/produto/lista.jsp").forward(request, response);
     }
 
     // Método auxiliar para construir um objeto Produto a partir dos parâmetros da requisição (usando Mapper)

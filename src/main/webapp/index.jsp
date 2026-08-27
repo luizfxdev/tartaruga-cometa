@@ -17,8 +17,7 @@
                                 <div class="hexagon-item">
                                     <div class="hex-item"><div></div><div></div><div></div></div>
                                     <div class="hex-item"><div></div><div></div><div></div></div>
-                                    <a href="#" class="hex-content" data-menu-item="sobre"> <%-- Adicionado data-menu-item --%>
-                                        <span class="hex-content-inner">
+                                    <a href="#" class="hex-content" data-menu-item="sobre">                                        <span class="hex-content-inner">
                                             <span class="icon"><i class="fa fa-universal-access"></i></span>
                                             <span class="title">Sobre</span>
                                         </span>
@@ -28,8 +27,7 @@
                                 <div class="hexagon-item">
                                     <div class="hex-item"><div></div><div></div><div></div></div>
                                     <div class="hex-item"><div></div><div></div><div></div></div>
-                                    <a href="#" class="hex-content" data-menu-item="rastrear"> <%-- Adicionado data-menu-item --%>
-                                        <span class="hex-content-inner">
+                                    <a href="#" class="hex-content" data-menu-item="rastrear">                                        <span class="hex-content-inner">
                                             <span class="icon"><i class="fa fa-bullseye"></i></span>
                                             <span class="title">Rastrear</span>
                                         </span>
@@ -39,8 +37,7 @@
                                 <div class="hexagon-item">
                                     <div class="hex-item"><div></div><div></div><div></div></div>
                                     <div class="hex-item"><div></div><div></div><div></div></div>
-                                    <a href="#" class="hex-content" data-menu-item="servicos"> <%-- Adicionado data-menu-item --%>
-                                        <span class="hex-content-inner">
+                                    <a href="#" class="hex-content" data-menu-item="servicos">                                        <span class="hex-content-inner">
                                             <span class="icon"><i class="fa fa-braille"></i></span>
                                             <span class="title">Serviços</span>
                                         </span>
@@ -50,8 +47,7 @@
                                 <div class="hexagon-item">
                                     <div class="hex-item"><div></div><div></div><div></div></div>
                                     <div class="hex-item"><div></div><div></div><div></div></div>
-                                    <a href="${pageContext.request.contextPath}/login.jsp" class="hex-content"> <%-- Este link mantém o comportamento original para login --%>
-                                        <span class="hex-content-inner">
+                                    <a href="${pageContext.request.contextPath}/login.jsp" class="hex-content">                                        <span class="hex-content-inner">
                                             <span class="icon"><i class="fa fa-id-badge"></i></span>
                                             <span class="title">Colaborador</span>
                                         </span>
@@ -61,8 +57,7 @@
                                 <div class="hexagon-item">
                                     <div class="hex-item"><div></div><div></div><div></div></div>
                                     <div class="hex-item"><div></div><div></div><div></div></div>
-                                    <a href="#" class="hex-content" data-menu-item="unidades"> <%-- Adicionado data-menu-item --%>
-                                        <span class="hex-content-inner">
+                                    <a href="#" class="hex-content" data-menu-item="unidades">                                        <span class="hex-content-inner">
                                             <span class="icon"><i class="fa fa-life-ring"></i></span>
                                             <span class="title">Unidades</span>
                                         </span>
@@ -72,8 +67,7 @@
                                 <div class="hexagon-item">
                                     <div class="hex-item"><div></div><div></div><div></div></div>
                                     <div class="hex-item"><div></div><div></div><div></div></div>
-                                    <a href="#" class="hex-content" data-menu-item="cotacao"> <%-- Adicionado data-menu-item --%>
-                                        <span class="hex-content-inner">
+                                    <a href="#" class="hex-content" data-menu-item="cotacao">                                        <span class="hex-content-inner">
                                             <span class="icon"><i class="fa fa-clipboard"></i></span>
                                             <span class="title">Cotação</span>
                                         </span>
@@ -83,8 +77,7 @@
                                 <div class="hexagon-item">
                                     <div class="hex-item"><div></div><div></div><div></div></div>
                                     <div class="hex-item"><div></div><div></div><div></div></div>
-                                    <a href="#" class="hex-content" data-menu-item="contato"> <%-- Adicionado data-menu-item --%>
-                                        <span class="hex-content-inner">
+                                    <a href="#" class="hex-content" data-menu-item="contato">                                        <span class="hex-content-inner">
                                             <span class="icon"><i class="fa fa-map-signs"></i></span>
                                             <span class="title">Contato</span>
                                         </span>
@@ -101,23 +94,4 @@
 </t:header>
 <t:footer />
 
-<%-- Bloco de script para os alertas --%>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Seleciona todos os links com a classe 'hex-content' e o atributo 'data-menu-item'
-        const menuItems = document.querySelectorAll('.hex-content[data-menu-item]');
-
-        menuItems.forEach(item => {
-            item.addEventListener('click', function(event) {
-                // Previne o comportamento padrão do link (navegar para #)
-                event.preventDefault();
-
-                // Obtém o nome do item do menu para usar no alerta
-                const menuItemName = this.querySelector('.title').textContent;
-
-                // Exibe o alerta
-                alert(`O menu "${menuItemName}" está em construção!`);
-            });
-        });
-    });
-</script>
+<script src="${pageContext.request.contextPath}/static/js/principal.js" defer></script>

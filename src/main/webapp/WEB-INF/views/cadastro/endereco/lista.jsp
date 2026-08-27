@@ -88,14 +88,12 @@
                                     <div class="btn-group">
                                         <a href="${pageContext.request.contextPath}/addresses/edit/${address.id}" class="custom-btn btn-warning btn-sm">Editar</a>
                                         <c:if test="${not address.isMain}">
-                                            <a href="${pageContext.request.contextPath}/addresses/set-principal/${address.id}" 
-                                               class="custom-btn btn-info btn-sm"
-                                               onclick="return confirm('Definir como endereço principal?')">
-                                                Principal
-                                            </a>
+                                            <form method="POST" action="${pageContext.request.contextPath}/addresses/set-principal/${address.id}" style="display:inline;" data-confirmacao-exclusao>
+                                                <button type="submit" class="custom-btn btn-info btn-sm" data-acao="excluir" data-mensagem="Definir como endereço principal?">Principal</button>
+                                            </form>
                                         </c:if>
-                                        <form method="POST" action="${pageContext.request.contextPath}/addresses/delete/${address.id}" style="display:inline;">
-                                            <button type="submit" class="custom-btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja deletar este endereço?')">Deletar</button>
+                                        <form method="POST" action="${pageContext.request.contextPath}/addresses/delete/${address.id}" style="display:inline;" data-confirmacao-exclusao>
+                                            <button type="submit" class="custom-btn btn-danger btn-sm" data-acao="excluir" data-mensagem="Tem certeza que deseja deletar este endereço?">Deletar</button>
                                         </form>
                                     </div>
                                 </td>

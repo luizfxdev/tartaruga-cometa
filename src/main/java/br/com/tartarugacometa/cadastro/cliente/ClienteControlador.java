@@ -75,13 +75,13 @@ public class ClienteControlador extends HttpServlet {
             throws SQLException, ServletException, IOException {
         List<Cliente> clients = clientService.getAllClients();
         request.setAttribute("clients", clients);
-        request.getRequestDispatcher("/pages/clients/list.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/cadastro/cliente/lista.jsp").forward(request, response);
     }
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setAttribute("personTypes", TipoPessoa.values());
-        request.getRequestDispatcher("/pages/clients/new.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/cadastro/cliente/form.jsp").forward(request, response);
     }
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response, String pathInfo)
@@ -92,7 +92,7 @@ public class ClienteControlador extends HttpServlet {
         if (client.isPresent()) {
             request.setAttribute("client", client.get());
             request.setAttribute("personTypes", TipoPessoa.values());
-            request.getRequestDispatcher("/pages/clients/new.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/cadastro/cliente/form.jsp").forward(request, response);
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -105,7 +105,7 @@ public class ClienteControlador extends HttpServlet {
 
         if (client.isPresent()) {
             request.setAttribute("client", client.get());
-            request.getRequestDispatcher("/pages/clients/view.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/cadastro/cliente/detalhe.jsp").forward(request, response);
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -116,7 +116,7 @@ public class ClienteControlador extends HttpServlet {
         String searchTerm = request.getParameter("q");
         List<Cliente> clients = clientService.search(searchTerm);
         request.setAttribute("clients", clients);
-        request.getRequestDispatcher("/pages/clients/list.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/cadastro/cliente/lista.jsp").forward(request, response);
     }
 
     private void saveClient(HttpServletRequest request, HttpServletResponse response)
@@ -153,7 +153,7 @@ public class ClienteControlador extends HttpServlet {
             request.getSession().setAttribute("error", e.getMessage());
             request.setAttribute("client", client);
             request.setAttribute("personTypes", TipoPessoa.values());
-            request.getRequestDispatcher("/pages/clients/new.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/cadastro/cliente/form.jsp").forward(request, response);
         }
     }
 

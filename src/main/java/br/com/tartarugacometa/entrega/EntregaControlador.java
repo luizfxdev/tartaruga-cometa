@@ -126,7 +126,7 @@ public class EntregaControlador extends HttpServlet {
                 request.setAttribute("allClients", clientService.getAllClients());
                 request.setAttribute("allAddresses", addressService.getAllAddresses());
                 request.setAttribute("deliveryStatuses", StatusEntrega.values());
-                request.getRequestDispatcher("/pages/deliveries/new.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/views/entrega/form.jsp").forward(request, response);
             } catch (SQLException ex) {
                 System.err.println("Erro ao preparar formulário após erro de validação: " + ex.getMessage());
                 ex.printStackTrace();
@@ -145,7 +145,7 @@ public class EntregaControlador extends HttpServlet {
             throws SQLException, ServletException, IOException {
         List<Entrega> deliveries = deliveryService.getAllDeliveries();
         request.setAttribute("deliveries", deliveries);
-        request.getRequestDispatcher("/pages/deliveries/list.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/entrega/lista.jsp").forward(request, response);
     }
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response)
@@ -153,7 +153,7 @@ public class EntregaControlador extends HttpServlet {
         request.setAttribute("allClients", clientService.getAllClients());
         request.setAttribute("allAddresses", addressService.getAllAddresses());
         request.setAttribute("deliveryStatuses", StatusEntrega.values());
-        request.getRequestDispatcher("/pages/deliveries/new.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/entrega/form.jsp").forward(request, response);
     }
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response, String pathInfo)
@@ -172,7 +172,7 @@ public class EntregaControlador extends HttpServlet {
             request.setAttribute("allClients", clientService.getAllClients());
             request.setAttribute("allAddresses", addressService.getAllAddresses());
             request.setAttribute("deliveryStatuses", StatusEntrega.values());
-            request.getRequestDispatcher("/pages/deliveries/new.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/entrega/form.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "Entrega não encontrada para edição com o ID: " + id);
             request.getRequestDispatcher("/error.jsp").forward(request, response);
@@ -193,7 +193,7 @@ public class EntregaControlador extends HttpServlet {
         if (deliveryOptional.isPresent()) {
             Entrega delivery = deliveryOptional.get();
             request.setAttribute("delivery", delivery);
-            request.getRequestDispatcher("/pages/deliveries/view.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/entrega/detalhe.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "Entrega não encontrada com o ID: " + deliveryId);
             request.getRequestDispatcher("/error.jsp").forward(request, response);
@@ -277,7 +277,7 @@ public class EntregaControlador extends HttpServlet {
         List<Entrega> deliveries = deliveryService.search(searchTerm);
         request.setAttribute("deliveries", deliveries);
         request.setAttribute("searchTerm", searchTerm); // Mantém o termo de busca no campo de busca
-        request.getRequestDispatcher("/pages/deliveries/list.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/entrega/lista.jsp").forward(request, response);
     }
 
     private Integer extractId(String pathInfo) {
