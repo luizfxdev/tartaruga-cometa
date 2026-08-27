@@ -1,6 +1,6 @@
 package com.tartarugacometasystem.dao;
 
-import com.tartarugacometasystem.model.Product;
+import com.tartarugacometasystem.model.Produto;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -11,13 +11,13 @@ import static org.junit.Assert.*;
 
 public class ProductDAOTest {
 
-    private ProductDAO productDAO;
-    private Product testProduct;
+    private ProdutoDAO productDAO;
+    private Produto testProduct;
 
     @Before
     public void setUp() {
-        productDAO = new ProductDAO();
-        testProduct = new Product();
+        productDAO = new ProdutoDAO();
+        testProduct = new Produto();
         testProduct.setName("Produto Teste");
         testProduct.setDescription("Descrição do produto teste");
         testProduct.setCategory("Eletrônicos");
@@ -41,7 +41,7 @@ public class ProductDAOTest {
     public void testGetProductById() {
         try {
             productDAO.create(testProduct);
-            Optional<Product> retrieved = productDAO.getById(testProduct.getId());
+            Optional<Produto> retrieved = productDAO.getById(testProduct.getId());
             assertTrue(retrieved.isPresent());
             assertEquals(testProduct.getName(), retrieved.get().getName());
         } catch (Exception e) {
@@ -56,7 +56,7 @@ public class ProductDAOTest {
             testProduct.setName("Produto Atualizado");
             productDAO.update(testProduct);
 
-            Optional<Product> updated = productDAO.getById(testProduct.getId());
+            Optional<Produto> updated = productDAO.getById(testProduct.getId());
             assertTrue(updated.isPresent());
             assertEquals("Produto Atualizado", updated.get().getName());
         } catch (Exception e) {
@@ -71,7 +71,7 @@ public class ProductDAOTest {
             Integer id = testProduct.getId();
             productDAO.delete(id);
 
-            Optional<Product> deleted = productDAO.getById(id);
+            Optional<Produto> deleted = productDAO.getById(id);
             assertFalse(deleted.isPresent());
         } catch (Exception e) {
             fail("Não deveria lançar exceção: " + e.getMessage());
@@ -81,7 +81,7 @@ public class ProductDAOTest {
     @Test
     public void testGetAllProducts() {
         try {
-            List<Product> products = productDAO.getAll();
+            List<Produto> products = productDAO.getAll();
             assertNotNull(products);
             assertTrue(products.size() >= 0);
         } catch (Exception e) {
@@ -93,7 +93,7 @@ public class ProductDAOTest {
     public void testSearchProductByName() {
         try {
             productDAO.create(testProduct);
-            List<Product> results = productDAO.searchByName("Produto");
+            List<Produto> results = productDAO.searchByName("Produto");
             assertNotNull(results);
             assertTrue(results.size() > 0);
         } catch (Exception e) {
@@ -104,7 +104,7 @@ public class ProductDAOTest {
     @Test
     public void testGetProductByInvalidId() {
         try {
-            Optional<Product> result = productDAO.getById(99999);
+            Optional<Produto> result = productDAO.getById(99999);
             assertFalse(result.isPresent());
         } catch (Exception e) {
             fail("Não deveria lançar exceção: " + e.getMessage());

@@ -76,7 +76,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <c:forEach var="delivery" items="${deliveries}">
+                        <c:forEach var="delivery" items="${entregas}">
                             <tr>
                                 <td>${delivery.id}</td>
                                 <td><strong>${delivery.trackingCode}</strong></td>

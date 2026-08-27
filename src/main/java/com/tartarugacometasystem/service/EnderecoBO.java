@@ -4,19 +4,19 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-import com.tartarugacometasystem.dao.AddressDAO;
-import com.tartarugacometasystem.model.Address;
-import com.tartarugacometasystem.model.Client;
+import com.tartarugacometasystem.dao.EnderecoDAO;
+import com.tartarugacometasystem.model.Endereco;
+import com.tartarugacometasystem.model.Cliente;
 import com.tartarugacometasystem.util.DateFormatter;
 
-public class AddressService {
+public class EnderecoBO {
 
-    private final AddressDAO addressDAO;
-    private final ClientService clientService;
+    private final EnderecoDAO addressDAO;
+    private final ClienteBO clientService;
 
-    public AddressService() {
-        this.addressDAO = new AddressDAO();
-        this.clientService = new ClientService();
+    public EnderecoBO() {
+        this.addressDAO = new EnderecoDAO();
+        this.clientService = new ClienteBO();
     }
 
     // ==============================
@@ -24,7 +24,7 @@ public class AddressService {
     // ==============================
 
     /** Compatibilidade: addAddress → createAddress */
-    public Address addAddress(Address address) throws SQLException {
+    public Endereco addAddress(Endereco address) throws SQLException {
         return createAddress(address);
     }
 
@@ -37,31 +37,31 @@ public class AddressService {
     // CRUD
     // ==============================
 
-    public Address createAddress(Address address) throws SQLException {
+    public Endereco createAddress(Endereco address) throws SQLException {
         validateAddress(address);
         return addressDAO.save(address);
     }
 
-    public Optional<Address> getAddressById(Integer id) throws SQLException {
-        Optional<Address> address = addressDAO.findById(id);
+    public Optional<Endereco> getAddressById(Integer id) throws SQLException {
+        Optional<Endereco> address = addressDAO.findById(id);
         address.ifPresent(this::enrichAddress);
         return address;
     }
 
-    public void updateAddress(Address address) throws SQLException {
+    public void updateAddress(Endereco address) throws SQLException {
         if (address.getId() == null) {
             throw new IllegalArgumentException("ID do endereço é obrigatório para atualização.");
         }
 
         validateAddress(address);
 
-        Optional<Address> existing = addressDAO.findById(address.getId());
+        Optional<Endereco> existing = addressDAO.findById(address.getId());
         if (existing.isEmpty()) {
             throw new IllegalArgumentException("Endereço com ID " + address.getId() + " não encontrado.");
         }
 
         if (address.getClientId() != null) {
-            Optional<Client> client = clientService.getClientById(address.getClientId());
+            Optional<Cliente> client = clientService.getClientById(address.getClientId());
             if (client.isEmpty()) {
                 throw new IllegalArgumentException("Cliente com ID " + address.getClientId() + " não existe.");
             }
@@ -74,25 +74,25 @@ public class AddressService {
         addressDAO.delete(id);
     }
 
-    public List<Address> getAllAddresses() throws SQLException {
-        List<Address> addresses = addressDAO.getAll();
+    public List<Endereco> getAllAddresses() throws SQLException {
+        List<Endereco> addresses = addressDAO.getAll();
         addresses.forEach(this::enrichAddress);
         return addresses;
     }
 
-    public List<Address> getAddressesByClientId(Integer clientId) throws SQLException {
-        List<Address> addresses = addressDAO.findByClientId(clientId);
+    public List<Endereco> getAddressesByClientId(Integer clientId) throws SQLException {
+        List<Endereco> addresses = addressDAO.findByClientId(clientId);
         addresses.forEach(this::enrichAddress);
         return addresses;
     }
 
     public void setMainAddress(Integer clientId, Integer addressId) throws SQLException {
-        Optional<Client> client = clientService.getClientById(clientId);
+        Optional<Cliente> client = clientService.getClientById(clientId);
         if (client.isEmpty()) {
             throw new IllegalArgumentException("Cliente com ID " + clientId + " não encontrado.");
         }
 
-        Optional<Address> address = addressDAO.findById(addressId);
+        Optional<Endereco> address = addressDAO.findById(addressId);
         if (address.isEmpty() || !address.get().getClientId().equals(clientId)) {
             throw new IllegalArgumentException(
                 "Endereço com ID " + addressId + " não encontrado ou não pertence ao cliente " + clientId + "."
@@ -106,7 +106,7 @@ public class AddressService {
     // Validações
     // ==============================
 
-    private void validateAddress(Address address) {
+    private void validateAddress(Endereco address) {
         if (address.getClientId() == null)
             throw new IllegalArgumentException("ID do cliente é obrigatório.");
         if (address.getAddressType() == null)
@@ -131,7 +131,7 @@ public class AddressService {
     // Enriquecimento
     // ==============================
 
-    private void enrichAddress(Address address) {
+    private void enrichAddress(Endereco address) {
         if (address == null) return;
 
         String complement = (address.getComplement() != null && !address.getComplement().isBlank())

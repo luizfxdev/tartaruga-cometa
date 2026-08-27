@@ -3,7 +3,7 @@ package com.tartarugacometasystem.model;
 import java.time.LocalDateTime;
 import br.com.tartarugacometa.enums.TipoPessoa;
 
-public class Client {
+public class Cliente {
     private Integer id;
     private String name;
     private String document; // CPF ou CNPJ
@@ -19,11 +19,11 @@ public class Client {
     private String formattedPersonType; // NOVO: Campo formatado para o tipo de pessoa
 
     // Construtor padrão
-    public Client() {
+    public Cliente() {
     }
 
     // Construtor completo (sem IDs e datas)
-    public Client(String name, String document, String email, String phone, TipoPessoa personType) {
+    public Cliente(String name, String document, String email, String phone, TipoPessoa personType) {
         this.name = name;
         this.document = document;
         this.email = email;
@@ -32,7 +32,7 @@ public class Client {
     }
 
     // Construtor completo (com IDs e datas)
-    public Client(Integer id, String name, String document, String email, String phone, TipoPessoa personType,
+    public Cliente(Integer id, String name, String document, String email, String phone, TipoPessoa personType,
                   LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
@@ -136,7 +136,7 @@ public class Client {
 
     @Override
     public String toString() {
-        return "Client{" +
+        return "Cliente{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", document='" + document + '\'' +

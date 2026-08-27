@@ -5,11 +5,11 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-import com.tartarugacometasystem.model.Address;
+import com.tartarugacometasystem.model.Endereco;
 import br.com.tartarugacometa.enums.TipoEndereco;
-import com.tartarugacometasystem.model.Client;
-import com.tartarugacometasystem.service.AddressService;
-import com.tartarugacometasystem.service.ClientService;
+import com.tartarugacometasystem.model.Cliente;
+import com.tartarugacometasystem.service.EnderecoBO;
+import com.tartarugacometasystem.service.ClienteBO;
 import com.tartarugacometasystem.util.Mapper;
 
 import jakarta.servlet.ServletException; // Importe o Mapper do pacote correto
@@ -18,22 +18,22 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet("/addresses/*")
-public class AddressServlet extends HttpServlet {
+@WebServlet("/endereco/*")
+public class EnderecoControlador extends HttpServlet {
 
-    private AddressService addressService;
-    private ClientService clientService;
+    private EnderecoBO addressService;
+    private ClienteBO clientService;
 
     @Override
     public void init() throws ServletException {
         try {
-            addressService = new AddressService();
-            clientService = new ClientService();
-            System.out.println("✅ AddressServlet inicializado com sucesso");
+            addressService = new EnderecoBO();
+            clientService = new ClienteBO();
+            System.out.println("✅ EnderecoControlador inicializado com sucesso");
         } catch (Exception e) {
-            System.err.println("❌ Erro ao inicializar AddressServlet: " + e.getMessage());
+            System.err.println("❌ Erro ao inicializar EnderecoControlador: " + e.getMessage());
             e.printStackTrace();
-            throw new ServletException("Erro ao inicializar AddressServlet", e);
+            throw new ServletException("Erro ao inicializar EnderecoControlador", e);
         }
     }
 
@@ -42,7 +42,7 @@ public class AddressServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String pathInfo = request.getPathInfo();
-        System.out.println("🔍 AddressServlet.doGet - pathInfo: " + pathInfo);
+        System.out.println("🔍 EnderecoControlador.doGet - pathInfo: " + pathInfo);
 
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
@@ -72,18 +72,18 @@ public class AddressServlet extends HttpServlet {
             }
 
         } catch (SQLException e) {
-            System.err.println("❌ Erro de SQL no AddressServlet: " + e.getMessage());
+            System.err.println("❌ Erro de SQL no EnderecoControlador: " + e.getMessage());
             e.printStackTrace();
-            throw new ServletException("Erro de banco de dados no AddressServlet", e);
+            throw new ServletException("Erro de banco de dados no EnderecoControlador", e);
         } catch (IllegalArgumentException e) {
             System.err.println("❌ Argumento inválido: " + e.getMessage());
             e.printStackTrace();
             request.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (Exception e) {
-            System.err.println("❌ Erro inesperado no AddressServlet: " + e.getMessage());
+            System.err.println("❌ Erro inesperado no EnderecoControlador: " + e.getMessage());
             e.printStackTrace();
-            throw new ServletException("Erro inesperado no AddressServlet", e);
+            throw new ServletException("Erro inesperado no EnderecoControlador", e);
         }
     }
 
@@ -92,7 +92,7 @@ public class AddressServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String pathInfo = request.getPathInfo();
-        System.out.println("🔍 AddressServlet.doPost - pathInfo: " + pathInfo);
+        System.out.println("🔍 EnderecoControlador.doPost - pathInfo: " + pathInfo);
 
         try {
             if (pathInfo != null && pathInfo.equals("/save")) {
@@ -104,7 +104,7 @@ public class AddressServlet extends HttpServlet {
         } catch (SQLException e) {
             System.err.println("❌ Erro de SQL no doPost: " + e.getMessage());
             e.printStackTrace();
-            throw new ServletException("Erro ao processar operação no AddressServlet", e);
+            throw new ServletException("Erro ao processar operação no EnderecoControlador", e);
 
         } catch (IllegalArgumentException e) {
             System.err.println("❌ Argumento inválido no doPost: " + e.getMessage());
@@ -115,7 +115,7 @@ public class AddressServlet extends HttpServlet {
             // para que o formulário possa ser preenchido novamente e o dropdown de clientes funcione.
             try {
                 // Mapeia o endereço do request para preencher os campos do formulário
-                Address addressWithError = Mapper.mapToAddress(request); // Usa o Mapper corrigido
+                Endereco addressWithError = Mapper.mapToAddress(request); // Usa o Mapper corrigido
                 request.setAttribute("address", addressWithError);
 
                 // Carrega todos os clientes para o dropdown
@@ -143,7 +143,7 @@ public class AddressServlet extends HttpServlet {
             throws SQLException, IOException, ServletException {
 
         // Não é mais necessário criar o HashMap aqui, o Mapper.mapToAddress(request) já faz isso
-        Address address = Mapper.mapToAddress(request); // Usa o Mapper corrigido
+        Endereco address = Mapper.mapToAddress(request); // Usa o Mapper corrigido
 
         // Validação do clientId no servidor ANTES de tentar salvar
         if (address.getClientId() == null) {
@@ -170,7 +170,7 @@ public class AddressServlet extends HttpServlet {
             throws SQLException, ServletException, IOException {
 
         System.out.println("📋 Listando todos os endereços");
-        List<Address> addresses = addressService.getAllAddresses();
+        List<Endereco> addresses = addressService.getAllAddresses();
         System.out.println("📋 Total de endereços encontrados: " + addresses.size());
 
         request.setAttribute("addresses", addresses);
@@ -192,9 +192,9 @@ public class AddressServlet extends HttpServlet {
         int clientId = Integer.parseInt(clientIdStr);
 
         // Busca o cliente para exibir o nome
-        Optional<Client> clientOpt = clientService.getClientById(clientId);
+        Optional<Cliente> clientOpt = clientService.getClientById(clientId);
 
-        List<Address> addresses = addressService.getAddressesByClientId(clientId);
+        List<Endereco> addresses = addressService.getAddressesByClientId(clientId);
         System.out.println("📋 Total de endereços do cliente " + clientId + ": " + addresses.size());
 
         request.setAttribute("addresses", addresses);
@@ -215,7 +215,7 @@ public class AddressServlet extends HttpServlet {
         System.out.println("📝 Exibindo formulário de novo endereço (sem cliente pré-selecionado)");
 
         try {
-            List<Client> allClients = clientService.getAllClients();
+            List<Cliente> allClients = clientService.getAllClients();
             System.out.println("📝 Total de clientes carregados: " + (allClients != null ? allClients.size() : 0));
 
             request.setAttribute("allClients", allClients);
@@ -242,7 +242,7 @@ public class AddressServlet extends HttpServlet {
         }
 
         int clientId = Integer.parseInt(clientIdStr);
-        Optional<Client> clientOpt = clientService.getClientById(clientId);
+        Optional<Cliente> clientOpt = clientService.getClientById(clientId);
 
         if (clientOpt.isEmpty()) {
             System.err.println("❌ Cliente não encontrado: " + clientId);
@@ -277,7 +277,7 @@ public class AddressServlet extends HttpServlet {
         }
 
         int id = Integer.parseInt(idStr);
-        Optional<Address> addressOpt = addressService.getAddressById(id);
+        Optional<Endereco> addressOpt = addressService.getAddressById(id);
 
         if (addressOpt.isEmpty()) {
             System.err.println("❌ Endereço não encontrado: " + id);
@@ -285,8 +285,8 @@ public class AddressServlet extends HttpServlet {
             return;
         }
 
-        Address address = addressOpt.get();
-        Optional<Client> clientOpt = clientService.getClientById(address.getClientId());
+        Endereco address = addressOpt.get();
+        Optional<Cliente> clientOpt = clientService.getClientById(address.getClientId());
 
         request.setAttribute("address", address);
         if (clientOpt.isPresent()) {
@@ -315,7 +315,7 @@ public class AddressServlet extends HttpServlet {
         int id = Integer.parseInt(idStr);
 
         // Pega o clientId antes de deletar
-        Optional<Address> addressOpt = addressService.getAddressById(id);
+        Optional<Endereco> addressOpt = addressService.getAddressById(id);
         int clientId = addressOpt.isPresent() ? addressOpt.get().getClientId() : 0;
 
         addressService.deleteAddress(id);
@@ -344,7 +344,7 @@ public class AddressServlet extends HttpServlet {
 
         int addressId = Integer.parseInt(idStr);
 
-        Optional<Address> addressOpt = addressService.getAddressById(addressId);
+        Optional<Endereco> addressOpt = addressService.getAddressById(addressId);
         if (addressOpt.isEmpty()) {
             System.err.println("❌ Endereço não encontrado para definir como principal: " + addressId);
             request.setAttribute("error", "Endereço não encontrado.");

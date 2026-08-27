@@ -1,7 +1,7 @@
 package com.tartarugacometasystem.service;
 
-import com.tartarugacometasystem.dao.ClientDAO;
-import com.tartarugacometasystem.model.Client;
+import com.tartarugacometasystem.dao.ClienteDAO;
+import com.tartarugacometasystem.model.Cliente;
 import br.com.tartarugacometa.enums.TipoPessoa;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,22 +16,22 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@DisplayName("ClientService Tests")
+@DisplayName("ClienteBO Tests")
 class ClientServiceTest {
 
-    private ClientService clientService;
+    private ClienteBO clientService;
 
     @Mock
-    private ClientDAO clientDAO;
+    private ClienteDAO clientDAO;
 
-    private Client testClient;
+    private Cliente testClient;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        clientService = new ClientService();
+        clientService = new ClienteBO();
 
-        testClient = new Client();
+        testClient = new Cliente();
         testClient.setId(1);
         testClient.setPersonType(TipoPessoa.FISICA);
         testClient.setDocument("12345678901");
@@ -71,7 +71,7 @@ class ClientServiceTest {
     void testGetClientById() {
         assertDoesNotThrow(() -> {
             when(clientDAO.getById(1)).thenReturn(Optional.of(testClient));
-            Optional<Client> result = clientService.getClientById(1);
+            Optional<Cliente> result = clientService.getClientById(1);
             assertTrue(result.isPresent());
         });
     }
@@ -80,9 +80,9 @@ class ClientServiceTest {
     @DisplayName("Deve retornar lista de clientes")
     void testGetAllClients() {
         assertDoesNotThrow(() -> {
-            List<Client> clients = Arrays.asList(testClient);
+            List<Cliente> clients = Arrays.asList(testClient);
             when(clientDAO.getAll()).thenReturn(clients);
-            List<Client> result = clientService.getAllClients();
+            List<Cliente> result = clientService.getAllClients();
             assertNotNull(result);
             assertEquals(1, result.size());
         });
@@ -92,9 +92,9 @@ class ClientServiceTest {
     @DisplayName("Deve buscar clientes por nome")
     void testSearchClientsByName() {
         assertDoesNotThrow(() -> {
-            List<Client> clients = Arrays.asList(testClient);
+            List<Cliente> clients = Arrays.asList(testClient);
             when(clientDAO.searchByName("João")).thenReturn(clients);
-            List<Client> result = clientService.searchClientsByName("João");
+            List<Cliente> result = clientService.searchClientsByName("João");
             assertNotNull(result);
             assertTrue(result.size() > 0);
         });

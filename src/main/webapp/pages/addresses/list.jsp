@@ -65,7 +65,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <c:forEach var="address" items="${addresses}">
+                        <c:forEach var="address" items="${enderecos}">
                             <tr>
                                 <td>${address.id}</td>
                                 <td>${address.addressType}</td>

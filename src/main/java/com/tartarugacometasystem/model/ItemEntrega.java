@@ -2,7 +2,7 @@ package com.tartarugacometasystem.model;
 
 import java.math.BigDecimal;
 
-public class DeliveryProduct {
+public class ItemEntrega {
     private Integer id;
     private Integer deliveryId;
     private Integer productId;
@@ -13,9 +13,9 @@ public class DeliveryProduct {
     private BigDecimal subtotal;
     private String observations;
 
-    public DeliveryProduct() {}
+    public ItemEntrega() {}
 
-    public DeliveryProduct(Integer deliveryId, Integer productId, Integer quantity,
+    public ItemEntrega(Integer deliveryId, Integer productId, Integer quantity,
                            BigDecimal unitWeightKg, BigDecimal unitVolumeM3,
                            BigDecimal unitValue) {
         this.deliveryId = deliveryId;
@@ -101,7 +101,7 @@ public class DeliveryProduct {
 
     @Override
     public String toString() {
-        return "DeliveryProduct{" +
+        return "ItemEntrega{" +
                 "id=" + id +
                 ", deliveryId=" + deliveryId +
                 ", productId=" + productId +

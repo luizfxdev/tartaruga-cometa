@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List; // Para o histórico
 
-public class Delivery {
+public class Entrega {
     private Integer id;
     private String trackingCode;
     private Integer senderId; // ID do cliente remetente
@@ -24,11 +24,11 @@ public class Delivery {
     private LocalDateTime updatedAt;
 
     // Campos para objetos relacionados (para enriquecimento)
-    private Client sender; // Objeto Cliente Remetente
-    private Client recipient; // Objeto Cliente Destinatário
-    private Address originAddress; // Objeto Endereço de Origem
-    private Address destinationAddress; // Objeto Endereço de Destino
-    private List<DeliveryHistory> history; // Histórico da entrega
+    private Cliente sender; // Objeto Cliente Remetente
+    private Cliente recipient; // Objeto Cliente Destinatário
+    private Endereco originAddress; // Objeto Endereço de Origem
+    private Endereco destinationAddress; // Objeto Endereço de Destino
+    private List<HistoricoEntrega> history; // Histórico da entrega
 
     // Campos formatados para exibição no JSP
     private String formattedCreationDate;
@@ -36,11 +36,11 @@ public class Delivery {
     private String formattedUpdatedAt;
 
     // Construtor padrão
-    public Delivery() {
+    public Entrega() {
     }
 
     // Construtor completo (sem IDs e datas)
-    public Delivery(String trackingCode, Integer senderId, Integer recipientId, Integer originAddressId,
+    public Entrega(String trackingCode, Integer senderId, Integer recipientId, Integer originAddressId,
                     Integer destinationAddressId, BigDecimal totalValue, BigDecimal freightValue,
                     BigDecimal totalWeightKg, BigDecimal totalVolumeM3, StatusEntrega status,
                     String observations, LocalDateTime deliveryDate, String reasonNotDelivered) {
@@ -60,7 +60,7 @@ public class Delivery {
     }
 
     // Construtor completo (com IDs e datas)
-    public Delivery(Integer id, String trackingCode, Integer senderId, Integer recipientId, Integer originAddressId,
+    public Entrega(Integer id, String trackingCode, Integer senderId, Integer recipientId, Integer originAddressId,
                     Integer destinationAddressId, BigDecimal totalValue, BigDecimal freightValue,
                     BigDecimal totalWeightKg, BigDecimal totalVolumeM3, StatusEntrega status,
                     String observations, LocalDateTime creationDate, LocalDateTime deliveryDate,
@@ -213,43 +213,43 @@ public class Delivery {
     }
 
     // Getters e Setters para objetos relacionados (NOVO)
-    public Client getSender() {
+    public Cliente getSender() {
         return sender;
     }
 
-    public void setSender(Client sender) {
+    public void setSender(Cliente sender) {
         this.sender = sender;
     }
 
-    public Client getRecipient() {
+    public Cliente getRecipient() {
         return recipient;
     }
 
-    public void setRecipient(Client recipient) {
+    public void setRecipient(Cliente recipient) {
         this.recipient = recipient;
     }
 
-    public Address getOriginAddress() {
+    public Endereco getOriginAddress() {
         return originAddress;
     }
 
-    public void setOriginAddress(Address originAddress) {
+    public void setOriginAddress(Endereco originAddress) {
         this.originAddress = originAddress;
     }
 
-    public Address getDestinationAddress() {
+    public Endereco getDestinationAddress() {
         return destinationAddress;
     }
 
-    public void setDestinationAddress(Address destinationAddress) {
+    public void setDestinationAddress(Endereco destinationAddress) {
         this.destinationAddress = destinationAddress;
     }
 
-    public List<DeliveryHistory> getHistory() {
+    public List<HistoricoEntrega> getHistory() {
         return history;
     }
 
-    public void setHistory(List<DeliveryHistory> history) {
+    public void setHistory(List<HistoricoEntrega> history) {
         this.history = history;
     }
 
@@ -280,7 +280,7 @@ public class Delivery {
 
     @Override
     public String toString() {
-        return "Delivery{" +
+        return "Entrega{" +
                 "id=" + id +
                 ", trackingCode='" + trackingCode + '\'' +
                 ", senderId=" + senderId +

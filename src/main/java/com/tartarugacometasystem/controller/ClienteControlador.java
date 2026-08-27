@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-import com.tartarugacometasystem.model.Client;
+import com.tartarugacometasystem.model.Cliente;
 import br.com.tartarugacometa.enums.TipoPessoa;
-import com.tartarugacometasystem.service.ClientService;
+import com.tartarugacometasystem.service.ClienteBO;
 import com.tartarugacometasystem.util.Mapper;
 
 import jakarta.servlet.ServletException;
@@ -17,14 +17,14 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet("/clients/*")
-public class ClientServlet extends HttpServlet {
-    private ClientService clientService;
+@WebServlet("/cliente/*")
+public class ClienteControlador extends HttpServlet {
+    private ClienteBO clientService;
 
     @Override
     public void init() throws ServletException {
         super.init();
-        this.clientService = new ClientService();
+        this.clientService = new ClienteBO();
     }
 
     @Override
@@ -73,7 +73,7 @@ public class ClientServlet extends HttpServlet {
 
     private void listClients(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
-        List<Client> clients = clientService.getAllClients();
+        List<Cliente> clients = clientService.getAllClients();
         request.setAttribute("clients", clients);
         request.getRequestDispatcher("/pages/clients/list.jsp").forward(request, response);
     }
@@ -87,7 +87,7 @@ public class ClientServlet extends HttpServlet {
     private void showEditForm(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, ServletException, IOException {
         Integer id = extractId(pathInfo);
-        Optional<Client> client = clientService.getClientById(id);
+        Optional<Cliente> client = clientService.getClientById(id);
 
         if (client.isPresent()) {
             request.setAttribute("client", client.get());
@@ -101,7 +101,7 @@ public class ClientServlet extends HttpServlet {
     private void viewClient(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, ServletException, IOException {
         Integer id = extractId(pathInfo);
-        Optional<Client> client = clientService.getClientById(id);
+        Optional<Cliente> client = clientService.getClientById(id);
 
         if (client.isPresent()) {
             request.setAttribute("client", client.get());
@@ -114,7 +114,7 @@ public class ClientServlet extends HttpServlet {
     private void searchClients(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
         String searchTerm = request.getParameter("q");
-        List<Client> clients = clientService.search(searchTerm);
+        List<Cliente> clients = clientService.search(searchTerm);
         request.setAttribute("clients", clients);
         request.getRequestDispatcher("/pages/clients/list.jsp").forward(request, response);
     }
@@ -128,7 +128,7 @@ public class ClientServlet extends HttpServlet {
         params.forEach((k, v) -> System.out.println(k + " = [" + v + "]"));
         System.out.println("================================");
         
-        Client client = Mapper.mapToClient(params);
+        Cliente client = Mapper.mapToClient(params);
         
         System.out.println("===== CLIENTE MAPEADO =====");
         System.out.println("ID: " + client.getId());

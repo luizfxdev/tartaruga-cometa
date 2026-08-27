@@ -11,19 +11,19 @@ import java.util.List;
 import java.util.Optional;
 
 import com.tartarugacometasystem.config.DatabaseConfig;
-import com.tartarugacometasystem.model.Delivery;
+import com.tartarugacometasystem.model.Entrega;
 import br.com.tartarugacometa.enums.StatusEntrega;
 
-public class DeliveryDAO {
+public class EntregaDAO {
 
     /**
      * Cria uma nova entrega no banco de dados.
      *
-     * @param delivery O objeto Delivery a ser criado.
-     * @return O objeto Delivery com o ID gerado.
+     * @param delivery O objeto Entrega a ser criado.
+     * @return O objeto Entrega com o ID gerado.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public Delivery save(Delivery delivery) throws SQLException {
+    public Entrega save(Entrega delivery) throws SQLException {
         String sql = "INSERT INTO delivery (tracking_code, sender_id, recipient_id, origin_address_id, destination_address_id, " +
                      "total_value, freight_value, total_weight_kg, total_volume_m3, status, observations, delivery_date, reason_not_delivered) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? AS delivery_status_enum), ?, ?, ?)"; // Status já corrigido
@@ -88,10 +88,10 @@ public class DeliveryDAO {
      * Busca uma entrega pelo ID.
      *
      * @param id O ID da entrega.
-     * @return Um Optional contendo o Delivery se encontrado, ou Optional.empty().
+     * @return Um Optional contendo o Entrega se encontrado, ou Optional.empty().
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public Optional<Delivery> findById(Integer id) throws SQLException {
+    public Optional<Entrega> findById(Integer id) throws SQLException {
         String sql = "SELECT id, tracking_code, sender_id, recipient_id, origin_address_id, destination_address_id, " +
                      "total_value, freight_value, total_weight_kg, total_volume_m3, status, observations, creation_date, " +
                      "updated_at, delivery_date, reason_not_delivered FROM delivery WHERE id = ?";
@@ -116,10 +116,10 @@ public class DeliveryDAO {
     /**
      * Atualiza uma entrega existente no banco de dados.
      *
-     * @param delivery O objeto Delivery a ser atualizado.
+     * @param delivery O objeto Entrega a ser atualizado.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public void update(Delivery delivery) throws SQLException {
+    public void update(Entrega delivery) throws SQLException {
         String sql = "UPDATE delivery SET tracking_code = ?, sender_id = ?, recipient_id = ?, origin_address_id = ?, " +
                      "destination_address_id = ?, total_value = ?, freight_value = ?, total_weight_kg = ?, " +
                      "total_volume_m3 = ?, status = CAST(? AS delivery_status_enum), observations = ?, delivery_date = ?, reason_not_delivered = ? WHERE id = ?"; // Status já corrigido
@@ -200,8 +200,8 @@ public class DeliveryDAO {
      * @return Uma lista de todas as entregas.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public List<Delivery> getAll() throws SQLException {
-        List<Delivery> deliveries = new ArrayList<>();
+    public List<Entrega> getAll() throws SQLException {
+        List<Entrega> deliveries = new ArrayList<>();
         String sql = "SELECT id, tracking_code, sender_id, recipient_id, origin_address_id, destination_address_id, " +
                      "total_value, freight_value, total_weight_kg, total_volume_m3, status, observations, creation_date, " +
                      "updated_at, delivery_date, reason_not_delivered FROM delivery";
@@ -229,8 +229,8 @@ public class DeliveryDAO {
      * @return Uma lista de entregas com o status especificado.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public List<Delivery> findByStatus(StatusEntrega status) throws SQLException {
-        List<Delivery> deliveries = new ArrayList<>();
+    public List<Entrega> findByStatus(StatusEntrega status) throws SQLException {
+        List<Entrega> deliveries = new ArrayList<>();
         String sql = "SELECT id, tracking_code, sender_id, recipient_id, origin_address_id, destination_address_id, " +
                      "total_value, freight_value, total_weight_kg, total_volume_m3, status, observations, creation_date, " +
                      "updated_at, delivery_date, reason_not_delivered FROM delivery WHERE status = CAST(? AS delivery_status_enum)"; // Status já corrigido
@@ -256,10 +256,10 @@ public class DeliveryDAO {
      * Busca entregas por código de rastreio.
      *
      * @param trackingCode O código de rastreio da entrega.
-     * @return Um Optional contendo o Delivery se encontrado, ou Optional.empty().
+     * @return Um Optional contendo o Entrega se encontrado, ou Optional.empty().
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public Optional<Delivery> findByTrackingCode(String trackingCode) throws SQLException {
+    public Optional<Entrega> findByTrackingCode(String trackingCode) throws SQLException {
         String sql = "SELECT id, tracking_code, sender_id, recipient_id, origin_address_id, destination_address_id, " +
                      "total_value, freight_value, total_weight_kg, total_volume_m3, status, observations, creation_date, " +
                      "updated_at, delivery_date, reason_not_delivered FROM delivery WHERE tracking_code = ?";
@@ -288,8 +288,8 @@ public class DeliveryDAO {
      * @return Uma lista de entregas que correspondem ao termo de busca.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public List<Delivery> search(String searchTerm) throws SQLException {
-        List<Delivery> deliveries = new ArrayList<>();
+    public List<Entrega> search(String searchTerm) throws SQLException {
+        List<Entrega> deliveries = new ArrayList<>();
         String sql = "SELECT id, tracking_code, sender_id, recipient_id, origin_address_id, destination_address_id, " +
                      "total_value, freight_value, total_weight_kg, total_volume_m3, status, observations, creation_date, " +
                      "updated_at, delivery_date, reason_not_delivered FROM delivery " +
@@ -316,14 +316,14 @@ public class DeliveryDAO {
     }
 
     /**
-     * Mapeia um ResultSet para um objeto Delivery.
+     * Mapeia um ResultSet para um objeto Entrega.
      *
      * @param rs O ResultSet.
-     * @return Um objeto Delivery preenchido.
+     * @return Um objeto Entrega preenchido.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    private Delivery mapResultSetToDelivery(ResultSet rs) throws SQLException {
-        Delivery delivery = new Delivery();
+    private Entrega mapResultSetToDelivery(ResultSet rs) throws SQLException {
+        Entrega delivery = new Entrega();
         delivery.setId(rs.getInt("id"));
         delivery.setTrackingCode(rs.getString("tracking_code"));
 

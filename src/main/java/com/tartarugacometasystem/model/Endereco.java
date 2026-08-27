@@ -3,7 +3,7 @@ package com.tartarugacometasystem.model;
 import java.time.LocalDateTime;
 import br.com.tartarugacometa.enums.TipoEndereco;
 
-public class Address {
+public class Endereco {
     private Integer id;
     private Integer clientId;
     private TipoEndereco addressType;
@@ -21,7 +21,7 @@ public class Address {
     private LocalDateTime updatedAt;
 
     // NOVO: Campo para associação com Cliente
-    private Client client;
+    private Cliente client;
 
     // Campos formatados para exibição no JSP (RESTAURADOS)
     private String formattedAddress;
@@ -29,11 +29,11 @@ public class Address {
     private String formattedUpdatedAt;
 
     // Construtor padrão
-    public Address() {
+    public Endereco() {
     }
 
     // Construtor completo (sem IDs e datas)
-    public Address(Integer clientId, TipoEndereco addressType, String street, String number, String complement, String neighborhood,
+    public Endereco(Integer clientId, TipoEndereco addressType, String street, String number, String complement, String neighborhood,
                    String city, String state, String zipCode, String country, String reference, Boolean isMain) {
         this.clientId = clientId;
         this.addressType = addressType;
@@ -50,7 +50,7 @@ public class Address {
     }
 
     // Construtor completo (com IDs e datas)
-    public Address(Integer id, Integer clientId, TipoEndereco addressType, String street, String number, String complement, String neighborhood,
+    public Endereco(Integer id, Integer clientId, TipoEndereco addressType, String street, String number, String complement, String neighborhood,
                    String city, String state, String zipCode, String country, String reference, Boolean isMain,
                    LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
@@ -191,12 +191,12 @@ public class Address {
         this.updatedAt = updatedAt;
     }
 
-    // NOVO: Getter e Setter para Client
-    public Client getClient() {
+    // NOVO: Getter e Setter para Cliente
+    public Cliente getClient() {
         return client;
     }
 
-    public void setClient(Client client) {
+    public void setClient(Cliente client) {
         this.client = client;
     }
 
@@ -227,7 +227,7 @@ public class Address {
 
     @Override
     public String toString() {
-        return "Address{" +
+        return "Endereco{" +
                 "id=" + id +
                 ", clientId=" + clientId +
                 ", addressType=" + addressType +

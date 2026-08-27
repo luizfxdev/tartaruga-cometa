@@ -11,19 +11,19 @@ import java.util.List;
 import java.util.Optional;
 
 import com.tartarugacometasystem.config.DatabaseConfig;
-import com.tartarugacometasystem.model.Client;
+import com.tartarugacometasystem.model.Cliente;
 import br.com.tartarugacometa.enums.TipoPessoa;
 
-public class ClientDAO {
+public class ClienteDAO {
 
     /**
      * Cria um novo cliente no banco de dados.
      *
-     * @param client O objeto Client a ser criado.
-     * @return O objeto Client com o ID gerado.
+     * @param client O objeto Cliente a ser criado.
+     * @return O objeto Cliente com o ID gerado.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public Client save(Client client) throws SQLException {
+    public Cliente save(Cliente client) throws SQLException {
         // created_at é gerenciado pelo DEFAULT CURRENT_TIMESTAMP no schema.sql
         String sql = "INSERT INTO client (name, document, email, phone, person_type) VALUES (?, ?, ?, ?, ?::person_type_enum)";
         Connection conn = null;
@@ -54,10 +54,10 @@ public class ClientDAO {
      * Busca um cliente pelo ID.
      *
      * @param id O ID do cliente.
-     * @return Um Optional contendo o Client se encontrado, ou Optional.empty().
+     * @return Um Optional contendo o Cliente se encontrado, ou Optional.empty().
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public Optional<Client> findById(Integer id) throws SQLException {
+    public Optional<Cliente> findById(Integer id) throws SQLException {
         String sql = "SELECT id, name, document, email, phone, person_type, created_at, updated_at FROM client WHERE id = ?";
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -80,10 +80,10 @@ public class ClientDAO {
     /**
      * Atualiza um cliente existente no banco de dados.
      *
-     * @param client O objeto Client a ser atualizado.
+     * @param client O objeto Cliente a ser atualizado.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public void update(Client client) throws SQLException {
+    public void update(Cliente client) throws SQLException {
         // updated_at é tratado por trigger, não precisa ser definido aqui explicitamente
         String sql = "UPDATE client SET name = ?, document = ?, email = ?, phone = ?, person_type = ?::person_type_enum WHERE id = ?";
         Connection conn = null;
@@ -129,8 +129,8 @@ public class ClientDAO {
      * @return Uma lista de todos os clientes.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public List<Client> getAll() throws SQLException {
-        List<Client> clients = new ArrayList<>();
+    public List<Cliente> getAll() throws SQLException {
+        List<Cliente> clients = new ArrayList<>();
         String sql = "SELECT id, name, document, email, phone, person_type, created_at, updated_at FROM client";
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -156,8 +156,8 @@ public class ClientDAO {
      * @return Uma lista de clientes que correspondem ao termo de busca.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public List<Client> search(String searchTerm) throws SQLException {
-        List<Client> clients = new ArrayList<>();
+    public List<Cliente> search(String searchTerm) throws SQLException {
+        List<Cliente> clients = new ArrayList<>();
         String sql = "SELECT id, name, document, email, phone, person_type, created_at, updated_at FROM client " +
                      "WHERE name ILIKE ? OR document ILIKE ? OR email ILIKE ?"; // Usando ILIKE para busca case-insensitive
         Connection conn = null;
@@ -182,14 +182,14 @@ public class ClientDAO {
     }
 
     /**
-     * Mapeia um ResultSet para um objeto Client.
+     * Mapeia um ResultSet para um objeto Cliente.
      *
      * @param rs O ResultSet.
-     * @return Um objeto Client.
+     * @return Um objeto Cliente.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    private Client mapResultSetToClient(ResultSet rs) throws SQLException {
-        Client client = new Client();
+    private Cliente mapResultSetToClient(ResultSet rs) throws SQLException {
+        Cliente client = new Cliente();
         client.setId(rs.getInt("id"));
         client.setName(rs.getString("name"));
         client.setDocument(rs.getString("document"));

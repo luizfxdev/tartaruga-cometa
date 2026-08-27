@@ -10,17 +10,17 @@ import java.util.List;
 import java.util.Optional;
 
 import com.tartarugacometasystem.config.DatabaseConfig;
-import com.tartarugacometasystem.model.DeliveryProduct;
+import com.tartarugacometasystem.model.ItemEntrega;
 
-public class DeliveryProductDAO {
+public class ItemEntregaDAO {
 
     /**
      * Cria um novo produto de entrega no banco de dados.
      *
-     * @param deliveryProduct O objeto DeliveryProduct a ser criado.
+     * @param deliveryProduct O objeto ItemEntrega a ser criado.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public void save(DeliveryProduct deliveryProduct) throws SQLException {
+    public void save(ItemEntrega deliveryProduct) throws SQLException {
         String sql = "INSERT INTO delivery_product (delivery_id, product_id, quantity, " + // Nome da tabela e colunas alterados
                      "unit_weight_kg, unit_volume_m3, unit_value, subtotal, observations) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -50,10 +50,10 @@ public class DeliveryProductDAO {
     /**
      * Atualiza um produto de entrega existente no banco de dados.
      *
-     * @param deliveryProduct O objeto DeliveryProduct a ser atualizado.
+     * @param deliveryProduct O objeto ItemEntrega a ser atualizado.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public void update(DeliveryProduct deliveryProduct) throws SQLException {
+    public void update(ItemEntrega deliveryProduct) throws SQLException {
         String sql = "UPDATE delivery_product SET quantity = ?, unit_weight_kg = ?, " + // Nome da tabela e colunas alterados
                      "unit_volume_m3 = ?, unit_value = ?, subtotal = ?, observations = ? WHERE id = ?";
 
@@ -110,10 +110,10 @@ public class DeliveryProductDAO {
      * Busca um produto de entrega pelo ID.
      *
      * @param id O ID do produto de entrega.
-     * @return Um Optional contendo o DeliveryProduct se encontrado, ou Optional.empty().
+     * @return Um Optional contendo o ItemEntrega se encontrado, ou Optional.empty().
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public Optional<DeliveryProduct> findById(Integer id) throws SQLException {
+    public Optional<ItemEntrega> findById(Integer id) throws SQLException {
         String sql = "SELECT id, delivery_id, product_id, quantity, unit_weight_kg, " + // Nome da tabela e colunas alterados
                      "unit_volume_m3, unit_value, subtotal, observations " +
                      "FROM delivery_product WHERE id = ?";
@@ -139,11 +139,11 @@ public class DeliveryProductDAO {
      * @return Uma lista de produtos de entrega associados à entrega.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public List<DeliveryProduct> findByDeliveryId(Integer deliveryId) throws SQLException {
+    public List<ItemEntrega> findByDeliveryId(Integer deliveryId) throws SQLException {
         String sql = "SELECT id, delivery_id, product_id, quantity, unit_weight_kg, " + // Nome da tabela e colunas alterados
                      "unit_volume_m3, unit_value, subtotal, observations " +
                      "FROM delivery_product WHERE delivery_id = ?";
-        List<DeliveryProduct> products = new ArrayList<>();
+        List<ItemEntrega> products = new ArrayList<>();
 
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -164,10 +164,10 @@ public class DeliveryProductDAO {
      *
      * @param deliveryId O ID da entrega.
      * @param productId O ID do produto.
-     * @return Um Optional contendo o DeliveryProduct se encontrado, ou Optional.empty().
+     * @return Um Optional contendo o ItemEntrega se encontrado, ou Optional.empty().
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public Optional<DeliveryProduct> findByDeliveryAndProduct(Integer deliveryId, Integer productId) throws SQLException {
+    public Optional<ItemEntrega> findByDeliveryAndProduct(Integer deliveryId, Integer productId) throws SQLException {
         String sql = "SELECT id, delivery_id, product_id, quantity, unit_weight_kg, " + // Nome da tabela e colunas alterados
                      "unit_volume_m3, unit_value, subtotal, observations " +
                      "FROM delivery_product WHERE delivery_id = ? AND product_id = ?";
@@ -188,14 +188,14 @@ public class DeliveryProductDAO {
     }
 
     /**
-     * Mapeia um ResultSet para um objeto DeliveryProduct.
+     * Mapeia um ResultSet para um objeto ItemEntrega.
      *
      * @param rs O ResultSet.
-     * @return Um objeto DeliveryProduct.
+     * @return Um objeto ItemEntrega.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    private DeliveryProduct mapResultSetToDeliveryProduct(ResultSet rs) throws SQLException {
-        DeliveryProduct deliveryProduct = new DeliveryProduct();
+    private ItemEntrega mapResultSetToDeliveryProduct(ResultSet rs) throws SQLException {
+        ItemEntrega deliveryProduct = new ItemEntrega();
         deliveryProduct.setId(rs.getInt("id"));
         deliveryProduct.setDeliveryId(rs.getInt("delivery_id")); // Nome da coluna alterado
         deliveryProduct.setProductId(rs.getInt("product_id")); // Nome da coluna alterado

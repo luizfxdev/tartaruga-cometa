@@ -4,23 +4,23 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Optional;
 
-import com.tartarugacometasystem.model.Address;
+import com.tartarugacometasystem.model.Endereco;
 import br.com.tartarugacometa.enums.TipoEndereco;
-import com.tartarugacometasystem.model.Client;
-import com.tartarugacometasystem.model.Delivery;
+import com.tartarugacometasystem.model.Cliente;
+import com.tartarugacometasystem.model.Entrega;
 import br.com.tartarugacometa.enums.StatusEntrega;
 import br.com.tartarugacometa.enums.TipoPessoa;
-import com.tartarugacometasystem.model.Product;
+import com.tartarugacometasystem.model.Produto;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 public class Mapper {
 
     /**
-     * Converte HttpServletRequest -> HashMap<String, String> -> Address.
+     * Converte HttpServletRequest -> HashMap<String, String> -> Endereco.
      * Mantém compatibilidade com o método já existente (mapToAddress(HashMap...)).
      */
-    public static Address mapToAddress(HttpServletRequest request) {
+    public static Endereco mapToAddress(HttpServletRequest request) {
         HashMap<String, String> params = new HashMap<>();
         request.getParameterMap().forEach((key, value) -> {
             if (value != null && value.length > 0) {
@@ -33,13 +33,13 @@ public class Mapper {
     }
 
     /**
-     * Mapeia um HashMap de parâmetros para um objeto Address.
+     * Mapeia um HashMap de parâmetros para um objeto Endereco.
      *
      * @param params HashMap contendo os parâmetros da requisição.
-     * @return Um objeto Address preenchido.
+     * @return Um objeto Endereco preenchido.
      */
-    public static Address mapToAddress(HashMap<String, String> params) {
-        Address address = new Address();
+    public static Endereco mapToAddress(HashMap<String, String> params) {
+        Endereco address = new Endereco();
 
         Optional.ofNullable(params.get("id"))
                 .filter(s -> !s.trim().isEmpty())
@@ -117,9 +117,9 @@ public class Mapper {
     }
 
     /**
-     * Converte HttpServletRequest -> HashMap<String, String> -> Client.
+     * Converte HttpServletRequest -> HashMap<String, String> -> Cliente.
      */
-    public static Client mapToClient(HttpServletRequest request) {
+    public static Cliente mapToClient(HttpServletRequest request) {
         HashMap<String, String> params = new HashMap<>();
         request.getParameterMap().forEach((key, value) -> {
             if (value != null && value.length > 0) {
@@ -132,10 +132,10 @@ public class Mapper {
     }
 
     /**
-     * Mapeia um HashMap de parâmetros para um objeto Client.
+     * Mapeia um HashMap de parâmetros para um objeto Cliente.
      */
-    public static Client mapToClient(HashMap<String, String> params) {
-        Client client = new Client();
+    public static Cliente mapToClient(HashMap<String, String> params) {
+        Cliente client = new Cliente();
 
         Optional.ofNullable(params.get("id"))
                 .filter(s -> !s.trim().isEmpty())
@@ -184,9 +184,9 @@ public class Mapper {
     }
 
     /**
-     * Converte HttpServletRequest -> HashMap<String, String> -> Product.
+     * Converte HttpServletRequest -> HashMap<String, String> -> Produto.
      */
-    public static Product mapToProduct(HttpServletRequest request) {
+    public static Produto mapToProduct(HttpServletRequest request) {
         HashMap<String, String> params = new HashMap<>();
         request.getParameterMap().forEach((key, value) -> {
             if (value != null && value.length > 0) {
@@ -199,10 +199,10 @@ public class Mapper {
     }
 
     /**
-     * Mapeia um HashMap de parâmetros para um objeto Product.
+     * Mapeia um HashMap de parâmetros para um objeto Produto.
      */
-    public static Product mapToProduct(HashMap<String, String> params) {
-        Product product = new Product();
+    public static Produto mapToProduct(HashMap<String, String> params) {
+        Produto product = new Produto();
 
         Optional.ofNullable(params.get("id"))
                 .filter(s -> !s.trim().isEmpty())
@@ -299,9 +299,9 @@ public class Mapper {
     }
 
     /**
-     * Converte HttpServletRequest -> HashMap<String, String> -> Delivery.
+     * Converte HttpServletRequest -> HashMap<String, String> -> Entrega.
      */
-    public static Delivery mapToDelivery(HttpServletRequest request) {
+    public static Entrega mapToDelivery(HttpServletRequest request) {
         HashMap<String, String> params = new HashMap<>();
         request.getParameterMap().forEach((key, value) -> {
             if (value != null && value.length > 0) {
@@ -314,10 +314,10 @@ public class Mapper {
     }
 
     /**
-     * Mapeia um HashMap de parâmetros para um objeto Delivery.
+     * Mapeia um HashMap de parâmetros para um objeto Entrega.
      */
-    public static Delivery mapToDelivery(HashMap<String, String> params) {
-        Delivery delivery = new Delivery();
+    public static Entrega mapToDelivery(HashMap<String, String> params) {
+        Entrega delivery = new Entrega();
 
         Optional.ofNullable(params.get("id"))
                 .filter(s -> !s.trim().isEmpty())
@@ -329,7 +329,7 @@ public class Mapper {
                 .filter(s -> !s.trim().isEmpty())
                 .ifPresent(delivery::setTrackingCode);
 
-        // CORREÇÃO 2: Mapeando 'shipperId' do JSP para 'senderId' no Delivery
+        // CORREÇÃO 2: Mapeando 'shipperId' do JSP para 'senderId' no Entrega
         Optional.ofNullable(params.get("shipperId")) // O nome do campo no JSP é 'shipperId'
                 .filter(s -> !s.trim().isEmpty())
                 .map(Integer::parseInt)

@@ -1,4 +1,4 @@
-// ProductDAO.java
+// ProdutoDAO.java
 package com.tartarugacometasystem.dao;
 
 import java.sql.Connection;
@@ -11,18 +11,18 @@ import java.util.List;
 import java.util.Optional;
 
 import com.tartarugacometasystem.config.DatabaseConfig;
-import com.tartarugacometasystem.model.Product;
+import com.tartarugacometasystem.model.Produto;
 
-public class ProductDAO {
+public class ProdutoDAO {
 
     /**
      * Cria um novo produto no banco de dados.
      *
-     * @param product O objeto Product a ser criado.
-     * @return O objeto Product com o ID gerado.
+     * @param product O objeto Produto a ser criado.
+     * @return O objeto Produto com o ID gerado.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public Product save(Product product) throws SQLException {
+    public Produto save(Produto product) throws SQLException {
         String sql = "INSERT INTO product (name, description, price, weight_kg, volume_m3, declared_value, category, is_active, stock_quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -62,10 +62,10 @@ public class ProductDAO {
      * Busca um produto pelo ID.
      *
      * @param id O ID do produto.
-     * @return Um Optional contendo o Product se encontrado, ou Optional.empty().
+     * @return Um Optional contendo o Produto se encontrado, ou Optional.empty().
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public Optional<Product> findById(Integer id) throws SQLException {
+    public Optional<Produto> findById(Integer id) throws SQLException {
         String sql = "SELECT id, name, description, price, weight_kg, volume_m3, declared_value, category, is_active, stock_quantity, created_at, updated_at FROM product WHERE id = ?";
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -88,10 +88,10 @@ public class ProductDAO {
     /**
      * Atualiza um produto existente no banco de dados.
      *
-     * @param product O objeto Product a ser atualizado.
+     * @param product O objeto Produto a ser atualizado.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public void update(Product product) throws SQLException {
+    public void update(Produto product) throws SQLException {
         String sql = "UPDATE product SET name = ?, description = ?, price = ?, weight_kg = ?, volume_m3 = ?, declared_value = ?, category = ?, is_active = ?, stock_quantity = ? WHERE id = ?";
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -146,8 +146,8 @@ public class ProductDAO {
      * @return Uma lista de todos os produtos.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public List<Product> getAll() throws SQLException {
-        List<Product> products = new ArrayList<>();
+    public List<Produto> getAll() throws SQLException {
+        List<Produto> products = new ArrayList<>();
         String sql = "SELECT id, name, description, price, weight_kg, volume_m3, declared_value, category, is_active, stock_quantity, created_at, updated_at FROM product";
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -173,8 +173,8 @@ public class ProductDAO {
      * @return Uma lista de produtos que correspondem ao termo de busca.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public List<Product> searchByName(String query) throws SQLException {
-        List<Product> products = new ArrayList<>();
+    public List<Produto> searchByName(String query) throws SQLException {
+        List<Produto> products = new ArrayList<>();
         String sql = "SELECT id, name, description, price, weight_kg, volume_m3, declared_value, category, is_active, stock_quantity, created_at, updated_at FROM product WHERE name ILIKE ? OR description ILIKE ?";
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -196,14 +196,14 @@ public class ProductDAO {
     }
 
     /**
-     * Mapeia um ResultSet para um objeto Product.
+     * Mapeia um ResultSet para um objeto Produto.
      *
      * @param rs O ResultSet.
-     * @return Um objeto Product.
+     * @return Um objeto Produto.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    private Product mapResultSetToProduct(ResultSet rs) throws SQLException {
-        Product product = new Product();
+    private Produto mapResultSetToProduct(ResultSet rs) throws SQLException {
+        Produto product = new Produto();
         product.setId(rs.getInt("id"));
         product.setName(rs.getString("name"));
         product.setDescription(rs.getString("description"));

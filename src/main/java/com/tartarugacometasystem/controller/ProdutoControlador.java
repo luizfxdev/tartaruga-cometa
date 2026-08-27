@@ -6,8 +6,8 @@ import java.util.HashMap; // Importar Mapper
 import java.util.List;
 import java.util.Optional;
 
-import com.tartarugacometasystem.model.Product;
-import com.tartarugacometasystem.service.ProductService;
+import com.tartarugacometasystem.model.Produto;
+import com.tartarugacometasystem.service.ProdutoBO;
 import com.tartarugacometasystem.util.Mapper;
 
 import jakarta.servlet.ServletException;
@@ -16,14 +16,14 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet("/products/*")
-public class ProductServlet extends HttpServlet {
-    private ProductService productService;
+@WebServlet("/produto/*")
+public class ProdutoControlador extends HttpServlet {
+    private ProdutoBO productService;
 
     @Override
     public void init() throws ServletException {
         super.init();
-        this.productService = new ProductService();
+        this.productService = new ProdutoBO();
     }
 
     @Override
@@ -72,7 +72,7 @@ public class ProductServlet extends HttpServlet {
 
     private void listProducts(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
-        List<Product> products = productService.getAllProducts();
+        List<Produto> products = productService.getAllProducts();
         request.setAttribute("products", products);
         request.getRequestDispatcher("/pages/products/list.jsp").forward(request, response);
     }
@@ -85,7 +85,7 @@ public class ProductServlet extends HttpServlet {
     private void showEditForm(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, ServletException, IOException {
         Integer id = extractId(pathInfo);
-        Optional<Product> product = productService.getProductById(id);
+        Optional<Produto> product = productService.getProductById(id);
 
         if (product.isPresent()) {
             request.setAttribute("product", product.get());
@@ -98,7 +98,7 @@ public class ProductServlet extends HttpServlet {
     private void viewProduct(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, ServletException, IOException {
         Integer id = extractId(pathInfo);
-        Optional<Product> product = productService.getProductById(id);
+        Optional<Produto> product = productService.getProductById(id);
 
         if (product.isPresent()) {
             request.setAttribute("product", product.get());
@@ -112,7 +112,7 @@ public class ProductServlet extends HttpServlet {
             throws SQLException, IOException, ServletException {
         HashMap<String, String> params = new HashMap<>();
         request.getParameterMap().forEach((key, value) -> params.put(key, value[0]));
-        Product product = Mapper.mapToProduct(params); // Usar Mapper
+        Produto product = Mapper.mapToProduct(params); // Usar Mapper
 
         try {
             if (product.getId() == null) {
@@ -141,13 +141,13 @@ public class ProductServlet extends HttpServlet {
     private void searchProducts(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
         String searchTerm = request.getParameter("query");
-        List<Product> products = productService.searchProductsByName(searchTerm);
+        List<Produto> products = productService.searchProductsByName(searchTerm);
         request.setAttribute("products", products);
         request.getRequestDispatcher("/pages/products/list.jsp").forward(request, response);
     }
 
-    // Método auxiliar para construir um objeto Product a partir dos parâmetros da requisição (usando Mapper)
-    private Product buildProductFromRequest(HttpServletRequest request) {
+    // Método auxiliar para construir um objeto Produto a partir dos parâmetros da requisição (usando Mapper)
+    private Produto buildProductFromRequest(HttpServletRequest request) {
         HashMap<String, String> params = new HashMap<>();
         request.getParameterMap().forEach((key, value) -> params.put(key, value[0]));
         return Mapper.mapToProduct(params);

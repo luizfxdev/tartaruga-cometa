@@ -4,36 +4,36 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-import com.tartarugacometasystem.dao.ClientDAO;
-import com.tartarugacometasystem.model.Client;
+import com.tartarugacometasystem.dao.ClienteDAO;
+import com.tartarugacometasystem.model.Cliente;
 import br.com.tartarugacometa.enums.TipoPessoa;
 import com.tartarugacometasystem.util.DateFormatter;
 import com.tartarugacometasystem.util.Validator;
 
-public class ClientService {
-    private final ClientDAO clientDAO;
+public class ClienteBO {
+    private final ClienteDAO clientDAO;
 
-    public ClientService() {
-        this.clientDAO = new ClientDAO();
+    public ClienteBO() {
+        this.clientDAO = new ClienteDAO();
     }
 
-    public Client createClient(Client client) throws SQLException {
+    public Cliente createClient(Cliente client) throws SQLException {
         validateClient(client);
         return clientDAO.save(client);
     }
 
-    public Optional<Client> getClientById(Integer id) throws SQLException {
-        Optional<Client> client = clientDAO.findById(id);
+    public Optional<Cliente> getClientById(Integer id) throws SQLException {
+        Optional<Cliente> client = clientDAO.findById(id);
         client.ifPresent(this::enrichClient);
         return client;
     }
 
-    public void updateClient(Client client) throws SQLException {
+    public void updateClient(Cliente client) throws SQLException {
         if (client.getId() == null) {
             throw new IllegalArgumentException("ID do cliente é obrigatório para atualização.");
         }
         validateClient(client);
-        Optional<Client> existingClient = clientDAO.findById(client.getId());
+        Optional<Cliente> existingClient = clientDAO.findById(client.getId());
         if (existingClient.isEmpty()) {
             throw new IllegalArgumentException("Cliente com ID " + client.getId() + " não encontrado.");
         }
@@ -44,19 +44,19 @@ public class ClientService {
         clientDAO.delete(id);
     }
 
-    public List<Client> getAllClients() throws SQLException {
-        List<Client> clients = clientDAO.getAll();
+    public List<Cliente> getAllClients() throws SQLException {
+        List<Cliente> clients = clientDAO.getAll();
         clients.forEach(this::enrichClient);
         return clients;
     }
 
-    public List<Client> search(String searchTerm) throws SQLException {
-        List<Client> clients = clientDAO.search(searchTerm);
+    public List<Cliente> search(String searchTerm) throws SQLException {
+        List<Cliente> clients = clientDAO.search(searchTerm);
         clients.forEach(this::enrichClient);
         return clients;
     }
 
-    private void validateClient(Client client) {
+    private void validateClient(Cliente client) {
         if (client.getName() == null || client.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Nome do cliente é obrigatório.");
         }
@@ -95,7 +95,7 @@ public class ClientService {
         }
     }
 
-    private void enrichClient(Client client) {
+    private void enrichClient(Cliente client) {
         if (client == null) return;
 
         if (client.getCreatedAt() != null) {

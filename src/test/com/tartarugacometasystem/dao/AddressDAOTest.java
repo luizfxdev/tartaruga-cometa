@@ -1,6 +1,6 @@
 package com.tartarugacometasystem.dao;
 
-import com.tartarugacometasystem.model.Address;
+import com.tartarugacometasystem.model.Endereco;
 import br.com.tartarugacometa.enums.TipoEndereco;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,13 +12,13 @@ import static org.junit.Assert.*;
 
 public class AddressDAOTest {
 
-    private AddressDAO addressDAO;
-    private Address testAddress;
+    private EnderecoDAO addressDAO;
+    private Endereco testAddress;
 
     @Before
     public void setUp() {
-        addressDAO = new AddressDAO();
-        testAddress = new Address();
+        addressDAO = new EnderecoDAO();
+        testAddress = new Endereco();
         testAddress.setStreet("Rua Teste");
         testAddress.setNumber("123");
         testAddress.setNeighborhood("Bairro Teste");
@@ -43,7 +43,7 @@ public class AddressDAOTest {
     public void testGetAddressById() {
         try {
             addressDAO.create(testAddress);
-            Optional<Address> retrieved = addressDAO.getById(testAddress.getId());
+            Optional<Endereco> retrieved = addressDAO.getById(testAddress.getId());
             assertTrue(retrieved.isPresent());
             assertEquals(testAddress.getStreet(), retrieved.get().getStreet());
         } catch (Exception e) {
@@ -58,7 +58,7 @@ public class AddressDAOTest {
             testAddress.setStreet("Rua Atualizada");
             addressDAO.update(testAddress);
 
-            Optional<Address> updated = addressDAO.getById(testAddress.getId());
+            Optional<Endereco> updated = addressDAO.getById(testAddress.getId());
             assertTrue(updated.isPresent());
             assertEquals("Rua Atualizada", updated.get().getStreet());
         } catch (Exception e) {
@@ -73,7 +73,7 @@ public class AddressDAOTest {
             Integer id = testAddress.getId();
             addressDAO.delete(id);
 
-            Optional<Address> deleted = addressDAO.getById(id);
+            Optional<Endereco> deleted = addressDAO.getById(id);
             assertFalse(deleted.isPresent());
         } catch (Exception e) {
             fail("Não deveria lançar exceção: " + e.getMessage());
@@ -83,7 +83,7 @@ public class AddressDAOTest {
     @Test
     public void testGetAllAddresses() {
         try {
-            List<Address> addresses = addressDAO.getAll();
+            List<Endereco> addresses = addressDAO.getAll();
             assertNotNull(addresses);
             assertTrue(addresses.size() >= 0);
         } catch (Exception e) {
@@ -94,7 +94,7 @@ public class AddressDAOTest {
     @Test
     public void testGetAddressByInvalidId() {
         try {
-            Optional<Address> result = addressDAO.getById(99999);
+            Optional<Endereco> result = addressDAO.getById(99999);
             assertFalse(result.isPresent());
         } catch (Exception e) {
             fail("Não deveria lançar exceção: " + e.getMessage());

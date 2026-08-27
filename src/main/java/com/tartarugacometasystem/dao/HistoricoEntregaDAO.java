@@ -10,19 +10,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.tartarugacometasystem.config.DatabaseConfig;
-import com.tartarugacometasystem.model.DeliveryHistory;
+import com.tartarugacometasystem.model.HistoricoEntrega;
 import br.com.tartarugacometa.enums.StatusEntrega;
 
-public class DeliveryHistoryDAO {
+public class HistoricoEntregaDAO {
 
     /**
      * Salva um novo registro de histórico de entrega no banco de dados.
      *
-     * @param history O objeto DeliveryHistory a ser salvo.
-     * @return O objeto DeliveryHistory com o ID gerado.
+     * @param history O objeto HistoricoEntrega a ser salvo.
+     * @return O objeto HistoricoEntrega com o ID gerado.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public DeliveryHistory save(DeliveryHistory history) throws SQLException {
+    public HistoricoEntrega save(HistoricoEntrega history) throws SQLException {
         String sql = "INSERT INTO delivery_history (delivery_id, previous_status, new_status, change_date, location, observations) VALUES (?, ?, ?, ?, ?, ?)";
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -55,8 +55,8 @@ public class DeliveryHistoryDAO {
      * @return Uma lista de registros de histórico para a entrega especificada.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public List<DeliveryHistory> getHistoryByDeliveryId(Integer deliveryId) throws SQLException {
-        List<DeliveryHistory> historyList = new ArrayList<>();
+    public List<HistoricoEntrega> getHistoryByDeliveryId(Integer deliveryId) throws SQLException {
+        List<HistoricoEntrega> historyList = new ArrayList<>();
         String sql = "SELECT id, delivery_id, previous_status, new_status, change_date, location, observations FROM delivery_history WHERE delivery_id = ? ORDER BY change_date ASC";
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -97,14 +97,14 @@ public class DeliveryHistoryDAO {
     }
 
     /**
-     * Mapeia um ResultSet para um objeto DeliveryHistory.
+     * Mapeia um ResultSet para um objeto HistoricoEntrega.
      *
      * @param rs O ResultSet.
-     * @return Um objeto DeliveryHistory.
+     * @return Um objeto HistoricoEntrega.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    private DeliveryHistory mapResultSetToDeliveryHistory(ResultSet rs) throws SQLException {
-        DeliveryHistory history = new DeliveryHistory();
+    private HistoricoEntrega mapResultSetToDeliveryHistory(ResultSet rs) throws SQLException {
+        HistoricoEntrega history = new HistoricoEntrega();
         history.setId(rs.getInt("id"));
         history.setDeliveryId(rs.getInt("delivery_id"));
 

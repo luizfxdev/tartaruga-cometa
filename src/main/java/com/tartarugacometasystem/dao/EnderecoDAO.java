@@ -11,19 +11,19 @@ import java.util.List;
 import java.util.Optional;
 
 import com.tartarugacometasystem.config.DatabaseConfig;
-import com.tartarugacometasystem.model.Address;
+import com.tartarugacometasystem.model.Endereco;
 import br.com.tartarugacometa.enums.TipoEndereco;
 
-public class AddressDAO {
+public class EnderecoDAO {
 
     /**
      * Cria um novo endereço no banco de dados.
      *
-     * @param address O objeto Address a ser criado.
-     * @return O objeto Address com o ID gerado.
+     * @param address O objeto Endereco a ser criado.
+     * @return O objeto Endereco com o ID gerado.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public Address save(Address address) throws SQLException {
+    public Endereco save(Endereco address) throws SQLException {
         String sql = "INSERT INTO address (client_id, street, number, complement, neighborhood, city, state, zip_code, country, is_main, address_type, reference) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -59,10 +59,10 @@ public class AddressDAO {
      * Busca um endereço pelo ID.
      *
      * @param id O ID do endereço.
-     * @return Um Optional contendo o Address se encontrado, ou Optional.empty().
+     * @return Um Optional contendo o Endereco se encontrado, ou Optional.empty().
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public Optional<Address> findById(Integer id) throws SQLException {
+    public Optional<Endereco> findById(Integer id) throws SQLException {
         String sql = "SELECT id, client_id, street, number, complement, neighborhood, city, state, zip_code, country, is_main, address_type, reference, created_at, updated_at FROM address WHERE id = ?";
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -85,10 +85,10 @@ public class AddressDAO {
     /**
      * Atualiza um endereço existente no banco de dados.
      *
-     * @param address O objeto Address a ser atualizado.
+     * @param address O objeto Endereco a ser atualizado.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public void update(Address address) throws SQLException {
+    public void update(Endereco address) throws SQLException {
         String sql = "UPDATE address SET client_id = ?, street = ?, number = ?, complement = ?, neighborhood = ?, city = ?, state = ?, zip_code = ?, country = ?, is_main = ?, address_type = ?, reference = ? WHERE id = ?";
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -140,8 +140,8 @@ public class AddressDAO {
      * @return Uma lista de todos os endereços.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public List<Address> getAll() throws SQLException {
-        List<Address> addresses = new ArrayList<>();
+    public List<Endereco> getAll() throws SQLException {
+        List<Endereco> addresses = new ArrayList<>();
         String sql = "SELECT id, client_id, street, number, complement, neighborhood, city, state, zip_code, country, is_main, address_type, reference, created_at, updated_at FROM address";
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -167,8 +167,8 @@ public class AddressDAO {
      * @return Uma lista de endereços associados ao cliente.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public List<Address> findByClientId(Integer clientId) throws SQLException {
-        List<Address> addresses = new ArrayList<>();
+    public List<Endereco> findByClientId(Integer clientId) throws SQLException {
+        List<Endereco> addresses = new ArrayList<>();
         String sql = "SELECT id, client_id, street, number, complement, neighborhood, city, state, zip_code, country, is_main, address_type, reference, created_at, updated_at FROM address WHERE client_id = ?";
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -238,14 +238,14 @@ public class AddressDAO {
 
 
     /**
-     * Mapeia um ResultSet para um objeto Address.
+     * Mapeia um ResultSet para um objeto Endereco.
      *
      * @param rs O ResultSet.
-     * @return Um objeto Address.
+     * @return Um objeto Endereco.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    private Address mapResultSetToAddress(ResultSet rs) throws SQLException {
-        Address address = new Address();
+    private Endereco mapResultSetToAddress(ResultSet rs) throws SQLException {
+        Endereco address = new Endereco();
         address.setId(rs.getInt("id"));
         address.setClientId(rs.getInt("client_id"));
         address.setStreet(rs.getString("street"));

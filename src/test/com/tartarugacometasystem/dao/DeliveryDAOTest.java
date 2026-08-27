@@ -1,6 +1,6 @@
 package com.tartarugacometasystem.dao;
 
-import com.tartarugacometasystem.model.Delivery;
+import com.tartarugacometasystem.model.Entrega;
 import br.com.tartarugacometa.enums.StatusEntrega;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,13 +12,13 @@ import static org.junit.Assert.*;
 
 public class DeliveryDAOTest {
 
-    private DeliveryDAO deliveryDAO;
-    private Delivery testDelivery;
+    private EntregaDAO deliveryDAO;
+    private Entrega testDelivery;
 
     @Before
     public void setUp() {
-        deliveryDAO = new DeliveryDAO();
-        testDelivery = new Delivery();
+        deliveryDAO = new EntregaDAO();
+        testDelivery = new Entrega();
         testDelivery.setTrackingCode("TC123456789");
         testDelivery.setShipperId(1);
         testDelivery.setRecipientId(2);
@@ -45,7 +45,7 @@ public class DeliveryDAOTest {
     public void testGetDeliveryById() {
         try {
             deliveryDAO.create(testDelivery);
-            Optional<Delivery> retrieved = deliveryDAO.getById(testDelivery.getId());
+            Optional<Entrega> retrieved = deliveryDAO.getById(testDelivery.getId());
             assertTrue(retrieved.isPresent());
             assertEquals(testDelivery.getTrackingCode(), retrieved.get().getTrackingCode());
         } catch (Exception e) {
@@ -60,7 +60,7 @@ public class DeliveryDAOTest {
             testDelivery.setStatus(StatusEntrega.EM_TRANSITO);
             deliveryDAO.update(testDelivery);
 
-            Optional<Delivery> updated = deliveryDAO.getById(testDelivery.getId());
+            Optional<Entrega> updated = deliveryDAO.getById(testDelivery.getId());
             assertTrue(updated.isPresent());
             assertEquals(StatusEntrega.EM_TRANSITO, updated.get().getStatus());
         } catch (Exception e) {
@@ -75,7 +75,7 @@ public class DeliveryDAOTest {
             Integer id = testDelivery.getId();
             deliveryDAO.delete(id);
 
-            Optional<Delivery> deleted = deliveryDAO.getById(id);
+            Optional<Entrega> deleted = deliveryDAO.getById(id);
             assertFalse(deleted.isPresent());
         } catch (Exception e) {
             fail("Não deveria lançar exceção: " + e.getMessage());
@@ -85,7 +85,7 @@ public class DeliveryDAOTest {
     @Test
     public void testGetAllDeliveries() {
         try {
-            List<Delivery> deliveries = deliveryDAO.getAll();
+            List<Entrega> deliveries = deliveryDAO.getAll();
             assertNotNull(deliveries);
             assertTrue(deliveries.size() >= 0);
         } catch (Exception e) {
@@ -97,7 +97,7 @@ public class DeliveryDAOTest {
     public void testGetDeliveryByTrackingCode() {
         try {
             deliveryDAO.create(testDelivery);
-            Optional<Delivery> result = deliveryDAO.getByTrackingCode(testDelivery.getTrackingCode());
+            Optional<Entrega> result = deliveryDAO.getByTrackingCode(testDelivery.getTrackingCode());
             assertTrue(result.isPresent());
             assertEquals(testDelivery.getTrackingCode(), result.get().getTrackingCode());
         } catch (Exception e) {
@@ -108,7 +108,7 @@ public class DeliveryDAOTest {
     @Test
     public void testGetDeliveryByInvalidId() {
         try {
-            Optional<Delivery> result = deliveryDAO.getById(99999);
+            Optional<Entrega> result = deliveryDAO.getById(99999);
             assertFalse(result.isPresent());
         } catch (Exception e) {
             fail("Não deveria lançar exceção: " + e.getMessage());

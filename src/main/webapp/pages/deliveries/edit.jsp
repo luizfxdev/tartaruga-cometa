@@ -29,7 +29,7 @@
             <label for="senderId">Remetente *</label>
             <select id="senderId" name="senderId" required>
                 <option value="">Selecione...</option>
-                <c:forEach var="client" items="${clients}">
+                <c:forEach var="client" items="${clientes}">
                     <option value="${client.id}" ${delivery != null && delivery.senderId == client.id ? 'selected' : ''}>
                         ${client.name} (${client.document})
                     </option>
@@ -41,7 +41,7 @@
             <label for="recipientId">Destinatário *</label>
             <select id="recipientId" name="recipientId" required>
                 <option value="">Selecione...</option>
-                <c:forEach var="client" items="${clients}">
+                <c:forEach var="client" items="${clientes}">
                     <option value="${client.id}" ${delivery != null && delivery.recipientId == client.id ? 'selected' : ''}>
                         ${client.name} (${client.document})
                     </option>
@@ -53,7 +53,7 @@
             <label for="originAddressId">Endereço de Origem *</label>
             <select id="originAddressId" name="originAddressId" required>
                 <option value="">Selecione...</option>
-                <c:forEach var="address" items="${addresses}">
+                <c:forEach var="address" items="${enderecos}">
                     <option value="${address.id}" ${delivery != null && delivery.originAddressId == address.id ? 'selected' : ''}>
                         ${address.street}, ${address.number} - ${address.city}, ${address.state} (${address.addressType.label})
                     </option>
@@ -65,7 +65,7 @@
             <label for="destinationAddressId">Endereço de Destino *</label>
             <select id="destinationAddressId" name="destinationAddressId" required>
                 <option value="">Selecione...</option>
-                <c:forEach var="address" items="${addresses}">
+                <c:forEach var="address" items="${enderecos}">
                     <option value="${address.id}" ${delivery != null && delivery.destinationAddressId == address.id ? 'selected' : ''}>
                         ${address.street}, ${address.number} - ${address.city}, ${address.state} (${address.addressType.label})
                     </option>

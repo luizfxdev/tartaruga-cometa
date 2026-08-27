@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects; // Importar para equals/hashCode
 
-public class Product {
+public class Produto {
     private Integer id;
     private String name;
     private String description;
@@ -18,14 +18,14 @@ public class Product {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public Product() {
+    public Produto() {
         // Opcional: Definir valores padrão para novos produtos
         this.createdAt = LocalDateTime.now();
         this.active = true; // Produtos novos são ativos por padrão
     }
 
     // Construtor completo (sem IDs e datas, mas com 'active')
-    public Product(String name, String description, BigDecimal price, BigDecimal weightKg,
+    public Produto(String name, String description, BigDecimal price, BigDecimal weightKg,
                    BigDecimal volumeM3, BigDecimal declaredValue, String category,
                    boolean active, Integer stockQuantity) { // Mudança: de Boolean isActive para boolean active
         this.name = name;
@@ -41,7 +41,7 @@ public class Product {
     }
 
     // Construtor completo (com IDs e datas, e 'active')
-    public Product(Integer id, String name, String description, BigDecimal price,
+    public Produto(Integer id, String name, String description, BigDecimal price,
                    BigDecimal weightKg, BigDecimal volumeM3, BigDecimal declaredValue,
                    String category, boolean active, Integer stockQuantity, // Mudança: de Boolean isActive para boolean active
                    LocalDateTime createdAt, LocalDateTime updatedAt) {
@@ -173,7 +173,7 @@ public class Product {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Product product = (Product) o;
+        Produto product = (Produto) o;
         return Objects.equals(id, product.id); // Usar Objects.equals para Integer
     }
 
@@ -184,7 +184,7 @@ public class Product {
 
     @Override
     public String toString() {
-        return "Product{" +
+        return "Produto{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +

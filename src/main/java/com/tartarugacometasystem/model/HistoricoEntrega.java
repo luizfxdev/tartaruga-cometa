@@ -3,7 +3,7 @@ package com.tartarugacometasystem.model;
 import java.time.LocalDateTime;
 import br.com.tartarugacometa.enums.StatusEntrega;
 
-public class DeliveryHistory {
+public class HistoricoEntrega {
     private Integer id;
     private Integer deliveryId;
     private StatusEntrega previousStatus;
@@ -21,11 +21,11 @@ public class DeliveryHistory {
     private String formattedNewStatus;  // NOVO
 
     // Construtor padrão
-    public DeliveryHistory() {
+    public HistoricoEntrega() {
     }
 
     // Construtor completo (sem IDs e datas)
-    public DeliveryHistory(Integer deliveryId, StatusEntrega previousStatus, StatusEntrega newStatus,
+    public HistoricoEntrega(Integer deliveryId, StatusEntrega previousStatus, StatusEntrega newStatus,
                            String observations, String user, String location) {
         this.deliveryId = deliveryId;
         this.previousStatus = previousStatus;
@@ -38,7 +38,7 @@ public class DeliveryHistory {
     }
 
     // Construtor completo (com IDs e datas)
-    public DeliveryHistory(Integer id, Integer deliveryId, StatusEntrega previousStatus, StatusEntrega newStatus,
+    public HistoricoEntrega(Integer id, Integer deliveryId, StatusEntrega previousStatus, StatusEntrega newStatus,
                            LocalDateTime changeDate, String observations, String user, String location,
                            LocalDateTime createdAt) {
         this.id = id;
@@ -160,7 +160,7 @@ public class DeliveryHistory {
 
     @Override
     public String toString() {
-        return "DeliveryHistory{" +
+        return "HistoricoEntrega{" +
                 "id=" + id +
                 ", deliveryId=" + deliveryId +
                 ", previousStatus=" + previousStatus +

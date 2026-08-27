@@ -5,44 +5,44 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import com.tartarugacometasystem.dao.DeliveryDAO;
-import com.tartarugacometasystem.dao.DeliveryHistoryDAO;
-import com.tartarugacometasystem.model.Delivery;
-import com.tartarugacometasystem.model.DeliveryHistory;
+import com.tartarugacometasystem.dao.EntregaDAO;
+import com.tartarugacometasystem.dao.HistoricoEntregaDAO;
+import com.tartarugacometasystem.model.Entrega;
+import com.tartarugacometasystem.model.HistoricoEntrega;
 import br.com.tartarugacometa.enums.StatusEntrega;
 import com.tartarugacometasystem.util.DateFormatter;
 
-public class DeliveryService {
-    private final DeliveryDAO deliveryDAO;
-    private final ClientService clientService;
-    private final AddressService addressService;
-    private final DeliveryHistoryDAO deliveryHistoryDAO;
+public class EntregaBO {
+    private final EntregaDAO deliveryDAO;
+    private final ClienteBO clientService;
+    private final EnderecoBO addressService;
+    private final HistoricoEntregaDAO deliveryHistoryDAO;
 
-    public DeliveryService() {
-        this.deliveryDAO = new DeliveryDAO();
-        this.clientService = new ClientService();
-        this.addressService = new AddressService();
-        this.deliveryHistoryDAO = new DeliveryHistoryDAO();
+    public EntregaBO() {
+        this.deliveryDAO = new EntregaDAO();
+        this.clientService = new ClienteBO();
+        this.addressService = new EnderecoBO();
+        this.deliveryHistoryDAO = new HistoricoEntregaDAO();
     }
 
     /**
      * Cria uma nova entrega.
      *
-     * @param delivery O objeto Delivery a ser criado.
-     * @return O objeto Delivery criado com o ID.
+     * @param delivery O objeto Entrega a ser criado.
+     * @return O objeto Entrega criado com o ID.
      * @throws SQLException             Se ocorrer um erro de SQL.
      * @throws IllegalArgumentException Se a entrega for inválida.
      */
-    public Delivery createDelivery(Delivery delivery) throws SQLException {
+    public Entrega createDelivery(Entrega delivery) throws SQLException {
         validateDelivery(delivery);
         delivery.setCreationDate(LocalDateTime.now()); // Definir data de criação
         delivery.setUpdatedAt(LocalDateTime.now());    // Definir data de atualização inicial
         delivery.setStatus(StatusEntrega.PENDENTE);    // Status inicial
 
-        Delivery createdDelivery = deliveryDAO.save(delivery);
+        Entrega createdDelivery = deliveryDAO.save(delivery);
 
         // Registrar histórico da criação
-        DeliveryHistory historyEntry = new DeliveryHistory();
+        HistoricoEntrega historyEntry = new HistoricoEntrega();
         historyEntry.setDeliveryId(createdDelivery.getId());
         historyEntry.setPreviousStatus(null); // Não havia status anterior
         historyEntry.setNewStatus(StatusEntrega.PENDENTE);
@@ -60,11 +60,11 @@ public class DeliveryService {
      * Busca uma entrega pelo ID.
      *
      * @param id O ID da entrega.
-     * @return Um Optional contendo o Delivery se encontrado, ou Optional.empty().
+     * @return Um Optional contendo o Entrega se encontrado, ou Optional.empty().
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public Optional<Delivery> getDeliveryById(Integer id) throws SQLException {
-        Optional<Delivery> delivery = deliveryDAO.findById(id);
+    public Optional<Entrega> getDeliveryById(Integer id) throws SQLException {
+        Optional<Entrega> delivery = deliveryDAO.findById(id);
         delivery.ifPresent(this::enrichDelivery); // Enriquecer se presente
         return delivery;
     }
@@ -72,28 +72,28 @@ public class DeliveryService {
     /**
      * Atualiza uma entrega existente.
      *
-     * @param delivery O objeto Delivery a ser atualizado.
+     * @param delivery O objeto Entrega a ser atualizado.
      * @throws SQLException             Se ocorrer um erro de SQL.
      * @throws IllegalArgumentException Se a entrega for inválida ou não existir.
      */
-    public void updateDelivery(Delivery delivery) throws SQLException {
+    public void updateDelivery(Entrega delivery) throws SQLException {
         if (delivery.getId() == null) {
             throw new IllegalArgumentException("ID da entrega é obrigatório para atualização.");
         }
         validateDelivery(delivery);
 
-        Optional<Delivery> existingDeliveryOpt = deliveryDAO.findById(delivery.getId());
+        Optional<Entrega> existingDeliveryOpt = deliveryDAO.findById(delivery.getId());
         if (existingDeliveryOpt.isEmpty()) {
             throw new IllegalArgumentException("Entrega com ID " + delivery.getId() + " não encontrada.");
         }
-        Delivery existingDelivery = existingDeliveryOpt.get();
+        Entrega existingDelivery = existingDeliveryOpt.get();
 
         // Atualizar a data de atualização
         delivery.setUpdatedAt(LocalDateTime.now());
 
         // Se o status mudou, registrar no histórico
         if (!existingDelivery.getStatus().equals(delivery.getStatus())) {
-            DeliveryHistory historyEntry = new DeliveryHistory();
+            HistoricoEntrega historyEntry = new HistoricoEntrega();
             historyEntry.setDeliveryId(delivery.getId());
             historyEntry.setPreviousStatus(existingDelivery.getStatus());
             historyEntry.setNewStatus(delivery.getStatus());
@@ -128,8 +128,8 @@ public class DeliveryService {
      * @return Uma lista de todas as entregas.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public List<Delivery> getAllDeliveries() throws SQLException {
-        List<Delivery> deliveries = deliveryDAO.getAll();
+    public List<Entrega> getAllDeliveries() throws SQLException {
+        List<Entrega> deliveries = deliveryDAO.getAll();
         deliveries.forEach(this::enrichDelivery); // Enriquecer cada entrega na lista
         return deliveries;
     }
@@ -141,8 +141,8 @@ public class DeliveryService {
      * @return Uma lista de entregas com o status especificado.<br>
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public List<Delivery> getDeliveriesByStatus(StatusEntrega status) throws SQLException {
-        List<Delivery> deliveries = deliveryDAO.findByStatus(status);
+    public List<Entrega> getDeliveriesByStatus(StatusEntrega status) throws SQLException {
+        List<Entrega> deliveries = deliveryDAO.findByStatus(status);
         deliveries.forEach(this::enrichDelivery); // Enriquecer cada entrega na lista
         return deliveries;
     }
@@ -151,11 +151,11 @@ public class DeliveryService {
      * Busca uma entrega pelo código de rastreio.
      *
      * @param trackingCode O código de rastreio.
-     * @return Um Optional contendo o Delivery se encontrado, ou Optional.empty().
+     * @return Um Optional contendo o Entrega se encontrado, ou Optional.empty().
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public Optional<Delivery> getDeliveryByTrackingCode(String trackingCode) throws SQLException {
-        Optional<Delivery> delivery = deliveryDAO.findByTrackingCode(trackingCode);
+    public Optional<Entrega> getDeliveryByTrackingCode(String trackingCode) throws SQLException {
+        Optional<Entrega> delivery = deliveryDAO.findByTrackingCode(trackingCode);
         delivery.ifPresent(this::enrichDelivery); // Enriquecer se presente
         return delivery;
     }
@@ -178,11 +178,11 @@ public class DeliveryService {
             throw new IllegalArgumentException("ID da entrega e novo status não podem ser nulos.");
         }
 
-        Optional<Delivery> deliveryOpt = deliveryDAO.findById(id);
+        Optional<Entrega> deliveryOpt = deliveryDAO.findById(id);
         if (deliveryOpt.isEmpty()) {
             throw new IllegalArgumentException("Entrega com ID " + id + " não encontrada.");
         }
-        Delivery delivery = deliveryOpt.get();
+        Entrega delivery = deliveryOpt.get();
         StatusEntrega oldStatus = delivery.getStatus();
 
         // Validações de transição de status
@@ -215,7 +215,7 @@ public class DeliveryService {
         deliveryDAO.update(delivery);
 
         // Registrar histórico
-        DeliveryHistory historyEntry = new DeliveryHistory();
+        HistoricoEntrega historyEntry = new HistoricoEntrega();
         historyEntry.setDeliveryId(delivery.getId());
         historyEntry.setPreviousStatus(oldStatus);
         historyEntry.setNewStatus(newStatus);
@@ -235,8 +235,8 @@ public class DeliveryService {
      * @return Uma lista de entregas que correspondem ao termo.
      * @throws SQLException Se ocorrer um erro de SQL.
      */
-    public List<Delivery> search(String searchTerm) throws SQLException {
-        List<Delivery> deliveries = deliveryDAO.search(searchTerm);
+    public List<Entrega> search(String searchTerm) throws SQLException {
+        List<Entrega> deliveries = deliveryDAO.search(searchTerm);
         deliveries.forEach(this::enrichDelivery); // Enriquecer cada entrega na lista
         return deliveries;
     }
@@ -246,12 +246,12 @@ public class DeliveryService {
     /**
      * Valida os campos de uma entrega.
      *
-     * @param delivery O objeto Delivery a ser validado.
+     * @param delivery O objeto Entrega a ser validado.
      * @throws IllegalArgumentException Se algum campo obrigatório estiver faltando ou for inválido.
      */
-    private void validateDelivery(Delivery delivery) {
+    private void validateDelivery(Entrega delivery) {
         if (delivery == null) {
-            throw new IllegalArgumentException("Objeto Delivery não pode ser nulo.");
+            throw new IllegalArgumentException("Objeto Entrega não pode ser nulo.");
         }
         if (delivery.getTrackingCode() == null || delivery.getTrackingCode().trim().isEmpty()) {
             throw new IllegalArgumentException("Código de rastreio é obrigatório.");
@@ -286,11 +286,11 @@ public class DeliveryService {
     }
 
     /**
-     * Enriquecer um objeto Delivery com dados formatados e objetos relacionados.
+     * Enriquecer um objeto Entrega com dados formatados e objetos relacionados.
      *
-     * @param delivery O objeto Delivery a ser enriquecido.
+     * @param delivery O objeto Entrega a ser enriquecido.
      */
-    private void enrichDelivery(Delivery delivery) {
+    private void enrichDelivery(Entrega delivery) {
         if (delivery == null) return;
 
         // Preencher os campos formatados
@@ -317,7 +317,7 @@ public class DeliveryService {
             }
             // Enriquecer com histórico da entrega
             if (delivery.getId() != null) {
-                List<DeliveryHistory> history = deliveryHistoryDAO.getHistoryByDeliveryId(delivery.getId());
+                List<HistoricoEntrega> history = deliveryHistoryDAO.getHistoryByDeliveryId(delivery.getId());
                 history.forEach(h -> {
                     h.setFormattedChangeDate(DateFormatter.formatLocalDateTime(h.getChangeDate()));
                     if (h.getPreviousStatus() != null) {

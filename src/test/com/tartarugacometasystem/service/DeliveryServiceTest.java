@@ -1,7 +1,7 @@
 package com.tartarugacometasystem.service;
 
-import com.tartarugacometasystem.dao.DeliveryDAO;
-import com.tartarugacometasystem.model.Delivery;
+import com.tartarugacometasystem.dao.EntregaDAO;
+import com.tartarugacometasystem.model.Entrega;
 import br.com.tartarugacometa.enums.StatusEntrega;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,22 +16,22 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@DisplayName("DeliveryService Tests")
+@DisplayName("EntregaBO Tests")
 class DeliveryServiceTest {
 
-    private DeliveryService deliveryService;
+    private EntregaBO deliveryService;
 
     @Mock
-    private DeliveryDAO deliveryDAO;
+    private EntregaDAO deliveryDAO;
 
-    private Delivery testDelivery;
+    private Entrega testDelivery;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        deliveryService = new DeliveryService();
+        deliveryService = new EntregaBO();
 
-        testDelivery = new Delivery();
+        testDelivery = new Entrega();
         testDelivery.setId(1);
         testDelivery.setTrackingCode("TC123456789");
         testDelivery.setShipperId(1);
@@ -67,7 +67,7 @@ class DeliveryServiceTest {
     void testGetDeliveryById() {
         assertDoesNotThrow(() -> {
             when(deliveryDAO.getById(1)).thenReturn(Optional.of(testDelivery));
-            Optional<Delivery> result = deliveryService.getDeliveryById(1);
+            Optional<Entrega> result = deliveryService.getDeliveryById(1);
             assertTrue(result.isPresent());
         });
     }
@@ -76,9 +76,9 @@ class DeliveryServiceTest {
     @DisplayName("Deve retornar lista de entregas")
     void testGetAllDeliveries() {
         assertDoesNotThrow(() -> {
-            List<Delivery> deliveries = Arrays.asList(testDelivery);
+            List<Entrega> deliveries = Arrays.asList(testDelivery);
             when(deliveryDAO.getAll()).thenReturn(deliveries);
-            List<Delivery> result = deliveryService.getAllDeliveries();
+            List<Entrega> result = deliveryService.getAllDeliveries();
             assertNotNull(result);
             assertEquals(1, result.size());
         });
@@ -89,7 +89,7 @@ class DeliveryServiceTest {
     void testGetDeliveryByTrackingCode() {
         assertDoesNotThrow(() -> {
             when(deliveryDAO.getByTrackingCode("TC123456789")).thenReturn(Optional.of(testDelivery));
-            Optional<Delivery> result = deliveryService.getDeliveryByTrackingCode("TC123456789");
+            Optional<Entrega> result = deliveryService.getDeliveryByTrackingCode("TC123456789");
             assertTrue(result.isPresent());
         });
     }
@@ -97,9 +97,9 @@ class DeliveryServiceTest {
     @Test
     @DisplayName("Deve retornar entregas por status")
     void testGetDeliverieesNotThrow(() -> {
-            List<Delivery> deliveries = Arrays.asList(testDelivery);
+            List<Entrega> deliveries = Arrays.asList(testDelivery);
             when(deliveryDAO.getByStatus(StatusEntrega.PENDENTE)).thenReturn(deliveries);
-            List<Delivery> result = deliveryService.getDeliveriesByStatus(StatusEntrega.PENDENTE);
+            List<Entrega> result = deliveryService.getDeliveriesByStatus(StatusEntrega.PENDENTE);
             assertNotNull(result);
             assertTrue(result.size() > 0);
         });

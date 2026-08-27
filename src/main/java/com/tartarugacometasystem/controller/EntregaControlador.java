@@ -5,11 +5,11 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-import com.tartarugacometasystem.model.Delivery;
+import com.tartarugacometasystem.model.Entrega;
 import br.com.tartarugacometa.enums.StatusEntrega;
-import com.tartarugacometasystem.service.AddressService;
-import com.tartarugacometasystem.service.ClientService;
-import com.tartarugacometasystem.service.DeliveryService;
+import com.tartarugacometasystem.service.EnderecoBO;
+import com.tartarugacometasystem.service.ClienteBO;
+import com.tartarugacometasystem.service.EntregaBO;
 import com.tartarugacometasystem.util.Mapper; // Certifique-se de que esta classe e seus métodos estão corretos
 
 import jakarta.servlet.ServletException;
@@ -18,20 +18,20 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet("/deliveries/*")
-public class DeliveryServlet extends HttpServlet {
+@WebServlet("/entrega/*")
+public class EntregaControlador extends HttpServlet {
 
-    private DeliveryService deliveryService;
-    private ClientService clientService;
-    private AddressService addressService;
+    private EntregaBO deliveryService;
+    private ClienteBO clientService;
+    private EnderecoBO addressService;
 
     @Override
     public void init() throws ServletException {
         super.init();
         // Instanciação dos serviços
-        this.deliveryService = new DeliveryService();
-        this.clientService = new ClientService();
-        this.addressService = new AddressService();
+        this.deliveryService = new EntregaBO();
+        this.clientService = new ClienteBO();
+        this.addressService = new EnderecoBO();
     }
 
     @Override
@@ -143,7 +143,7 @@ public class DeliveryServlet extends HttpServlet {
 
     private void listDeliveries(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
-        List<Delivery> deliveries = deliveryService.getAllDeliveries();
+        List<Entrega> deliveries = deliveryService.getAllDeliveries();
         request.setAttribute("deliveries", deliveries);
         request.getRequestDispatcher("/pages/deliveries/list.jsp").forward(request, response);
     }
@@ -165,7 +165,7 @@ public class DeliveryServlet extends HttpServlet {
             return;
         }
 
-        Optional<Delivery> delivery = deliveryService.getDeliveryById(id);
+        Optional<Entrega> delivery = deliveryService.getDeliveryById(id);
 
         if (delivery.isPresent()) {
             request.setAttribute("delivery", delivery.get());
@@ -188,10 +188,10 @@ public class DeliveryServlet extends HttpServlet {
             return;
         }
 
-        Optional<Delivery> deliveryOptional = deliveryService.getDeliveryById(deliveryId);
+        Optional<Entrega> deliveryOptional = deliveryService.getDeliveryById(deliveryId);
 
         if (deliveryOptional.isPresent()) {
-            Delivery delivery = deliveryOptional.get();
+            Entrega delivery = deliveryOptional.get();
             request.setAttribute("delivery", delivery);
             request.getRequestDispatcher("/pages/deliveries/view.jsp").forward(request, response);
         } else {
@@ -206,7 +206,7 @@ public class DeliveryServlet extends HttpServlet {
         // então podemos remover o try-catch daqui para evitar duplicação e simplificar.
         // Se o Mapper.mapToDelivery ou os services lançarem IllegalArgumentException,
         // ela será capturada no doPost.
-        Delivery delivery = Mapper.mapToDelivery(request);
+        Entrega delivery = Mapper.mapToDelivery(request);
 
         if (delivery.getId() == null) {
             deliveryService.createDelivery(delivery);
@@ -274,7 +274,7 @@ public class DeliveryServlet extends HttpServlet {
     private void searchDeliveries(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
         String searchTerm = request.getParameter("query");
-        List<Delivery> deliveries = deliveryService.search(searchTerm);
+        List<Entrega> deliveries = deliveryService.search(searchTerm);
         request.setAttribute("deliveries", deliveries);
         request.setAttribute("searchTerm", searchTerm); // Mantém o termo de busca no campo de busca
         request.getRequestDispatcher("/pages/deliveries/list.jsp").forward(request, response);
