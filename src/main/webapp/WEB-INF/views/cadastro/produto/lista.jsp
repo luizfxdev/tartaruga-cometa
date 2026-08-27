@@ -2,7 +2,7 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ page import="com.tartarugacometasystem.util.DateFormatter" %>
+<%@ page import="br.com.tartarugacometa.util.DateFormatter" %>
 
 <t:header title="Lista de Produtos">
     <t:breadcrumb />
