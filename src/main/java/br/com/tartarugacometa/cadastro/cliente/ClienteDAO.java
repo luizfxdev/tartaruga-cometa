@@ -11,201 +11,163 @@ import java.util.List;
 import java.util.Optional;
 
 import br.com.tartarugacometa.config.DatabaseConfig;
-import br.com.tartarugacometa.cadastro.cliente.Cliente;
 import br.com.tartarugacometa.enums.TipoPessoa;
 
 public class ClienteDAO {
 
-    /**
-     * Cria um novo cliente no banco de dados.
-     *
-     * @param client O objeto Cliente a ser criado.
-     * @return O objeto Cliente com o ID gerado.
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
-    public Cliente save(Cliente client) throws SQLException {
-        // created_at é gerenciado pelo DEFAULT CURRENT_TIMESTAMP no schema.sql
+    public void inserir(Connection conn, Cliente cliente) throws SQLException {
         String sql = "INSERT INTO client (name, document, email, phone, person_type) VALUES (?, ?, ?, ?, ?::person_type_enum)";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            conn = DatabaseConfig.getConnection();
-            pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            pstmt.setString(1, client.getName());
-            pstmt.setString(2, client.getDocument());
-            pstmt.setString(3, client.getEmail());
-            pstmt.setString(4, client.getPhone());
-            pstmt.setString(5, client.getPersonType().name()); // Salva o nome do enum (INDIVIDUAL ou LEGAL_ENTITY)
-            // updated_at é tratado por trigger, não precisa ser definido aqui para INSERT
+        try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, cliente.getName());
+            pstmt.setString(2, cliente.getDocument());
+            pstmt.setString(3, cliente.getEmail());
+            pstmt.setString(4, cliente.getPhone());
+            pstmt.setString(5, cliente.getPersonType().name());
             pstmt.executeUpdate();
 
-            rs = pstmt.getGeneratedKeys();
-            if (rs.next()) {
-                client.setId(rs.getInt(1));
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    cliente.setId(rs.getInt(1));
+                }
             }
-            return client;
-        } finally {
-            DatabaseConfig.close(conn, pstmt, rs);
         }
     }
 
-    /**
-     * Busca um cliente pelo ID.
-     *
-     * @param id O ID do cliente.
-     * @return Um Optional contendo o Cliente se encontrado, ou Optional.empty().
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
-    public Optional<Cliente> findById(Integer id) throws SQLException {
+    public Optional<Cliente> buscarPorId(Connection conn, Integer id) throws SQLException {
         String sql = "SELECT id, name, document, email, phone, person_type, created_at, updated_at FROM client WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            conn = DatabaseConfig.getConnection();
-            pstmt = conn.prepareStatement(sql);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
-            rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                return Optional.of(mapResultSetToClient(rs));
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapearClienteDoResultSet(rs));
+                }
+                return Optional.empty();
             }
-            return Optional.empty();
-        } finally {
-            DatabaseConfig.close(conn, pstmt, rs);
         }
     }
 
-    /**
-     * Atualiza um cliente existente no banco de dados.
-     *
-     * @param client O objeto Cliente a ser atualizado.
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
-    public void update(Cliente client) throws SQLException {
-        // updated_at é tratado por trigger, não precisa ser definido aqui explicitamente
+    public void atualizar(Connection conn, Cliente cliente) throws SQLException {
         String sql = "UPDATE client SET name = ?, document = ?, email = ?, phone = ?, person_type = ?::person_type_enum WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        try {
-            conn = DatabaseConfig.getConnection();
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, client.getName());
-            pstmt.setString(2, client.getDocument());
-            pstmt.setString(3, client.getEmail());
-            pstmt.setString(4, client.getPhone());
-            pstmt.setString(5, client.getPersonType().name()); // Salva o nome do enum (INDIVIDUAL ou LEGAL_ENTITY)
-            pstmt.setInt(6, client.getId());
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, cliente.getName());
+            pstmt.setString(2, cliente.getDocument());
+            pstmt.setString(3, cliente.getEmail());
+            pstmt.setString(4, cliente.getPhone());
+            pstmt.setString(5, cliente.getPersonType().name());
+            pstmt.setInt(6, cliente.getId());
             pstmt.executeUpdate();
-        } finally {
-            DatabaseConfig.close(conn, pstmt);
         }
     }
 
-    /**
-     * Deleta um cliente pelo ID.
-     *
-     * @param id O ID do cliente a ser deletado.
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
-    public void delete(Integer id) throws SQLException {
+    public void excluir(Connection conn, Integer id) throws SQLException {
         String sql = "DELETE FROM client WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        try {
-            conn = DatabaseConfig.getConnection();
-            pstmt = conn.prepareStatement(sql);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
-        } finally {
-            DatabaseConfig.close(conn, pstmt);
         }
     }
 
-    /**
-     * Busca todos os clientes.
-     *
-     * @return Uma lista de todos os clientes.
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
-    public List<Cliente> getAll() throws SQLException {
-        List<Cliente> clients = new ArrayList<>();
+    public List<Cliente> buscarTodos(Connection conn) throws SQLException {
+        List<Cliente> clientes = new ArrayList<>();
         String sql = "SELECT id, name, document, email, phone, person_type, created_at, updated_at FROM client";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            conn = DatabaseConfig.getConnection();
-            pstmt = conn.prepareStatement(sql);
-            rs = pstmt.executeQuery();
-
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
-                clients.add(mapResultSetToClient(rs));
+                clientes.add(mapearClienteDoResultSet(rs));
             }
-        } finally {
-            DatabaseConfig.close(conn, pstmt, rs);
         }
-        return clients;
+        return clientes;
     }
 
-    /**
-     * Implementa busca por nome, documento, email, etc.
-     *
-     * @param searchTerm O termo de busca.
-     * @return Uma lista de clientes que correspondem ao termo de busca.
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
-    public List<Cliente> search(String searchTerm) throws SQLException {
-        List<Cliente> clients = new ArrayList<>();
+    public List<Cliente> pesquisar(Connection conn, String termo) throws SQLException {
+        List<Cliente> clientes = new ArrayList<>();
         String sql = "SELECT id, name, document, email, phone, person_type, created_at, updated_at FROM client " +
-                     "WHERE name ILIKE ? OR document ILIKE ? OR email ILIKE ?"; // Usando ILIKE para busca case-insensitive
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            conn = DatabaseConfig.getConnection();
-            pstmt = conn.prepareStatement(sql);
-            String searchPattern = "%" + searchTerm + "%";
-            pstmt.setString(1, searchPattern);
-            pstmt.setString(2, searchPattern);
-            pstmt.setString(3, searchPattern);
-            rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                clients.add(mapResultSetToClient(rs));
+                     "WHERE name ILIKE ? OR document ILIKE ? OR email ILIKE ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            String padrao = "%" + termo + "%";
+            pstmt.setString(1, padrao);
+            pstmt.setString(2, padrao);
+            pstmt.setString(3, padrao);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    clientes.add(mapearClienteDoResultSet(rs));
+                }
             }
-        } finally {
-            DatabaseConfig.close(conn, pstmt, rs);
         }
-        return clients;
+        return clientes;
     }
 
-    /**
-     * Mapeia um ResultSet para um objeto Cliente.
-     *
-     * @param rs O ResultSet.
-     * @return Um objeto Cliente.
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
-    private Cliente mapResultSetToClient(ResultSet rs) throws SQLException {
-        Cliente client = new Cliente();
-        client.setId(rs.getInt("id"));
-        client.setName(rs.getString("name"));
-        client.setDocument(rs.getString("document"));
-        client.setEmail(rs.getString("email"));
-        client.setPhone(rs.getString("phone"));
-        client.setPersonType(TipoPessoa.fromValue(rs.getString("person_type"))); // Converte String para TipoPessoa
+    public boolean existeDocumento(Connection conn, String documento, Integer idExcluido) throws SQLException {
+        String sql = "SELECT 1 FROM client WHERE document = ?";
+        if (idExcluido != null) {
+            sql += " AND id != ?";
+        }
 
-        // created_at e updated_at são lidos do banco de dados
-        Timestamp createdAtTimestamp = rs.getTimestamp("created_at");
-        if (createdAtTimestamp != null) {
-            client.setCreatedAt(createdAtTimestamp.toLocalDateTime());
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, documento);
+            if (idExcluido != null) {
+                pstmt.setInt(2, idExcluido);
+            }
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
         }
-        Timestamp updatedAtTimestamp = rs.getTimestamp("updated_at");
-        if (updatedAtTimestamp != null) {
-            client.setUpdatedAt(updatedAtTimestamp.toLocalDateTime());
+    }
+
+    public Cliente save(Cliente cliente) throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            inserir(conn, cliente);
+            return cliente;
         }
-        return client;
+    }
+
+    public Optional<Cliente> findById(Integer id) throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            return buscarPorId(conn, id);
+        }
+    }
+
+    public void update(Cliente cliente) throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            atualizar(conn, cliente);
+        }
+    }
+
+    public void delete(Integer id) throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            excluir(conn, id);
+        }
+    }
+
+    public List<Cliente> getAll() throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            return buscarTodos(conn);
+        }
+    }
+
+    public List<Cliente> search(String termo) throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            return pesquisar(conn, termo);
+        }
+    }
+
+    private Cliente mapearClienteDoResultSet(ResultSet rs) throws SQLException {
+        Cliente cliente = new Cliente();
+        cliente.setId(rs.getInt("id"));
+        cliente.setName(rs.getString("name"));
+        cliente.setDocument(rs.getString("document"));
+        cliente.setEmail(rs.getString("email"));
+        cliente.setPhone(rs.getString("phone"));
+        cliente.setPersonType(TipoPessoa.fromValue(rs.getString("person_type")));
+
+        Timestamp criadoEm = rs.getTimestamp("created_at");
+        if (criadoEm != null) {
+            cliente.setCreatedAt(criadoEm.toLocalDateTime());
+        }
+        Timestamp atualizadoEm = rs.getTimestamp("updated_at");
+        if (atualizadoEm != null) {
+            cliente.setUpdatedAt(atualizadoEm.toLocalDateTime());
+        }
+        return cliente;
     }
 }

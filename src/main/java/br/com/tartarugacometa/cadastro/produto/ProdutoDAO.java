@@ -1,4 +1,3 @@
-// ProdutoDAO.java
 package br.com.tartarugacometa.cadastro.produto;
 
 import java.sql.Connection;
@@ -6,223 +5,161 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import br.com.tartarugacometa.config.DatabaseConfig;
-import br.com.tartarugacometa.cadastro.produto.Produto;
 
 public class ProdutoDAO {
 
-    /**
-     * Cria um novo produto no banco de dados.
-     *
-     * @param product O objeto Produto a ser criado.
-     * @return O objeto Produto com o ID gerado.
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
-    public Produto save(Produto product) throws SQLException {
+    public void inserir(Connection conn, Produto produto) throws SQLException {
         String sql = "INSERT INTO product (name, description, price, weight_kg, volume_m3, declared_value, category, is_active, stock_quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            conn = DatabaseConfig.getConnection();
-            pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            pstmt.setString(1, product.getName());
-            pstmt.setString(2, product.getDescription());
-            pstmt.setBigDecimal(3, product.getPrice());
-            pstmt.setBigDecimal(4, product.getWeightKg());
-            pstmt.setBigDecimal(5, product.getVolumeM3());
-            pstmt.setBigDecimal(6, product.getDeclaredValue());
-            pstmt.setBigDecimal(7, product.getDeclaredValue()); // Parece um erro aqui, deveria ser category
-            pstmt.setString(7, product.getCategory()); // Correção: Mover para a posição correta e usar getCategory()
-
-            // Correção: Usar o getter isActive() e não precisa mais verificar null se for boolean primitivo
-            pstmt.setBoolean(8, product.isActive()); // Mudança: de getIsActive() para isActive()
-
-            // Correção para evitar unboxing de null
-            Integer stockQuantity = product.getStockQuantity();
-            pstmt.setInt(9, stockQuantity != null ? stockQuantity : 0);
-
+        try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, produto.getName());
+            pstmt.setString(2, produto.getDescription());
+            pstmt.setBigDecimal(3, produto.getPrice());
+            pstmt.setBigDecimal(4, produto.getWeightKg());
+            pstmt.setBigDecimal(5, produto.getVolumeM3());
+            pstmt.setBigDecimal(6, produto.getDeclaredValue());
+            pstmt.setString(7, produto.getCategory());
+            pstmt.setBoolean(8, produto.isActive());
+            Integer estoque = produto.getStockQuantity();
+            pstmt.setInt(9, estoque != null ? estoque : 0);
             pstmt.executeUpdate();
 
-            rs = pstmt.getGeneratedKeys();
-            if (rs.next()) {
-                product.setId(rs.getInt(1));
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    produto.setId(rs.getInt(1));
+                }
             }
-            return product;
-        } finally {
-            DatabaseConfig.close(conn, pstmt, rs);
         }
     }
 
-    /**
-     * Busca um produto pelo ID.
-     *
-     * @param id O ID do produto.
-     * @return Um Optional contendo o Produto se encontrado, ou Optional.empty().
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
-    public Optional<Produto> findById(Integer id) throws SQLException {
+    public Optional<Produto> buscarPorId(Connection conn, Integer id) throws SQLException {
         String sql = "SELECT id, name, description, price, weight_kg, volume_m3, declared_value, category, is_active, stock_quantity, created_at, updated_at FROM product WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            conn = DatabaseConfig.getConnection();
-            pstmt = conn.prepareStatement(sql);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
-            rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                return Optional.of(mapResultSetToProduct(rs));
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapearProdutoDoResultSet(rs));
+                }
+                return Optional.empty();
             }
-            return Optional.empty();
-        } finally {
-            DatabaseConfig.close(conn, pstmt, rs);
         }
     }
 
-    /**
-     * Atualiza um produto existente no banco de dados.
-     *
-     * @param product O objeto Produto a ser atualizado.
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
-    public void update(Produto product) throws SQLException {
+    public void atualizar(Connection conn, Produto produto) throws SQLException {
         String sql = "UPDATE product SET name = ?, description = ?, price = ?, weight_kg = ?, volume_m3 = ?, declared_value = ?, category = ?, is_active = ?, stock_quantity = ? WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        try {
-            conn = DatabaseConfig.getConnection();
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, product.getName());
-            pstmt.setString(2, product.getDescription());
-            pstmt.setBigDecimal(3, product.getPrice());
-            pstmt.setBigDecimal(4, product.getWeightKg());
-            pstmt.setBigDecimal(5, product.getVolumeM3());
-            pstmt.setBigDecimal(6, product.getDeclaredValue());
-            pstmt.setString(7, product.getCategory());
-
-            // Correção: Usar o getter isActive() e não precisa mais verificar null se for boolean primitivo
-            pstmt.setBoolean(8, product.isActive()); // Mudança: de getIsActive() para isActive()
-
-            // Correção para evitar unboxing de null
-            Integer stockQuantity = product.getStockQuantity();
-            pstmt.setInt(9, stockQuantity != null ? stockQuantity : 0);
-
-            pstmt.setInt(10, product.getId());
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, produto.getName());
+            pstmt.setString(2, produto.getDescription());
+            pstmt.setBigDecimal(3, produto.getPrice());
+            pstmt.setBigDecimal(4, produto.getWeightKg());
+            pstmt.setBigDecimal(5, produto.getVolumeM3());
+            pstmt.setBigDecimal(6, produto.getDeclaredValue());
+            pstmt.setString(7, produto.getCategory());
+            pstmt.setBoolean(8, produto.isActive());
+            Integer estoque = produto.getStockQuantity();
+            pstmt.setInt(9, estoque != null ? estoque : 0);
+            pstmt.setInt(10, produto.getId());
             pstmt.executeUpdate();
-        } finally {
-            DatabaseConfig.close(conn, pstmt);
         }
     }
 
-    /**
-     * Deleta um produto pelo ID.
-     *
-     * @param id O ID do produto a ser deletado.
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
-    public void delete(Integer id) throws SQLException {
+    public void excluir(Connection conn, Integer id) throws SQLException {
         String sql = "DELETE FROM product WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        try {
-            conn = DatabaseConfig.getConnection();
-            pstmt = conn.prepareStatement(sql);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
-        } finally {
-            DatabaseConfig.close(conn, pstmt);
         }
     }
 
-    /**
-     * Busca todos os produtos.
-     *
-     * @return Uma lista de todos os produtos.
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
-    public List<Produto> getAll() throws SQLException {
-        List<Produto> products = new ArrayList<>();
+    public List<Produto> buscarTodos(Connection conn) throws SQLException {
+        List<Produto> produtos = new ArrayList<>();
         String sql = "SELECT id, name, description, price, weight_kg, volume_m3, declared_value, category, is_active, stock_quantity, created_at, updated_at FROM product";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            conn = DatabaseConfig.getConnection();
-            pstmt = conn.prepareStatement(sql);
-            rs = pstmt.executeQuery();
-
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
-                products.add(mapResultSetToProduct(rs));
+                produtos.add(mapearProdutoDoResultSet(rs));
             }
-        } finally {
-            DatabaseConfig.close(conn, pstmt, rs);
         }
-        return products;
+        return produtos;
     }
 
-    /**
-     * Busca produtos pelo nome ou descrição.
-     *
-     * @param query O termo de busca.
-     * @return Uma lista de produtos que correspondem ao termo de busca.
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
-    public List<Produto> searchByName(String query) throws SQLException {
-        List<Produto> products = new ArrayList<>();
-        String sql = "SELECT id, name, description, price, weight_kg, volume_m3, declared_value, category, is_active, stock_quantity, created_at, updated_at FROM product WHERE name ILIKE ? OR description ILIKE ?";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            conn = DatabaseConfig.getConnection();
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, "%" + query + "%");
-            pstmt.setString(2, "%" + query + "%");
-            rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                products.add(mapResultSetToProduct(rs));
+    public List<Produto> pesquisarPorNome(Connection conn, String nome) throws SQLException {
+        List<Produto> produtos = new ArrayList<>();
+        String sql = "SELECT id, name, description, price, weight_kg, volume_m3, declared_value, category, is_active, stock_quantity, created_at, updated_at FROM product WHERE name ILIKE ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, "%" + nome + "%");
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    produtos.add(mapearProdutoDoResultSet(rs));
+                }
             }
-        } finally {
-            DatabaseConfig.close(conn, pstmt, rs);
         }
-        return products;
+        return produtos;
     }
 
-    /**
-     * Mapeia um ResultSet para um objeto Produto.
-     *
-     * @param rs O ResultSet.
-     * @return Um objeto Produto.
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
-    private Produto mapResultSetToProduct(ResultSet rs) throws SQLException {
-        Produto product = new Produto();
-        product.setId(rs.getInt("id"));
-        product.setName(rs.getString("name"));
-        product.setDescription(rs.getString("description"));
-        product.setPrice(rs.getBigDecimal("price"));
-        product.setWeightKg(rs.getBigDecimal("weight_kg"));
-        product.setVolumeM3(rs.getBigDecimal("volume_m3"));
-        product.setDeclaredValue(rs.getBigDecimal("declared_value"));
-        product.setCategory(rs.getString("category"));
-        product.setActive(rs.getBoolean("is_active")); // Mudança: de setIsActive() para setActive()
-        product.setStockQuantity(rs.getInt("stock_quantity"));
-        // É importante verificar se as colunas de data não são nulas no banco de dados
-        // antes de chamar toLocalDateTime(), para evitar NullPointerException.
-        // Ou garantir que o banco sempre retorne um valor.
-        if (rs.getTimestamp("created_at") != null) {
-            product.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+    public Produto save(Produto produto) throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            inserir(conn, produto);
+            return produto;
         }
-        if (rs.getTimestamp("updated_at") != null) {
-            product.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
+    }
+
+    public Optional<Produto> findById(Integer id) throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            return buscarPorId(conn, id);
         }
-        return product;
+    }
+
+    public void update(Produto produto) throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            atualizar(conn, produto);
+        }
+    }
+
+    public void delete(Integer id) throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            excluir(conn, id);
+        }
+    }
+
+    public List<Produto> getAll() throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            return buscarTodos(conn);
+        }
+    }
+
+    public List<Produto> searchByName(String nome) throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            return pesquisarPorNome(conn, nome);
+        }
+    }
+
+    private Produto mapearProdutoDoResultSet(ResultSet rs) throws SQLException {
+        Produto produto = new Produto();
+        produto.setId(rs.getInt("id"));
+        produto.setName(rs.getString("name"));
+        produto.setDescription(rs.getString("description"));
+        produto.setPrice(rs.getBigDecimal("price"));
+        produto.setWeightKg(rs.getBigDecimal("weight_kg"));
+        produto.setVolumeM3(rs.getBigDecimal("volume_m3"));
+        produto.setDeclaredValue(rs.getBigDecimal("declared_value"));
+        produto.setCategory(rs.getString("category"));
+        produto.setActive(rs.getBoolean("is_active"));
+        produto.setStockQuantity(rs.getInt("stock_quantity"));
+
+        Timestamp criadoEm = rs.getTimestamp("created_at");
+        if (criadoEm != null) {
+            produto.setCreatedAt(criadoEm.toLocalDateTime());
+        }
+        Timestamp atualizadoEm = rs.getTimestamp("updated_at");
+        if (atualizadoEm != null) {
+            produto.setUpdatedAt(atualizadoEm.toLocalDateTime());
+        }
+        return produto;
     }
 }

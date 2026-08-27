@@ -10,115 +10,86 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.tartarugacometa.config.DatabaseConfig;
-import br.com.tartarugacometa.entrega.historico.HistoricoEntrega;
 import br.com.tartarugacometa.enums.StatusEntrega;
 
 public class HistoricoEntregaDAO {
 
-    /**
-     * Salva um novo registro de histórico de entrega no banco de dados.
-     *
-     * @param history O objeto HistoricoEntrega a ser salvo.
-     * @return O objeto HistoricoEntrega com o ID gerado.
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
-    public HistoricoEntrega save(HistoricoEntrega history) throws SQLException {
+    public void inserir(Connection conn, HistoricoEntrega historico) throws SQLException {
         String sql = "INSERT INTO delivery_history (delivery_id, previous_status, new_status, change_date, location, observations) VALUES (?, ?, ?, ?, ?, ?)";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            conn = DatabaseConfig.getConnection();
-            pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            pstmt.setInt(1, history.getDeliveryId());
-            pstmt.setString(2, history.getPreviousStatus() != null ? history.getPreviousStatus().name() : null);
-            pstmt.setString(3, history.getNewStatus() != null ? history.getNewStatus().name() : null);
-            pstmt.setTimestamp(4, Timestamp.valueOf(history.getChangeDate()));
-            pstmt.setString(5, history.getLocation());
-            pstmt.setString(6, history.getObservations());
-            pstmt.executeUpdate();
+        try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setInt(1, historico.getDeliveryId());
+            stmt.setString(2, historico.getPreviousStatus() != null ? historico.getPreviousStatus().name() : null);
+            stmt.setString(3, historico.getNewStatus().name());
+            stmt.setTimestamp(4, Timestamp.valueOf(historico.getChangeDate()));
+            stmt.setString(5, historico.getLocation());
+            stmt.setString(6, historico.getObservations());
+            stmt.executeUpdate();
 
-            rs = pstmt.getGeneratedKeys();
-            if (rs.next()) {
-                history.setId(rs.getInt(1));
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    historico.setId(rs.getInt(1));
+                }
             }
-            return history;
-        } finally {
-            DatabaseConfig.close(conn, pstmt, rs);
         }
     }
 
-    /**
-     * Busca o histórico de uma entrega pelo ID da entrega.
-     *
-     * @param deliveryId O ID da entrega.
-     * @return Uma lista de registros de histórico para a entrega especificada.
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
+    public List<HistoricoEntrega> buscarPorEntregaId(Connection conn, Integer deliveryId) throws SQLException {
+        List<HistoricoEntrega> historicos = new ArrayList<>();
+        String sql = "SELECT id, delivery_id, previous_status, new_status, change_date, location, observations FROM delivery_history WHERE delivery_id = ? ORDER BY change_date";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, deliveryId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    historicos.add(mapear(rs));
+                }
+            }
+        }
+        return historicos;
+    }
+
+    public void excluirPorEntregaId(Connection conn, Integer deliveryId) throws SQLException {
+        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM delivery_history WHERE delivery_id = ?")) {
+            stmt.setInt(1, deliveryId);
+            stmt.executeUpdate();
+        }
+    }
+
+    public void save(HistoricoEntrega historico) throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            inserir(conn, historico);
+        }
+    }
+
     public List<HistoricoEntrega> getHistoryByDeliveryId(Integer deliveryId) throws SQLException {
-        List<HistoricoEntrega> historyList = new ArrayList<>();
-        String sql = "SELECT id, delivery_id, previous_status, new_status, change_date, location, observations FROM delivery_history WHERE delivery_id = ? ORDER BY change_date ASC";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            conn = DatabaseConfig.getConnection();
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, deliveryId);
-            rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                historyList.add(mapResultSetToDeliveryHistory(rs));
-            }
-        } finally {
-            DatabaseConfig.close(conn, pstmt, rs);
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            return buscarPorEntregaId(conn, deliveryId);
         }
-        return historyList;
     }
 
-    /**
-     * Deleta todos os registros de histórico associados a uma entrega.
-     *
-     * @param deliveryId O ID da entrega cujos históricos serão deletados.
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
     public void deleteByDeliveryId(Integer deliveryId) throws SQLException {
-        String sql = "DELETE FROM delivery_history WHERE delivery_id = ?";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        try {
-            conn = DatabaseConfig.getConnection();
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, deliveryId);
-            pstmt.executeUpdate();
-        } finally {
-            DatabaseConfig.close(conn, pstmt);
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            excluirPorEntregaId(conn, deliveryId);
         }
     }
 
-    /**
-     * Mapeia um ResultSet para um objeto HistoricoEntrega.
-     *
-     * @param rs O ResultSet.
-     * @return Um objeto HistoricoEntrega.
-     * @throws SQLException Se ocorrer um erro de SQL.
-     */
-    private HistoricoEntrega mapResultSetToDeliveryHistory(ResultSet rs) throws SQLException {
-        HistoricoEntrega history = new HistoricoEntrega();
-        history.setId(rs.getInt("id"));
-        history.setDeliveryId(rs.getInt("delivery_id"));
-
-        String previousStatusStr = rs.getString("previous_status");
-        history.setPreviousStatus(previousStatusStr != null ? StatusEntrega.fromValue(previousStatusStr) : null);
-
-        String newStatusStr = rs.getString("new_status");
-        history.setNewStatus(newStatusStr != null ? StatusEntrega.fromValue(newStatusStr) : null);
-
-        Timestamp changeDateTimestamp = rs.getTimestamp("change_date");
-        history.setChangeDate(changeDateTimestamp != null ? changeDateTimestamp.toLocalDateTime() : null);
-
-        history.setLocation(rs.getString("location"));
-        history.setObservations(rs.getString("observations"));
-        return history;
+    private HistoricoEntrega mapear(ResultSet rs) throws SQLException {
+        HistoricoEntrega hist = new HistoricoEntrega();
+        hist.setId(rs.getInt("id"));
+        hist.setDeliveryId(rs.getInt("delivery_id"));
+        
+        String prevStatus = rs.getString("previous_status");
+        hist.setPreviousStatus(prevStatus != null ? StatusEntrega.valueOf(prevStatus) : null);
+        
+        String newStatus = rs.getString("new_status");
+        hist.setNewStatus(newStatus != null ? StatusEntrega.valueOf(newStatus) : null);
+        
+        Timestamp changeDate = rs.getTimestamp("change_date");
+        if (changeDate != null) {
+            hist.setChangeDate(changeDate.toLocalDateTime());
+        }
+        
+        hist.setLocation(rs.getString("location"));
+        hist.setObservations(rs.getString("observations"));
+        return hist;
     }
 }

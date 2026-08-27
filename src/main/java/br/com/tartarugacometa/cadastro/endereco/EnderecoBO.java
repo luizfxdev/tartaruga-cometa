@@ -1,174 +1,240 @@
 package br.com.tartarugacometa.cadastro.endereco;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-import br.com.tartarugacometa.cadastro.endereco.EnderecoDAO;
-import br.com.tartarugacometa.cadastro.endereco.Endereco;
-import br.com.tartarugacometa.cadastro.cliente.Cliente;
-import br.com.tartarugacometa.cadastro.cliente.ClienteBO;
+import br.com.tartarugacometa.exception.CadastroException;
+import br.com.tartarugacometa.util.Conexao;
 import br.com.tartarugacometa.util.DateFormatter;
 
 public class EnderecoBO {
-
-    private final EnderecoDAO addressDAO;
-    private final ClienteBO clientService;
+    private final EnderecoDAO enderecoDAO;
 
     public EnderecoBO() {
-        this.addressDAO = new EnderecoDAO();
-        this.clientService = new ClienteBO();
+        this.enderecoDAO = new EnderecoDAO();
     }
 
-    // ==============================
-    // Métodos auxiliares para compatibilidade com o servlet
-    // ==============================
-
-    /** Compatibilidade: addAddress → createAddress */
-    public Endereco addAddress(Endereco address) throws SQLException {
-        return createAddress(address);
+    public EnderecoBO(EnderecoDAO enderecoDAO) {
+        this.enderecoDAO = enderecoDAO;
     }
 
-    /** Compatibilidade: setPrincipalAddress → setMainAddress */
+    public void salvar(Endereco endereco) throws CadastroException {
+        validar(endereco);
+        try (Connection conexao = Conexao.abrir()) {
+            conexao.setAutoCommit(false);
+            try {
+                if (endereco.getId() == null) {
+                    enderecoDAO.inserir(conexao, endereco);
+                } else {
+                    enderecoDAO.atualizar(conexao, endereco);
+                }
+                conexao.commit();
+            } catch (SQLException e) {
+                conexao.rollback();
+                throw new CadastroException("Não foi possível salvar o endereço.", e);
+            }
+        } catch (SQLException e) {
+            throw new CadastroException("Falha de conexão com o banco.", e);
+        }
+    }
+
+    public Optional<Endereco> buscarPorId(Integer id) throws CadastroException {
+        try (Connection conexao = Conexao.abrir()) {
+            Optional<Endereco> endereco = enderecoDAO.buscarPorId(conexao, id);
+            endereco.ifPresent(this::enriquecer);
+            return endereco;
+        } catch (SQLException e) {
+            throw new CadastroException("Falha ao buscar endereço.", e);
+        }
+    }
+
+    public void excluir(Integer id) throws CadastroException {
+        try (Connection conexao = Conexao.abrir()) {
+            conexao.setAutoCommit(false);
+            try {
+                enderecoDAO.excluir(conexao, id);
+                conexao.commit();
+            } catch (SQLException e) {
+                conexao.rollback();
+                throw new CadastroException("Não foi possível excluir o endereço.", e);
+            }
+        } catch (SQLException e) {
+            throw new CadastroException("Falha de conexão com o banco.", e);
+        }
+    }
+
+    public List<Endereco> listarTodos() throws CadastroException {
+        try (Connection conexao = Conexao.abrir()) {
+            List<Endereco> enderecos = enderecoDAO.buscarTodos(conexao);
+            enderecos.forEach(this::enriquecer);
+            return enderecos;
+        } catch (SQLException e) {
+            throw new CadastroException("Falha ao listar endereços.", e);
+        }
+    }
+
+    public List<Endereco> listarPorClienteId(Integer clienteId) throws CadastroException {
+        try (Connection conexao = Conexao.abrir()) {
+            List<Endereco> enderecos = enderecoDAO.buscarPorClienteId(conexao, clienteId);
+            enderecos.forEach(this::enriquecer);
+            return enderecos;
+        } catch (SQLException e) {
+            throw new CadastroException("Falha ao listar endereços do cliente.", e);
+        }
+    }
+
+    public void definirEnderecoPrincipal(Integer clienteId, Integer enderecoId) throws CadastroException {
+        try (Connection conexao = Conexao.abrir()) {
+            conexao.setAutoCommit(false);
+            try {
+                enderecoDAO.definirEnderecoPrincipal(conexao, clienteId, enderecoId);
+                conexao.commit();
+            } catch (SQLException e) {
+                conexao.rollback();
+                throw new CadastroException("Não foi possível definir o endereço principal.", e);
+            }
+        } catch (SQLException e) {
+            throw new CadastroException("Falha de conexão com o banco.", e);
+        }
+    }
+
+    public Endereco addAddress(Endereco endereco) throws SQLException {
+        try {
+            salvar(endereco);
+            return endereco;
+        } catch (CadastroException e) {
+            throw new SQLException(e);
+        }
+    }
+
     public void setPrincipalAddress(Integer clientId, Integer addressId) throws SQLException {
-        setMainAddress(clientId, addressId);
+        try {
+            definirEnderecoPrincipal(clientId, addressId);
+        } catch (CadastroException e) {
+            throw new SQLException(e);
+        }
     }
 
-    // ==============================
-    // CRUD
-    // ==============================
-
-    public Endereco createAddress(Endereco address) throws SQLException {
-        validateAddress(address);
-        return addressDAO.save(address);
+    public Endereco createAddress(Endereco endereco) throws SQLException {
+        try {
+            salvar(endereco);
+            return endereco;
+        } catch (CadastroException e) {
+            throw new SQLException(e);
+        }
     }
 
     public Optional<Endereco> getAddressById(Integer id) throws SQLException {
-        Optional<Endereco> address = addressDAO.findById(id);
-        address.ifPresent(this::enrichAddress);
-        return address;
+        try {
+            return buscarPorId(id);
+        } catch (CadastroException e) {
+            throw new SQLException(e);
+        }
     }
 
-    public void updateAddress(Endereco address) throws SQLException {
-        if (address.getId() == null) {
-            throw new IllegalArgumentException("ID do endereço é obrigatório para atualização.");
+    public void updateAddress(Endereco endereco) throws SQLException {
+        try {
+            salvar(endereco);
+        } catch (CadastroException e) {
+            throw new SQLException(e);
         }
-
-        validateAddress(address);
-
-        Optional<Endereco> existing = addressDAO.findById(address.getId());
-        if (existing.isEmpty()) {
-            throw new IllegalArgumentException("Endereço com ID " + address.getId() + " não encontrado.");
-        }
-
-        if (address.getClientId() != null) {
-            Optional<Cliente> client = clientService.getClientById(address.getClientId());
-            if (client.isEmpty()) {
-                throw new IllegalArgumentException("Cliente com ID " + address.getClientId() + " não existe.");
-            }
-        }
-
-        addressDAO.update(address);
     }
 
     public void deleteAddress(Integer id) throws SQLException {
-        addressDAO.delete(id);
+        try {
+            excluir(id);
+        } catch (CadastroException e) {
+            throw new SQLException(e);
+        }
     }
 
     public List<Endereco> getAllAddresses() throws SQLException {
-        List<Endereco> addresses = addressDAO.getAll();
-        addresses.forEach(this::enrichAddress);
-        return addresses;
+        try {
+            return listarTodos();
+        } catch (CadastroException e) {
+            throw new SQLException(e);
+        }
     }
 
     public List<Endereco> getAddressesByClientId(Integer clientId) throws SQLException {
-        List<Endereco> addresses = addressDAO.findByClientId(clientId);
-        addresses.forEach(this::enrichAddress);
-        return addresses;
+        try {
+            return listarPorClienteId(clientId);
+        } catch (CadastroException e) {
+            throw new SQLException(e);
+        }
     }
 
     public void setMainAddress(Integer clientId, Integer addressId) throws SQLException {
-        Optional<Cliente> client = clientService.getClientById(clientId);
-        if (client.isEmpty()) {
-            throw new IllegalArgumentException("Cliente com ID " + clientId + " não encontrado.");
+        try {
+            definirEnderecoPrincipal(clientId, addressId);
+        } catch (CadastroException e) {
+            throw new SQLException(e);
         }
-
-        Optional<Endereco> address = addressDAO.findById(addressId);
-        if (address.isEmpty() || !address.get().getClientId().equals(clientId)) {
-            throw new IllegalArgumentException(
-                "Endereço com ID " + addressId + " não encontrado ou não pertence ao cliente " + clientId + "."
-            );
-        }
-
-        addressDAO.setMainAddress(clientId, addressId);
     }
 
-    // ==============================
-    // Validações
-    // ==============================
-
-    private void validateAddress(Endereco address) {
-        if (address.getClientId() == null)
-            throw new IllegalArgumentException("ID do cliente é obrigatório.");
-        if (address.getAddressType() == null)
-            throw new IllegalArgumentException("Tipo de endereço é obrigatório.");
-        if (address.getStreet() == null || address.getStreet().trim().isEmpty())
-            throw new IllegalArgumentException("Rua é obrigatória.");
-        if (address.getNumber() == null || address.getNumber().trim().isEmpty())
-            throw new IllegalArgumentException("Número é obrigatório.");
-        if (address.getNeighborhood() == null || address.getNeighborhood().trim().isEmpty())
-            throw new IllegalArgumentException("Bairro é obrigatório.");
-        if (address.getCity() == null || address.getCity().trim().isEmpty())
-            throw new IllegalArgumentException("Cidade é obrigatória.");
-        if (address.getState() == null || address.getState().trim().isEmpty())
-            throw new IllegalArgumentException("Estado é obrigatório.");
-        if (address.getZipCode() == null || address.getZipCode().trim().isEmpty())
-            throw new IllegalArgumentException("CEP é obrigatório.");
-        if (address.getCountry() == null || address.getCountry().trim().isEmpty())
-            throw new IllegalArgumentException("País é obrigatório.");
+    private void validar(Endereco endereco) throws CadastroException {
+        if (endereco.getClientId() == null) {
+            throw new CadastroException("ID do cliente é obrigatório.");
+        }
+        if (endereco.getAddressType() == null) {
+            throw new CadastroException("Tipo de endereço é obrigatório.");
+        }
+        if (endereco.getStreet() == null || endereco.getStreet().trim().isEmpty()) {
+            throw new CadastroException("Rua é obrigatória.");
+        }
+        if (endereco.getNumber() == null || endereco.getNumber().trim().isEmpty()) {
+            throw new CadastroException("Número é obrigatório.");
+        }
+        if (endereco.getNeighborhood() == null || endereco.getNeighborhood().trim().isEmpty()) {
+            throw new CadastroException("Bairro é obrigatório.");
+        }
+        if (endereco.getCity() == null || endereco.getCity().trim().isEmpty()) {
+            throw new CadastroException("Cidade é obrigatória.");
+        }
+        if (endereco.getState() == null || endereco.getState().trim().isEmpty()) {
+            throw new CadastroException("Estado é obrigatório.");
+        }
+        if (endereco.getZipCode() == null || endereco.getZipCode().trim().isEmpty()) {
+            throw new CadastroException("CEP é obrigatório.");
+        }
+        if (endereco.getCountry() == null || endereco.getCountry().trim().isEmpty()) {
+            throw new CadastroException("País é obrigatório.");
+        }
     }
 
-    // ==============================
-    // Enriquecimento
-    // ==============================
+    private void enriquecer(Endereco endereco) {
+        if (endereco == null) return;
 
-    private void enrichAddress(Endereco address) {
-        if (address == null) return;
-
-        String complement = (address.getComplement() != null && !address.getComplement().isBlank())
-                ? " (" + address.getComplement() + ")"
+        String complemento = (endereco.getComplement() != null && !endereco.getComplement().isBlank())
+                ? " (" + endereco.getComplement() + ")"
                 : "";
 
-        String fullAddress = String.format(
+        String enderecoCompleto = String.format(
             "%s, %s%s - %s, %s - %s, %s - CEP: %s",
-            safe(address.getStreet()),
-            safe(address.getNumber()),
-            complement,
-            safe(address.getNeighborhood()),
-            safe(address.getCity()),
-            safe(address.getState()),
-            safe(address.getCountry()),
-            safe(address.getZipCode())
+            seguro(endereco.getStreet()),
+            seguro(endereco.getNumber()),
+            complemento,
+            seguro(endereco.getNeighborhood()),
+            seguro(endereco.getCity()),
+            seguro(endereco.getState()),
+            seguro(endereco.getCountry()),
+            seguro(endereco.getZipCode())
         );
 
-        address.setFormattedAddress(fullAddress);
+        endereco.setFormattedAddress(enderecoCompleto);
 
-        if (address.getCreatedAt() != null)
-            address.setFormattedCreatedAt(DateFormatter.formatLocalDateTime(address.getCreatedAt()));
+        if (endereco.getCreatedAt() != null) {
+            endereco.setFormattedCreatedAt(DateFormatter.formatLocalDateTime(endereco.getCreatedAt()));
+        }
 
-        if (address.getUpdatedAt() != null)
-            address.setFormattedUpdatedAt(DateFormatter.formatLocalDateTime(address.getUpdatedAt()));
-
-        try {
-            if (address.getClientId() != null) {
-                clientService.getClientById(address.getClientId()).ifPresent(address::setClient);
-            }
-        } catch (SQLException e) {
-            System.err.println("Erro ao enriquecer endereço " + address.getId() + ": " + e.getMessage());
+        if (endereco.getUpdatedAt() != null) {
+            endereco.setFormattedUpdatedAt(DateFormatter.formatLocalDateTime(endereco.getUpdatedAt()));
         }
     }
 
-    private String safe(String value) {
-        return value == null ? "" : value;
+    private String seguro(String valor) {
+        return valor == null ? "" : valor;
     }
 }

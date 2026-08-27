@@ -1,111 +1,192 @@
 package br.com.tartarugacometa.cadastro.cliente;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-import br.com.tartarugacometa.cadastro.cliente.ClienteDAO;
-import br.com.tartarugacometa.cadastro.cliente.Cliente;
 import br.com.tartarugacometa.enums.TipoPessoa;
+import br.com.tartarugacometa.exception.CadastroException;
+import br.com.tartarugacometa.util.Conexao;
 import br.com.tartarugacometa.util.DateFormatter;
 import br.com.tartarugacometa.util.Validator;
 
 public class ClienteBO {
-    private final ClienteDAO clientDAO;
+    private final ClienteDAO clienteDAO;
 
     public ClienteBO() {
-        this.clientDAO = new ClienteDAO();
+        this.clienteDAO = new ClienteDAO();
+    }
+
+    public ClienteBO(ClienteDAO clienteDAO) {
+        this.clienteDAO = clienteDAO;
+    }
+
+    public void salvar(Cliente cliente) throws CadastroException {
+        validar(cliente);
+        try (Connection conexao = Conexao.abrir()) {
+            conexao.setAutoCommit(false);
+            try {
+                if (clienteDAO.existeDocumento(conexao, cliente.getDocument(), cliente.getId())) {
+                    throw new CadastroException("Já existe cliente com este documento.");
+                }
+                if (cliente.getId() == null) {
+                    clienteDAO.inserir(conexao, cliente);
+                } else {
+                    clienteDAO.atualizar(conexao, cliente);
+                }
+                conexao.commit();
+            } catch (SQLException | CadastroException e) {
+                conexao.rollback();
+                throw e instanceof CadastroException ce ? ce
+                        : new CadastroException("Não foi possível salvar o cliente.", e);
+            }
+        } catch (SQLException e) {
+            throw new CadastroException("Falha de conexão com o banco.", e);
+        }
+    }
+
+    public Optional<Cliente> buscarPorId(Integer id) throws CadastroException {
+        try (Connection conexao = Conexao.abrir()) {
+            Optional<Cliente> cliente = clienteDAO.buscarPorId(conexao, id);
+            cliente.ifPresent(this::enriquecer);
+            return cliente;
+        } catch (SQLException e) {
+            throw new CadastroException("Falha ao buscar cliente.", e);
+        }
+    }
+
+    public void excluir(Integer id) throws CadastroException {
+        try (Connection conexao = Conexao.abrir()) {
+            conexao.setAutoCommit(false);
+            try {
+                clienteDAO.excluir(conexao, id);
+                conexao.commit();
+            } catch (SQLException e) {
+                conexao.rollback();
+                throw new CadastroException("Não foi possível excluir o cliente.", e);
+            }
+        } catch (SQLException e) {
+            throw new CadastroException("Falha de conexão com o banco.", e);
+        }
+    }
+
+    public List<Cliente> listarTodos() throws CadastroException {
+        try (Connection conexao = Conexao.abrir()) {
+            List<Cliente> clientes = clienteDAO.buscarTodos(conexao);
+            clientes.forEach(this::enriquecer);
+            return clientes;
+        } catch (SQLException e) {
+            throw new CadastroException("Falha ao listar clientes.", e);
+        }
+    }
+
+    public List<Cliente> pesquisar(String termo) throws CadastroException {
+        try (Connection conexao = Conexao.abrir()) {
+            List<Cliente> clientes = clienteDAO.pesquisar(conexao, termo);
+            clientes.forEach(this::enriquecer);
+            return clientes;
+        } catch (SQLException e) {
+            throw new CadastroException("Falha na pesquisa de clientes.", e);
+        }
     }
 
     public Cliente createClient(Cliente client) throws SQLException {
-        validateClient(client);
-        return clientDAO.save(client);
+        try {
+            salvar(client);
+            return client;
+        } catch (CadastroException e) {
+            throw new SQLException(e);
+        }
     }
 
     public Optional<Cliente> getClientById(Integer id) throws SQLException {
-        Optional<Cliente> client = clientDAO.findById(id);
-        client.ifPresent(this::enrichClient);
-        return client;
+        try {
+            return buscarPorId(id);
+        } catch (CadastroException e) {
+            throw new SQLException(e);
+        }
     }
 
     public void updateClient(Cliente client) throws SQLException {
-        if (client.getId() == null) {
-            throw new IllegalArgumentException("ID do cliente é obrigatório para atualização.");
+        try {
+            salvar(client);
+        } catch (CadastroException e) {
+            throw new SQLException(e);
         }
-        validateClient(client);
-        Optional<Cliente> existingClient = clientDAO.findById(client.getId());
-        if (existingClient.isEmpty()) {
-            throw new IllegalArgumentException("Cliente com ID " + client.getId() + " não encontrado.");
-        }
-        clientDAO.update(client);
     }
 
     public void deleteClient(Integer id) throws SQLException {
-        clientDAO.delete(id);
+        try {
+            excluir(id);
+        } catch (CadastroException e) {
+            throw new SQLException(e);
+        }
     }
 
     public List<Cliente> getAllClients() throws SQLException {
-        List<Cliente> clients = clientDAO.getAll();
-        clients.forEach(this::enrichClient);
-        return clients;
-    }
-
-    public List<Cliente> search(String searchTerm) throws SQLException {
-        List<Cliente> clients = clientDAO.search(searchTerm);
-        clients.forEach(this::enrichClient);
-        return clients;
-    }
-
-    private void validateClient(Cliente client) {
-        if (client.getName() == null || client.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Nome do cliente é obrigatório.");
-        }
-        
-        if (client.getDocument() == null || client.getDocument().trim().isEmpty()) {
-            throw new IllegalArgumentException("Documento do cliente é obrigatório.");
-        }
-
-        if (client.getPersonType() == null) {
-            throw new IllegalArgumentException("Tipo de pessoa é obrigatório.");
-        }
-
-        // Validação de documento baseada no tipo de pessoa
-        if (client.getPersonType() == TipoPessoa.FISICA) {
-            if (!Validator.isValidCPF(client.getDocument())) {
-                throw new IllegalArgumentException("CPF inválido.");
-            }
-        } else if (client.getPersonType() == TipoPessoa.JURIDICA) {
-            if (!Validator.isValidCNPJ(client.getDocument())) {
-                throw new IllegalArgumentException("CNPJ inválido.");
-            }
-        }
-
-        // Email é OPCIONAL - só valida se preenchido
-        if (client.getEmail() != null && !client.getEmail().trim().isEmpty()) {
-            if (!Validator.isValidEmail(client.getEmail())) {
-                throw new IllegalArgumentException("Email inválido.");
-            }
-        }
-
-        // Telefone é OPCIONAL - só valida se preenchido
-        if (client.getPhone() != null && !client.getPhone().trim().isEmpty()) {
-            if (!Validator.isValidPhone(client.getPhone())) {
-                throw new IllegalArgumentException("Telefone inválido.");
-            }
+        try {
+            return listarTodos();
+        } catch (CadastroException e) {
+            throw new SQLException(e);
         }
     }
 
-    private void enrichClient(Cliente client) {
-        if (client == null) return;
+    public List<Cliente> search(String termo) throws SQLException {
+        try {
+            return pesquisar(termo);
+        } catch (CadastroException e) {
+            throw new SQLException(e);
+        }
+    }
 
-        if (client.getCreatedAt() != null) {
-            client.setFormattedCreatedAt(DateFormatter.formatLocalDateTime(client.getCreatedAt()));
+    private void validar(Cliente cliente) throws CadastroException {
+        if (cliente.getName() == null || cliente.getName().trim().isEmpty()) {
+            throw new CadastroException("Nome do cliente é obrigatório.");
         }
-        if (client.getUpdatedAt() != null) {
-            client.setFormattedUpdatedAt(DateFormatter.formatLocalDateTime(client.getUpdatedAt()));
+
+        if (cliente.getDocument() == null || cliente.getDocument().trim().isEmpty()) {
+            throw new CadastroException("Documento do cliente é obrigatório.");
         }
-        if (client.getPersonType() != null) {
-            client.setFormattedPersonType(client.getPersonType().getRotulo());
+
+        if (cliente.getPersonType() == null) {
+            throw new CadastroException("Tipo de pessoa é obrigatório.");
+        }
+
+        if (cliente.getPersonType() == TipoPessoa.FISICA) {
+            if (!Validator.isValidCPF(cliente.getDocument())) {
+                throw new CadastroException("CPF inválido.");
+            }
+        } else if (cliente.getPersonType() == TipoPessoa.JURIDICA) {
+            if (!Validator.isValidCNPJ(cliente.getDocument())) {
+                throw new CadastroException("CNPJ inválido.");
+            }
+        }
+
+        if (cliente.getEmail() != null && !cliente.getEmail().trim().isEmpty()) {
+            if (!Validator.isValidEmail(cliente.getEmail())) {
+                throw new CadastroException("Email inválido.");
+            }
+        }
+
+        if (cliente.getPhone() != null && !cliente.getPhone().trim().isEmpty()) {
+            if (!Validator.isValidPhone(cliente.getPhone())) {
+                throw new CadastroException("Telefone inválido.");
+            }
+        }
+    }
+
+    private void enriquecer(Cliente cliente) {
+        if (cliente == null) return;
+
+        if (cliente.getCreatedAt() != null) {
+            cliente.setFormattedCreatedAt(DateFormatter.formatLocalDateTime(cliente.getCreatedAt()));
+        }
+        if (cliente.getUpdatedAt() != null) {
+            cliente.setFormattedUpdatedAt(DateFormatter.formatLocalDateTime(cliente.getUpdatedAt()));
+        }
+        if (cliente.getPersonType() != null) {
+            cliente.setFormattedPersonType(cliente.getPersonType().getRotulo());
         }
     }
 }
