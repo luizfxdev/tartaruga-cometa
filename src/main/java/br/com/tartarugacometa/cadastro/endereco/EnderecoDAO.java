@@ -199,4 +199,15 @@ public class EnderecoDAO {
         }
         return endereco;
     }
+
+    public boolean contemEntregasVinculadas(Connection conn, Integer enderecoId) throws SQLException {
+        String sql = "SELECT 1 FROM delivery WHERE origin_address_id = ? OR destination_address_id = ? LIMIT 1";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, enderecoId);
+            pstmt.setInt(2, enderecoId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
 }

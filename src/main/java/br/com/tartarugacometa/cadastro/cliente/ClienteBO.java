@@ -9,6 +9,9 @@ import br.com.tartarugacometa.enums.TipoPessoa;
 import br.com.tartarugacometa.exception.CadastroException;
 import br.com.tartarugacometa.util.Conexao;
 import br.com.tartarugacometa.util.DateFormatter;
+import br.com.tartarugacometa.util.ValidadorCpf;
+import br.com.tartarugacometa.util.ValidadorCnpj;
+import br.com.tartarugacometa.util.ValidadorEmail;
 import br.com.tartarugacometa.util.Validator;
 
 public class ClienteBO {
@@ -141,38 +144,65 @@ public class ClienteBO {
     }
 
     private void validar(Cliente cliente) throws CadastroException {
+        validarTipo(cliente);
+        validarNome(cliente);
+        validarDocumento(cliente);
+        validarEmail(cliente);
+        validarCanalContato(cliente);
+    }
+
+    private void validarTipo(Cliente cliente) throws CadastroException {
+        if (cliente.getPersonType() == null) {
+            throw new CadastroException("Tipo de pessoa é obrigatório.");
+        }
+    }
+
+    private void validarNome(Cliente cliente) throws CadastroException {
         if (cliente.getName() == null || cliente.getName().trim().isEmpty()) {
             throw new CadastroException("Nome do cliente é obrigatório.");
         }
+        if (cliente.getName().trim().length() < 3) {
+            throw new CadastroException("Nome do cliente deve ter no mínimo 3 caracteres.");
+        }
+    }
 
+    private void validarDocumento(Cliente cliente) throws CadastroException {
         if (cliente.getDocument() == null || cliente.getDocument().trim().isEmpty()) {
             throw new CadastroException("Documento do cliente é obrigatório.");
         }
 
-        if (cliente.getPersonType() == null) {
-            throw new CadastroException("Tipo de pessoa é obrigatório.");
-        }
-
         if (cliente.getPersonType() == TipoPessoa.FISICA) {
-            if (!Validator.isValidCPF(cliente.getDocument())) {
+            if (!ValidadorCpf.valido(cliente.getDocument())) {
                 throw new CadastroException("CPF inválido.");
             }
         } else if (cliente.getPersonType() == TipoPessoa.JURIDICA) {
-            if (!Validator.isValidCNPJ(cliente.getDocument())) {
+            if (!ValidadorCnpj.valido(cliente.getDocument())) {
                 throw new CadastroException("CNPJ inválido.");
             }
         }
+    }
 
+    private void validarEmail(Cliente cliente) throws CadastroException {
         if (cliente.getEmail() != null && !cliente.getEmail().trim().isEmpty()) {
-            if (!Validator.isValidEmail(cliente.getEmail())) {
+            if (!ValidadorEmail.valido(cliente.getEmail())) {
                 throw new CadastroException("Email inválido.");
             }
         }
+    }
 
-        if (cliente.getPhone() != null && !cliente.getPhone().trim().isEmpty()) {
-            if (!Validator.isValidPhone(cliente.getPhone())) {
-                throw new CadastroException("Telefone inválido.");
-            }
+    private void validarCanalContato(Cliente cliente) throws CadastroException {
+        String email = cliente.getEmail();
+        String phone = cliente.getPhone();
+
+        boolean temEmail = email != null && !email.trim().isEmpty();
+        boolean temTelefone = phone != null && !phone.trim().isEmpty();
+
+        if (!temEmail && !temTelefone) {
+            throw new CadastroException("Cliente deve ter ao menos um canal de contato: email ou telefone.");
+        }
+
+        if (temTelefone && !Validator.isValidPhone(phone)) {
+            throw new CadastroException("Telefone inválido.");
         }
     }
 

@@ -49,6 +49,17 @@ public class ProdutoBO {
 
     public void excluir(Integer id) throws CadastroException {
         try (Connection conexao = Conexao.abrir()) {
+            validarExclusao(conexao, id);
+            Optional<Produto> produto = produtoDAO.buscarPorId(conexao, id);
+            if (produto.isPresent() && produtoDAO.contemEntregasVinculadas(conexao, id)) {
+                inativar(id);
+                return;
+            }
+        } catch (SQLException e) {
+            throw new CadastroException("Falha de conexão com o banco.", e);
+        }
+
+        try (Connection conexao = Conexao.abrir()) {
             conexao.setAutoCommit(false);
             try {
                 produtoDAO.excluir(conexao, id);
@@ -59,6 +70,14 @@ public class ProdutoBO {
             }
         } catch (SQLException e) {
             throw new CadastroException("Falha de conexão com o banco.", e);
+        }
+    }
+
+    public void inativar(Integer id) throws CadastroException {
+        Optional<Produto> produto = buscarPorId(id);
+        if (produto.isPresent()) {
+            produto.get().setActive(false);
+            salvar(produto.get());
         }
     }
 
@@ -128,14 +147,59 @@ public class ProdutoBO {
     }
 
     private void validar(Produto produto) throws CadastroException {
+        validarNome(produto);
+        validarCategoria(produto);
+        validarPeso(produto);
+        validarVolume(produto);
+        validarValorDeclarado(produto);
+    }
+
+    private void validarNome(Produto produto) throws CadastroException {
         if (produto.getName() == null || produto.getName().trim().isEmpty()) {
             throw new CadastroException("Nome do produto é obrigatório.");
         }
-        if (produto.getPrice() == null) {
-            throw new CadastroException("Preço do produto é obrigatório.");
-        }
+    }
+
+    private void validarCategoria(Produto produto) throws CadastroException {
         if (produto.getCategory() == null || produto.getCategory().trim().isEmpty()) {
             throw new CadastroException("Categoria do produto é obrigatória.");
+        }
+    }
+
+    private void validarPeso(Produto produto) throws CadastroException {
+        if (produto.getWeightKg() == null) {
+            throw new CadastroException("Peso do produto é obrigatório.");
+        }
+        if (produto.getWeightKg().signum() <= 0) {
+            throw new CadastroException("Peso do produto deve ser maior que zero.");
+        }
+    }
+
+    private void validarVolume(Produto produto) throws CadastroException {
+        if (produto.getVolumeM3() == null) {
+            throw new CadastroException("Volume do produto é obrigatório.");
+        }
+        if (produto.getVolumeM3().signum() <= 0) {
+            throw new CadastroException("Volume do produto deve ser maior que zero.");
+        }
+    }
+
+    private void validarValorDeclarado(Produto produto) throws CadastroException {
+        if (produto.getDeclaredValue() == null) {
+            throw new CadastroException("Valor declarado do produto é obrigatório.");
+        }
+        if (produto.getDeclaredValue().signum() < 0) {
+            throw new CadastroException("Valor declarado não pode ser negativo.");
+        }
+    }
+
+    private void validarExclusao(Connection conexao, Integer id) throws CadastroException {
+        try {
+            if (produtoDAO.contemEntregasVinculadas(conexao, id)) {
+                throw new CadastroException("Produto com entregas vinculadas não pode ser excluído. Use inativação.");
+            }
+        } catch (SQLException e) {
+            throw new CadastroException("Erro ao validar exclusão de produto.", e);
         }
     }
 }

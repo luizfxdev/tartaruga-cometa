@@ -1,5 +1,7 @@
 package br.com.tartarugacometa.enums;
-import br.com.tartarugacometa.enums.StatusEntrega;
+
+import java.util.EnumSet;
+import java.util.Map;
 
 public enum StatusEntrega {
     PENDENTE("Pendente"),
@@ -7,6 +9,14 @@ public enum StatusEntrega {
     ENTREGUE("Entregue"),
     CANCELADA("Cancelada"),
     NAO_REALIZADA("Não Realizada");
+
+    private static final Map<StatusEntrega, EnumSet<StatusEntrega>> TRANSICOES = Map.of(
+        PENDENTE,       EnumSet.of(EM_TRANSITO, CANCELADA),
+        EM_TRANSITO,    EnumSet.of(ENTREGUE, NAO_REALIZADA, CANCELADA),
+        ENTREGUE,       EnumSet.noneOf(StatusEntrega.class),
+        CANCELADA,      EnumSet.noneOf(StatusEntrega.class),
+        NAO_REALIZADA,  EnumSet.noneOf(StatusEntrega.class)
+    );
 
     private final String rotulo;
 
@@ -20,6 +30,14 @@ public enum StatusEntrega {
 
     public String getValue() {
         return this.name();
+    }
+
+    public boolean podeTransicionarPara(StatusEntrega novo) {
+        return TRANSICOES.get(this).contains(novo);
+    }
+
+    public boolean ehTerminal() {
+        return TRANSICOES.get(this).isEmpty();
     }
 
     public static StatusEntrega fromValue(String value) {

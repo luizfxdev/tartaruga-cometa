@@ -8,6 +8,8 @@ import java.util.Optional;
 import br.com.tartarugacometa.exception.CadastroException;
 import br.com.tartarugacometa.util.Conexao;
 import br.com.tartarugacometa.util.DateFormatter;
+import br.com.tartarugacometa.util.ValidadorCep;
+import br.com.tartarugacometa.util.ValidadorUf;
 
 public class EnderecoBO {
     private final EnderecoDAO enderecoDAO;
@@ -27,8 +29,14 @@ public class EnderecoBO {
             try {
                 if (endereco.getId() == null) {
                     enderecoDAO.inserir(conexao, endereco);
+                    if (endereco.getIsMain() != null && endereco.getIsMain()) {
+                        enderecoDAO.definirEnderecoPrincipal(conexao, endereco.getClientId(), endereco.getId());
+                    }
                 } else {
                     enderecoDAO.atualizar(conexao, endereco);
+                    if (endereco.getIsMain() != null && endereco.getIsMain()) {
+                        enderecoDAO.definirEnderecoPrincipal(conexao, endereco.getClientId(), endereco.getId());
+                    }
                 }
                 conexao.commit();
             } catch (SQLException e) {
@@ -51,6 +59,15 @@ public class EnderecoBO {
     }
 
     public void excluir(Integer id) throws CadastroException {
+        try (Connection conexao = Conexao.abrir()) {
+            Optional<Endereco> enderecoOpt = enderecoDAO.buscarPorId(conexao, id);
+            if (enderecoOpt.isPresent()) {
+                validarExclusao(conexao, id);
+            }
+        } catch (SQLException e) {
+            throw new CadastroException("Falha de conexão com o banco.", e);
+        }
+
         try (Connection conexao = Conexao.abrir()) {
             conexao.setAutoCommit(false);
             try {
@@ -175,14 +192,28 @@ public class EnderecoBO {
     }
 
     private void validar(Endereco endereco) throws CadastroException {
+        validarCliente(endereco);
+        validarTipo(endereco);
+        validarCamposObrigatorios(endereco);
+        validarCep(endereco);
+        validarUf(endereco);
+    }
+
+    private void validarCliente(Endereco endereco) throws CadastroException {
         if (endereco.getClientId() == null) {
             throw new CadastroException("ID do cliente é obrigatório.");
         }
+    }
+
+    private void validarTipo(Endereco endereco) throws CadastroException {
         if (endereco.getAddressType() == null) {
             throw new CadastroException("Tipo de endereço é obrigatório.");
         }
+    }
+
+    private void validarCamposObrigatorios(Endereco endereco) throws CadastroException {
         if (endereco.getStreet() == null || endereco.getStreet().trim().isEmpty()) {
-            throw new CadastroException("Rua é obrigatória.");
+            throw new CadastroException("Logradouro é obrigatório.");
         }
         if (endereco.getNumber() == null || endereco.getNumber().trim().isEmpty()) {
             throw new CadastroException("Número é obrigatório.");
@@ -201,6 +232,28 @@ public class EnderecoBO {
         }
         if (endereco.getCountry() == null || endereco.getCountry().trim().isEmpty()) {
             throw new CadastroException("País é obrigatório.");
+        }
+    }
+
+    private void validarCep(Endereco endereco) throws CadastroException {
+        if (!ValidadorCep.valido(endereco.getZipCode())) {
+            throw new CadastroException("CEP inválido. Deve conter 8 dígitos.");
+        }
+    }
+
+    private void validarUf(Endereco endereco) throws CadastroException {
+        if (!ValidadorUf.valida(endereco.getState())) {
+            throw new CadastroException("Estado inválido. UF deve ser uma das 27 unidades federativas.");
+        }
+    }
+
+    private void validarExclusao(Connection conexao, Integer enderecoId) throws CadastroException {
+        try {
+            if (enderecoDAO.contemEntregasVinculadas(conexao, enderecoId)) {
+                throw new CadastroException("Endereço com entregas vinculadas não pode ser excluído.");
+            }
+        } catch (SQLException e) {
+            throw new CadastroException("Erro ao validar exclusão de endereço.", e);
         }
     }
 

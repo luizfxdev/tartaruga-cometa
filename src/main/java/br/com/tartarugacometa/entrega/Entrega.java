@@ -4,6 +4,7 @@ import br.com.tartarugacometa.enums.StatusEntrega;
 import br.com.tartarugacometa.cadastro.cliente.Cliente;
 import br.com.tartarugacometa.cadastro.endereco.Endereco;
 import br.com.tartarugacometa.entrega.historico.HistoricoEntrega;
+import br.com.tartarugacometa.entrega.item.ItemEntrega;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -32,6 +33,7 @@ public class Entrega {
     private Endereco originAddress;
     private Endereco destinationAddress;
     private List<HistoricoEntrega> history;
+    private List<ItemEntrega> itens;
 
     private String formattedCreationDate;
     private String formattedDeliveryDate;
@@ -247,6 +249,14 @@ public class Entrega {
     }
 
     public void setHistory(List<HistoricoEntrega> history) {
+        this.history = history;
+    }
+
+    public List<ItemEntrega> getItens() {
+        return itens;
+    }
+
+    public void setItens(List<ItemEntrega> itens) {
         this.history = history;
     }
 

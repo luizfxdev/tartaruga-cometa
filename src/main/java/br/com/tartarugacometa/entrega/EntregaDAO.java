@@ -219,4 +219,14 @@ public class EntregaDAO {
         entrega.setReasonNotDelivered(rs.getString("reason_not_delivered"));
         return entrega;
     }
+
+    public boolean existeCodigoRastreio(Connection conn, String trackingCode) throws SQLException {
+        String sql = "SELECT 1 FROM delivery WHERE tracking_code = ? LIMIT 1";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, trackingCode);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
 }

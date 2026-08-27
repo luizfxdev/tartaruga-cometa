@@ -162,4 +162,14 @@ public class ProdutoDAO {
         }
         return produto;
     }
+
+    public boolean contemEntregasVinculadas(Connection conn, Integer produtoId) throws SQLException {
+        String sql = "SELECT 1 FROM entrega_produto WHERE product_id = ? LIMIT 1";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, produtoId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
 }
