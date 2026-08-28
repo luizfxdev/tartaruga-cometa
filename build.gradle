@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'war'
     id 'org.gretty' version '4.1.2'
+    id 'jacoco'
 }
 
 group = 'com.tartarugacometasystem'
@@ -29,7 +30,10 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
     testImplementation 'org.mockito:mockito-core:5.11.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.11.0'
     testImplementation 'org.assertj:assertj-core:3.25.3'
+    testImplementation 'org.testcontainers:postgresql:1.19.7'
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.7'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
@@ -54,8 +58,32 @@ tasks.withType(Test).configureEach {
 
 test {
     useJUnitPlatform()
+    exclude '**/*IT.class'
     testLogging {
         events "passed", "skipped", "failed"
         showStandardStreams = true
     }
+    finalizedBy jacocoTestReport
 }
+
+tasks.register('integrationTest', Test) {
+    useJUnitPlatform()
+    include '**/*IT.class'
+    shouldRunAfter test
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test, integrationTest
+    executionData fileTree(layout.buildDirectory.dir('jacoco')).include('*.exec')
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.10"
+}
+
+check.dependsOn integrationTest

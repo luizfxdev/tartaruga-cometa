@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import br.com.tartarugacometa.config.DatabaseConfig;
 import br.com.tartarugacometa.enums.TipoPessoa;
 
 public class ClienteDAO {
@@ -22,7 +21,7 @@ public class ClienteDAO {
             pstmt.setString(2, cliente.getDocument());
             pstmt.setString(3, cliente.getEmail());
             pstmt.setString(4, cliente.getPhone());
-            pstmt.setString(5, cliente.getPersonType().name());
+            pstmt.setString(5, cliente.getPersonType().paraColuna());
             pstmt.executeUpdate();
 
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
@@ -53,7 +52,7 @@ public class ClienteDAO {
             pstmt.setString(2, cliente.getDocument());
             pstmt.setString(3, cliente.getEmail());
             pstmt.setString(4, cliente.getPhone());
-            pstmt.setString(5, cliente.getPersonType().name());
+            pstmt.setString(5, cliente.getPersonType().paraColuna());
             pstmt.setInt(6, cliente.getId());
             pstmt.executeUpdate();
         }
@@ -111,43 +110,6 @@ public class ClienteDAO {
             try (ResultSet rs = pstmt.executeQuery()) {
                 return rs.next();
             }
-        }
-    }
-
-    public Cliente save(Cliente cliente) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            inserir(conn, cliente);
-            return cliente;
-        }
-    }
-
-    public Optional<Cliente> findById(Integer id) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            return buscarPorId(conn, id);
-        }
-    }
-
-    public void update(Cliente cliente) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            atualizar(conn, cliente);
-        }
-    }
-
-    public void delete(Integer id) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            excluir(conn, id);
-        }
-    }
-
-    public List<Cliente> getAll() throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            return buscarTodos(conn);
-        }
-    }
-
-    public List<Cliente> search(String termo) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            return pesquisar(conn, termo);
         }
     }
 

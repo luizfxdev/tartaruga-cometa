@@ -44,7 +44,7 @@
         </rollingPolicy>
     </appender>
 
-    <logger name="com.tartarugacometasystem" level="DEBUG"/>
+    <logger name="br.com.tartarugacometa" level="DEBUG"/>
     <logger name="org.postgresql" level="INFO"/>
     <logger name="org.apache.catalina" level="INFO"/>
 

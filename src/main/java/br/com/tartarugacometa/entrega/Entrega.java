@@ -257,7 +257,7 @@ public class Entrega {
     }
 
     public void setItens(List<ItemEntrega> itens) {
-        this.history = history;
+        this.itens = itens;
     }
 
     public String getFormattedCreationDate() {

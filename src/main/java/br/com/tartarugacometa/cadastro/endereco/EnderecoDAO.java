@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import br.com.tartarugacometa.config.DatabaseConfig;
 import br.com.tartarugacometa.enums.TipoEndereco;
 
 public class EnderecoDAO {
@@ -28,7 +27,7 @@ public class EnderecoDAO {
             pstmt.setString(8, endereco.getZipCode());
             pstmt.setString(9, endereco.getCountry());
             pstmt.setBoolean(10, endereco.getIsMain());
-            pstmt.setString(11, endereco.getAddressType().name());
+            pstmt.setString(11, endereco.getAddressType().paraColuna());
             pstmt.setString(12, endereco.getReference());
             pstmt.executeUpdate();
 
@@ -66,7 +65,7 @@ public class EnderecoDAO {
             pstmt.setString(8, endereco.getZipCode());
             pstmt.setString(9, endereco.getCountry());
             pstmt.setBoolean(10, endereco.getIsMain());
-            pstmt.setString(11, endereco.getAddressType().name());
+            pstmt.setString(11, endereco.getAddressType().paraColuna());
             pstmt.setString(12, endereco.getReference());
             pstmt.setInt(13, endereco.getId());
             pstmt.executeUpdate();
@@ -118,58 +117,6 @@ public class EnderecoDAO {
             if (pstmt.executeUpdate() == 0) {
                 throw new SQLException("Endereço não encontrado para este cliente.");
             }
-        }
-    }
-
-    public Endereco save(Endereco endereco) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            inserir(conn, endereco);
-            return endereco;
-        }
-    }
-
-    public Optional<Endereco> findById(Integer id) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            return buscarPorId(conn, id);
-        }
-    }
-
-    public void update(Endereco endereco) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            atualizar(conn, endereco);
-        }
-    }
-
-    public void delete(Integer id) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            excluir(conn, id);
-        }
-    }
-
-    public List<Endereco> getAll() throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            return buscarTodos(conn);
-        }
-    }
-
-    public List<Endereco> findByClientId(Integer clientId) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            return buscarPorClienteId(conn, clientId);
-        }
-    }
-
-    public void setMainAddress(Integer clientId, Integer addressId) throws SQLException {
-        Connection conn = DatabaseConfig.getConnection();
-        conn.setAutoCommit(false);
-        try {
-            definirEnderecoPrincipal(conn, clientId, addressId);
-            conn.commit();
-        } catch (SQLException e) {
-            conn.rollback();
-            throw e;
-        } finally {
-            conn.setAutoCommit(true);
-            conn.close();
         }
     }
 

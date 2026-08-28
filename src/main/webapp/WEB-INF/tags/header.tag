@@ -29,21 +29,15 @@
     <nav class="navbar">
         <div class="navbar-container">
             <a href="${pageContext.request.contextPath}/" class="navbar-brand">
-                <img 
-                    id="navbar-logo-img" 
-                    src="${pageContext.request.contextPath}/assets/logolight.png" 
-                    alt="Tartaruga Cometa Logo" 
+                <img
+                    id="navbar-logo-img"
+                    src="${pageContext.request.contextPath}/assets/logolight.png"
+                    alt="Tartaruga Cometa Logo"
                     class="navbar-logo-img"
-                    data-light-logo="${pageContext.request.contextPath}/assets/logolight.png"
-                    data-dark-logo="${pageContext.request.contextPath}/assets/logodark.png"
                 >
                 <span id="navbar-title" class="navbar-title">Tartaruga Cometa</span>
             </a>
             <div class="navbar-actions">
-                <button id="theme-toggle" class="theme-toggle" title="Alternar tema">
-                    <span id="sun-icon" class="theme-icon">☀️</span>
-                    <span id="moon-icon" class="theme-icon active">🌙</span>
-                </button>
             </div>
         </div>
     </nav>
@@ -57,7 +51,6 @@
         <jsp:doBody/>
     </div>
 
-    <script src="${pageContext.request.contextPath}/js/theme-toggle.js"></script>
     <script src="${pageContext.request.contextPath}/js/masks.js"></script>
     <script src="${pageContext.request.contextPath}/js/validation.js"></script>
 </body>

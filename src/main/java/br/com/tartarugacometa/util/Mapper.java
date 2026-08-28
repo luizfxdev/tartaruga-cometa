@@ -3,6 +3,8 @@ package br.com.tartarugacometa.util;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import br.com.tartarugacometa.cadastro.endereco.Endereco;
 import br.com.tartarugacometa.enums.TipoEndereco;
@@ -15,6 +17,8 @@ import br.com.tartarugacometa.cadastro.produto.Produto;
 import jakarta.servlet.http.HttpServletRequest;
 
 public class Mapper {
+
+    private static final Logger LOG = Logger.getLogger(Mapper.class.getName());
 
     /**
      * Converte HttpServletRequest -> HashMap<String, String> -> Endereco.
@@ -57,7 +61,7 @@ public class Mapper {
                     try {
                         return TipoEndereco.valueOf(s.trim().toUpperCase());
                     } catch (IllegalArgumentException e) {
-                        System.err.println("Erro ao converter tipo de endereço: '" + s + "' para TipoEndereco. " + e.getMessage());
+                        LOG.log(Level.WARNING, "Erro ao converter tipo de endereço: '" + s + "' para TipoEndereco.", e);
                         return null;
                     }
                 })
@@ -164,7 +168,7 @@ public class Mapper {
                     try {
                         return TipoPessoa.valueOf(s.trim().toUpperCase());
                     } catch (IllegalArgumentException e) {
-                        System.err.println("Erro ao converter tipo de pessoa: '" + s + "' para TipoPessoa. " + e.getMessage());
+                        LOG.log(Level.WARNING, "Erro ao converter tipo de pessoa: '" + s + "' para TipoPessoa.", e);
                         return null;
                     }
                 })
@@ -223,7 +227,7 @@ public class Mapper {
                     try {
                         return new BigDecimal(s.trim().replace(',', '.'));
                     } catch (NumberFormatException e) {
-                        System.err.println("Erro ao converter preço do produto: '" + s + "' para BigDecimal. " + e.getMessage());
+                        LOG.log(Level.WARNING, "Erro ao converter preço do produto: '" + s + "' para BigDecimal.", e);
                         return null;
                     }
                 })
@@ -235,7 +239,7 @@ public class Mapper {
                     try {
                         return new BigDecimal(s.trim().replace(',', '.'));
                     } catch (NumberFormatException e) {
-                        System.err.println("Erro ao converter peso do produto: '" + s + "' para BigDecimal. " + e.getMessage());
+                        LOG.log(Level.WARNING, "Erro ao converter peso do produto: '" + s + "' para BigDecimal.", e);
                         return null;
                     }
                 })
@@ -247,7 +251,7 @@ public class Mapper {
                     try {
                         return new BigDecimal(s.trim().replace(',', '.'));
                     } catch (NumberFormatException e) {
-                        System.err.println("Erro ao converter volume do produto: '" + s + "' para BigDecimal. " + e.getMessage());
+                        LOG.log(Level.WARNING, "Erro ao converter volume do produto: '" + s + "' para BigDecimal.", e);
                         return null;
                     }
                 })
@@ -259,7 +263,7 @@ public class Mapper {
                     try {
                         return new BigDecimal(s.trim().replace(',', '.'));
                     } catch (NumberFormatException e) {
-                        System.err.println("Erro ao converter valor declarado: '" + s + "' para BigDecimal. " + e.getMessage());
+                        LOG.log(Level.WARNING, "Erro ao converter valor declarado: '" + s + "' para BigDecimal.", e);
                         return null;
                     }
                 })
@@ -279,7 +283,7 @@ public class Mapper {
                     try {
                         return Integer.parseInt(s.trim());
                     } catch (NumberFormatException e) {
-                        System.err.println("Erro ao converter quantidade em estoque: '" + s + "' para Integer. " + e.getMessage());
+                        LOG.log(Level.WARNING, "Erro ao converter quantidade em estoque: '" + s + "' para Integer.", e);
                         return null;
                     }
                 })
@@ -324,13 +328,12 @@ public class Mapper {
                 .map(Integer::parseInt)
                 .ifPresent(delivery::setId);
 
-        // CORREÇÃO 1: Adicionado o mapeamento para trackingCode
         Optional.ofNullable(params.get("trackingCode"))
                 .filter(s -> !s.trim().isEmpty())
                 .ifPresent(delivery::setTrackingCode);
 
-        // CORREÇÃO 2: Mapeando 'shipperId' do JSP para 'senderId' no Entrega
-        Optional.ofNullable(params.get("shipperId")) // O nome do campo no JSP é 'shipperId'
+        // Campo no JSP chama-se 'shipperId', mapeado para senderId em Entrega
+        Optional.ofNullable(params.get("shipperId"))
                 .filter(s -> !s.trim().isEmpty())
                 .map(Integer::parseInt)
                 .ifPresent(delivery::setSenderId);
@@ -356,7 +359,7 @@ public class Mapper {
                     try {
                         return new BigDecimal(s.trim().replace(',', '.'));
                     } catch (NumberFormatException e) {
-                        System.err.println("Erro ao converter valor total da entrega: '" + s + "' para BigDecimal. " + e.getMessage());
+                        LOG.log(Level.WARNING, "Erro ao converter valor total da entrega: '" + s + "' para BigDecimal.", e);
                         return null;
                     }
                 })
@@ -368,7 +371,7 @@ public class Mapper {
                     try {
                         return new BigDecimal(s.trim().replace(',', '.'));
                     } catch (NumberFormatException e) {
-                        System.err.println("Erro ao converter valor do frete da entrega: '" + s + "' para BigDecimal. " + e.getMessage());
+                        LOG.log(Level.WARNING, "Erro ao converter valor do frete da entrega: '" + s + "' para BigDecimal.", e);
                         return null;
                     }
                 })
@@ -380,7 +383,7 @@ public class Mapper {
                     try {
                         return new BigDecimal(s.trim().replace(',', '.'));
                     } catch (NumberFormatException e) {
-                        System.err.println("Erro ao converter peso total da entrega: '" + s + "' para BigDecimal. " + e.getMessage());
+                        LOG.log(Level.WARNING, "Erro ao converter peso total da entrega: '" + s + "' para BigDecimal.", e);
                         return null;
                     }
                 })
@@ -392,7 +395,7 @@ public class Mapper {
                     try {
                         return new BigDecimal(s.trim().replace(',', '.'));
                     } catch (NumberFormatException e) {
-                        System.err.println("Erro ao converter volume total da entrega: '" + s + "' para BigDecimal. " + e.getMessage());
+                        LOG.log(Level.WARNING, "Erro ao converter volume total da entrega: '" + s + "' para BigDecimal.", e);
                         return null;
                     }
                 })
@@ -404,7 +407,7 @@ public class Mapper {
                     try {
                         return StatusEntrega.valueOf(s.trim().toUpperCase());
                     } catch (IllegalArgumentException e) {
-                        System.err.println("Erro ao converter status da entrega: '" + s + "' para StatusEntrega. " + e.getMessage());
+                        LOG.log(Level.WARNING, "Erro ao converter status da entrega: '" + s + "' para StatusEntrega.", e);
                         return null;
                     }
                 })

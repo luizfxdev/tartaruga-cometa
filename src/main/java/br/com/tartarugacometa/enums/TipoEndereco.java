@@ -15,12 +15,32 @@ public enum TipoEndereco {
         return rotulo;
     }
 
+    public String paraColuna() {
+        return switch (this) {
+            case ORIGEM -> "ORIGIN";
+            case DESTINO -> "DESTINATION";
+            case CADASTRO -> "REGISTRATION";
+        };
+    }
+
     public static TipoEndereco fromValue(String value) {
-        for (TipoEndereco tipo : TipoEndereco.values()) {
-            if (tipo.name().equalsIgnoreCase(value)) {
-                return tipo;
-            }
+        if (value == null) {
+            throw new IllegalArgumentException("Tipo de endereço inválido: null");
         }
-        throw new IllegalArgumentException("Tipo de endereço inválido: " + value);
+        String normalizado = value.trim().toUpperCase();
+
+        return switch (normalizado) {
+            case "ORIGIN" -> ORIGEM;
+            case "DESTINATION" -> DESTINO;
+            case "REGISTRATION" -> CADASTRO;
+            default -> {
+                for (TipoEndereco tipo : TipoEndereco.values()) {
+                    if (tipo.name().equals(normalizado)) {
+                        yield tipo;
+                    }
+                }
+                throw new IllegalArgumentException("Tipo de endereço inválido: " + value);
+            }
+        };
     }
 }

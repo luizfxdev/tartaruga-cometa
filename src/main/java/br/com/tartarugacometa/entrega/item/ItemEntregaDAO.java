@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import br.com.tartarugacometa.config.DatabaseConfig;
-
 public class ItemEntregaDAO {
 
     public void inserir(Connection conn, ItemEntrega item) throws SQLException {
@@ -87,42 +85,6 @@ public class ItemEntregaDAO {
             }
         }
         return itens;
-    }
-
-    public void save(ItemEntrega item) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            inserir(conn, item);
-        }
-    }
-
-    public void update(ItemEntrega item) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            atualizar(conn, item);
-        }
-    }
-
-    public void delete(Integer id) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            excluir(conn, id);
-        }
-    }
-
-    public void deleteByDeliveryId(Integer deliveryId) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            excluirPorEntregaId(conn, deliveryId);
-        }
-    }
-
-    public Optional<ItemEntrega> findById(Integer id) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            return buscarPorId(conn, id);
-        }
-    }
-
-    public List<ItemEntrega> findByDeliveryId(Integer deliveryId) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            return buscarPorEntregaId(conn, deliveryId);
-        }
     }
 
     private ItemEntrega mapear(ResultSet rs) throws SQLException {

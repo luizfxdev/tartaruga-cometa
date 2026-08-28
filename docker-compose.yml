@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: tartaruga_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-tartaruga_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-Tartaruga123!}
+      POSTGRES_DB: ${DB_NAME:-tartaruga_cometa_db}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./src/main/resources/db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-tartaruga_user} -d ${DB_NAME:-tartaruga_cometa_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - tartaruga_net
+
+  app:
+    build: .
+    container_name: tartaruga_app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-tartaruga_cometa_db}?charSet=UTF-8
+      DB_USERNAME: ${DB_USER:-tartaruga_user}
+      DB_PASSWORD: ${DB_PASSWORD:-Tartaruga123!}
+    ports:
+      - "8080:8080"
+    networks:
+      - tartaruga_net
+
+networks:
+  tartaruga_net:
+    driver: bridge
+
+volumes:
+  pgdata:
+    driver: local

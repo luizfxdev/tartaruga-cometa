@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import br.com.tartarugacometa.config.DatabaseConfig;
 import br.com.tartarugacometa.enums.StatusEntrega;
 
 public class EntregaDAO {
@@ -27,7 +26,7 @@ public class EntregaDAO {
             pstmt.setBigDecimal(7, entrega.getFreightValue());
             pstmt.setBigDecimal(8, entrega.getTotalWeightKg());
             pstmt.setBigDecimal(9, entrega.getTotalVolumeM3());
-            pstmt.setString(10, entrega.getStatus().name());
+            pstmt.setString(10, entrega.getStatus().paraColuna());
             pstmt.setString(11, entrega.getObservations());
             pstmt.setTimestamp(12, entrega.getDeliveryDate() != null ? Timestamp.valueOf(entrega.getDeliveryDate()) : null);
             pstmt.setString(13, entrega.getReasonNotDelivered());
@@ -66,7 +65,7 @@ public class EntregaDAO {
             pstmt.setBigDecimal(7, entrega.getFreightValue());
             pstmt.setBigDecimal(8, entrega.getTotalWeightKg());
             pstmt.setBigDecimal(9, entrega.getTotalVolumeM3());
-            pstmt.setString(10, entrega.getStatus().name());
+            pstmt.setString(10, entrega.getStatus().paraColuna());
             pstmt.setString(11, entrega.getObservations());
             pstmt.setTimestamp(12, entrega.getDeliveryDate() != null ? Timestamp.valueOf(entrega.getDeliveryDate()) : null);
             pstmt.setString(13, entrega.getReasonNotDelivered());
@@ -98,7 +97,7 @@ public class EntregaDAO {
         List<Entrega> entregas = new ArrayList<>();
         String sql = "SELECT id, tracking_code, sender_id, recipient_id, origin_address_id, destination_address_id, total_value, freight_value, total_weight_kg, total_volume_m3, status, observations, creation_date, updated_at, delivery_date, reason_not_delivered FROM delivery WHERE status = CAST(? AS delivery_status_enum)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, status.name());
+            pstmt.setString(1, status.paraColuna());
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     entregas.add(mapear(rs));
@@ -137,55 +136,6 @@ public class EntregaDAO {
         return entregas;
     }
 
-    public Entrega save(Entrega entrega) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            inserir(conn, entrega);
-            return entrega;
-        }
-    }
-
-    public Optional<Entrega> findById(Integer id) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            return buscarPorId(conn, id);
-        }
-    }
-
-    public void update(Entrega entrega) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            atualizar(conn, entrega);
-        }
-    }
-
-    public void delete(Integer id) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            excluir(conn, id);
-        }
-    }
-
-    public List<Entrega> getAll() throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            return buscarTodos(conn);
-        }
-    }
-
-    public List<Entrega> findByStatus(StatusEntrega status) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            return buscarPorStatus(conn, status);
-        }
-    }
-
-    public Optional<Entrega> findByTrackingCode(String trackingCode) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            return buscarPorCodigoRastreamento(conn, trackingCode);
-        }
-    }
-
-    public List<Entrega> search(String termo) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            return pesquisar(conn, termo);
-        }
-    }
-
     private Entrega mapear(ResultSet rs) throws SQLException {
         Entrega entrega = new Entrega();
         entrega.setId(rs.getInt("id"));
@@ -198,7 +148,7 @@ public class EntregaDAO {
         entrega.setFreightValue(rs.getBigDecimal("freight_value"));
         entrega.setTotalWeightKg(rs.getBigDecimal("total_weight_kg"));
         entrega.setTotalVolumeM3(rs.getBigDecimal("total_volume_m3"));
-        entrega.setStatus(StatusEntrega.valueOf(rs.getString("status")));
+        entrega.setStatus(StatusEntrega.fromValue(rs.getString("status")));
         entrega.setObservations(rs.getString("observations"));
 
         Timestamp criacaoDt = rs.getTimestamp("creation_date");

@@ -4,13 +4,15 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import br.com.tartarugacometa.entrega.Entrega;
 import br.com.tartarugacometa.enums.StatusEntrega;
 import br.com.tartarugacometa.cadastro.endereco.EnderecoBO;
 import br.com.tartarugacometa.cadastro.cliente.ClienteBO;
 import br.com.tartarugacometa.entrega.EntregaBO;
-import br.com.tartarugacometa.util.Mapper; // Certifique-se de que esta classe e seus métodos estão corretos
+import br.com.tartarugacometa.util.Mapper;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -21,6 +23,9 @@ import jakarta.servlet.http.HttpServletResponse;
 @WebServlet("/entrega/*")
 public class EntregaControlador extends HttpServlet {
 
+    private static final Logger LOG = Logger.getLogger(EntregaControlador.class.getName());
+    private static final String MENSAGEM_ERRO_GENERICA = "Não foi possível processar a requisição.";
+
     private EntregaBO deliveryService;
     private ClienteBO clientService;
     private EnderecoBO addressService;
@@ -28,7 +33,6 @@ public class EntregaControlador extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        // Instanciação dos serviços
         this.deliveryService = new EntregaBO();
         this.clientService = new ClienteBO();
         this.addressService = new EnderecoBO();
@@ -39,7 +43,6 @@ public class EntregaControlador extends HttpServlet {
             throws ServletException, IOException {
 
         String pathInfo = request.getPathInfo();
-        // Garante que pathInfo nunca seja null para evitar NullPointerExceptions
         String action = (pathInfo == null || pathInfo.equals("/")) ? "/" : pathInfo;
 
         try {
@@ -54,37 +57,25 @@ public class EntregaControlador extends HttpServlet {
             } else if (action.startsWith("/search")) {
                 searchDeliveries(request, response);
             } else if (action.startsWith("/markDelivered/")) {
-                // Para GET, apenas redireciona para a view após a ação, ou exibe um formulário de confirmação
-                // Se a intenção é que a ação de marcar como entregue seja idempotente e segura,
-                // um GET pode ser aceitável, mas POST é geralmente preferível para mudanças de estado.
-                // Por enquanto, mantemos a lógica existente.
                 markAsDelivered(request, response, action);
             } else if (action.startsWith("/markNotDelivered/")) {
-                // Similar ao markDelivered, POST é preferível.
                 markAsNotDelivered(request, response, action);
             } else if (action.startsWith("/delete/")) {
-                // Ações de exclusão via GET são desaconselhadas por questões de segurança e idempotência.
-                // Idealmente, isso deveria ser um POST. Por enquanto, mantemos a lógica existente.
                 deleteDelivery(request, response, action);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
 
         } catch (SQLException e) {
-            // Loga o erro para depuração
-            System.err.println("Erro de SQL no doGet: " + e.getMessage());
-            e.printStackTrace();
-            request.setAttribute("error", "Erro ao processar requisição de banco de dados: " + e.getMessage());
+            LOG.log(Level.SEVERE, "Falha de banco de dados no doGet de EntregaControlador", e);
+            request.setAttribute("error", MENSAGEM_ERRO_GENERICA);
             request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (IllegalArgumentException e) {
-            System.err.println("Erro de argumento inválido no doGet: " + e.getMessage());
-            e.printStackTrace();
             request.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (Exception e) {
-            System.err.println("Erro inesperado no doGet: " + e.getMessage());
-            e.printStackTrace();
-            request.setAttribute("error", "Erro inesperado: " + e.getMessage());
+            LOG.log(Level.SEVERE, "Falha inesperada no doGet de EntregaControlador", e);
+            request.setAttribute("error", MENSAGEM_ERRO_GENERICA);
             request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
     }
@@ -94,7 +85,6 @@ public class EntregaControlador extends HttpServlet {
             throws ServletException, IOException {
 
         String pathInfo = request.getPathInfo();
-        // Garante que pathInfo nunca seja null para evitar NullPointerExceptions
         String action = (pathInfo == null || pathInfo.equals("/")) ? "/" : pathInfo;
 
         try {
@@ -110,33 +100,25 @@ public class EntregaControlador extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (SQLException e) {
-            System.err.println("Erro de SQL no doPost: " + e.getMessage());
-            e.printStackTrace();
-            request.setAttribute("error", "Erro ao processar requisição de banco de dados: " + e.getMessage());
+            LOG.log(Level.SEVERE, "Falha de banco de dados no doPost de EntregaControlador", e);
+            request.setAttribute("error", MENSAGEM_ERRO_GENERICA);
             request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (IllegalArgumentException e) {
-            System.err.println("Erro de argumento inválido no doPost: " + e.getMessage());
-            e.printStackTrace();
             request.setAttribute("error", e.getMessage());
-            // Se houver um erro de validação ao salvar, redireciona para o formulário com os dados preenchidos
-            // e a mensagem de erro.
             try {
-                // Tenta mapear novamente para preencher o formulário com os dados submetidos
                 request.setAttribute("delivery", Mapper.mapToDelivery(request));
                 request.setAttribute("allClients", clientService.getAllClients());
                 request.setAttribute("allAddresses", addressService.getAllAddresses());
                 request.setAttribute("deliveryStatuses", StatusEntrega.values());
                 request.getRequestDispatcher("/WEB-INF/views/entrega/form.jsp").forward(request, response);
             } catch (SQLException ex) {
-                System.err.println("Erro ao preparar formulário após erro de validação: " + ex.getMessage());
-                ex.printStackTrace();
-                request.setAttribute("error", "Erro ao preparar formulário após validação: " + ex.getMessage());
+                LOG.log(Level.SEVERE, "Falha ao preparar formulário após erro de validação", ex);
+                request.setAttribute("error", MENSAGEM_ERRO_GENERICA);
                 request.getRequestDispatcher("/error.jsp").forward(request, response);
             }
         } catch (Exception e) {
-            System.err.println("Erro inesperado no doPost: " + e.getMessage());
-            e.printStackTrace();
-            request.setAttribute("error", "Erro inesperado: " + e.getMessage());
+            LOG.log(Level.SEVERE, "Falha inesperada no doPost de EntregaControlador", e);
+            request.setAttribute("error", MENSAGEM_ERRO_GENERICA);
             request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
     }
@@ -202,10 +184,6 @@ public class EntregaControlador extends HttpServlet {
 
     private void saveDelivery(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
-        // A lógica de tratamento de IllegalArgumentException já está no doPost,
-        // então podemos remover o try-catch daqui para evitar duplicação e simplificar.
-        // Se o Mapper.mapToDelivery ou os services lançarem IllegalArgumentException,
-        // ela será capturada no doPost.
         Entrega delivery = Mapper.mapToDelivery(request);
 
         if (delivery.getId() == null) {
@@ -239,22 +217,18 @@ public class EntregaControlador extends HttpServlet {
             return;
         }
         try {
-            // O campo 'reasonNotDelivered' não é aplicável aqui, então passamos null.
-            // O campo 'updatedBy' é "Sistema" conforme seu código.
             deliveryService.updateDeliveryStatus(id, StatusEntrega.ENTREGUE, null, "Sistema");
             request.getSession().setAttribute("message", "Entrega marcada como entregue com sucesso!");
             response.sendRedirect(request.getContextPath() + "/deliveries/view/" + id);
         } catch (IllegalArgumentException e) {
             request.setAttribute("error", e.getMessage());
-            viewDelivery(request, response, pathInfo); // Permite reexibir a página de visualização com o erro
+            viewDelivery(request, response, pathInfo);
         }
     }
 
     private void markAsNotDelivered(HttpServletRequest request, HttpServletResponse response, String pathInfo)
             throws SQLException, IOException, ServletException {
         Integer id = extractId(pathInfo);
-        // Pega o motivo da requisição. Se for um POST, pode vir de um formulário.
-        // Se for um GET (o que não é ideal para esta ação), pode vir como parâmetro de query.
         String reason = request.getParameter("reasonNotDelivered");
         if (id == null) {
             request.setAttribute("error", "ID da entrega inválido para marcar como não entregue.");
@@ -267,7 +241,7 @@ public class EntregaControlador extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/deliveries/view/" + id);
         } catch (IllegalArgumentException e) {
             request.setAttribute("error", e.getMessage());
-            viewDelivery(request, response, pathInfo); // Permite reexibir a página de visualização com o erro
+            viewDelivery(request, response, pathInfo);
         }
     }
 
@@ -282,12 +256,10 @@ public class EntregaControlador extends HttpServlet {
 
     private Integer extractId(String pathInfo) {
         try {
-            // pathInfo pode ser algo como "/edit/123" ou "/delete/456"
-            // Queremos pegar o "123" ou "456"
             String idStr = pathInfo.substring(pathInfo.lastIndexOf('/') + 1);
             return Integer.parseInt(idStr);
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
-            System.err.println("Erro ao extrair ID da URL: " + pathInfo + " - " + e.getMessage());
+            LOG.log(Level.WARNING, "Falha ao extrair ID da URL: " + pathInfo, e);
             return null;
         }
     }

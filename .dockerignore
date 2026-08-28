@@ -1,0 +1,14 @@
+Obsidian-Tartaruga/
+.git/
+.gradle/
+build/
+bin/
+*.md
+database.properties
+src/test/
+docs/
+docker-compose.yml
+Dockerfile
+.dockerignore
+.gitignore
+*.log

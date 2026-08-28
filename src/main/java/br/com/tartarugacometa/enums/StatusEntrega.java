@@ -40,6 +40,16 @@ public enum StatusEntrega {
         return TRANSICOES.get(this).isEmpty();
     }
 
+    public String paraColuna() {
+        return switch (this) {
+            case PENDENTE -> "PENDING";
+            case EM_TRANSITO -> "IN_TRANSIT";
+            case ENTREGUE -> "DELIVERED";
+            case CANCELADA -> "CANCELED";
+            case NAO_REALIZADA -> "NOT_PERFORMED";
+        };
+    }
+
     public static StatusEntrega fromValue(String value) {
         if (value == null || value.trim().isEmpty()) {
             throw new IllegalArgumentException("Status de entrega não pode ser nulo ou vazio.");

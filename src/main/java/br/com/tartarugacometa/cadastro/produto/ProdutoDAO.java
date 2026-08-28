@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import br.com.tartarugacometa.config.DatabaseConfig;
-
 public class ProdutoDAO {
 
     public void inserir(Connection conn, Produto produto) throws SQLException {
@@ -102,43 +100,6 @@ public class ProdutoDAO {
         return produtos;
     }
 
-    public Produto save(Produto produto) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            inserir(conn, produto);
-            return produto;
-        }
-    }
-
-    public Optional<Produto> findById(Integer id) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            return buscarPorId(conn, id);
-        }
-    }
-
-    public void update(Produto produto) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            atualizar(conn, produto);
-        }
-    }
-
-    public void delete(Integer id) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            excluir(conn, id);
-        }
-    }
-
-    public List<Produto> getAll() throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            return buscarTodos(conn);
-        }
-    }
-
-    public List<Produto> searchByName(String nome) throws SQLException {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            return pesquisarPorNome(conn, nome);
-        }
-    }
-
     private Produto mapearProdutoDoResultSet(ResultSet rs) throws SQLException {
         Produto produto = new Produto();
         produto.setId(rs.getInt("id"));
@@ -164,7 +125,7 @@ public class ProdutoDAO {
     }
 
     public boolean contemEntregasVinculadas(Connection conn, Integer produtoId) throws SQLException {
-        String sql = "SELECT 1 FROM entrega_produto WHERE product_id = ? LIMIT 1";
+        String sql = "SELECT 1 FROM delivery_product WHERE product_id = ? LIMIT 1";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, produtoId);
             try (ResultSet rs = pstmt.executeQuery()) {

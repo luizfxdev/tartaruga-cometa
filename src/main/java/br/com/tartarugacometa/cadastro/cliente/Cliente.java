@@ -12,17 +12,13 @@ public class Cliente {
     private TipoPessoa personType; // Tipo de pessoa (Física/Jurídica)
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-    // Campos formatados para exibição no JSP
     private String formattedCreatedAt;
     private String formattedUpdatedAt;
-    private String formattedPersonType; // NOVO: Campo formatado para o tipo de pessoa
+    private String formattedPersonType;
 
-    // Construtor padrão
     public Cliente() {
     }
 
-    // Construtor completo (sem IDs e datas)
     public Cliente(String name, String document, String email, String phone, TipoPessoa personType) {
         this.name = name;
         this.document = document;
@@ -31,7 +27,6 @@ public class Cliente {
         this.personType = personType;
     }
 
-    // Construtor completo (com IDs e datas)
     public Cliente(Integer id, String name, String document, String email, String phone, TipoPessoa personType,
                   LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
@@ -44,7 +39,6 @@ public class Cliente {
         this.updatedAt = updatedAt;
     }
 
-    // Getters e Setters
     public Integer getId() {
         return id;
     }

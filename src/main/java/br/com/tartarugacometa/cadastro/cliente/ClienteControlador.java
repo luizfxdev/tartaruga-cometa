@@ -123,21 +123,8 @@ public class ClienteControlador extends HttpServlet {
             throws SQLException, IOException, ServletException {
         HashMap<String, String> params = new HashMap<>();
         request.getParameterMap().forEach((key, value) -> params.put(key, value[0]));
-        
-        System.out.println("===== PARÂMETROS RECEBIDOS =====");
-        params.forEach((k, v) -> System.out.println(k + " = [" + v + "]"));
-        System.out.println("================================");
-        
+
         Cliente client = Mapper.mapToClient(params);
-        
-        System.out.println("===== CLIENTE MAPEADO =====");
-        System.out.println("ID: " + client.getId());
-        System.out.println("Nome: [" + client.getName() + "]");
-        System.out.println("Documento: [" + client.getDocument() + "]");
-        System.out.println("Email: [" + client.getEmail() + "]");
-        System.out.println("Telefone: [" + client.getPhone() + "]");
-        System.out.println("TipoPessoa: " + client.getPersonType());
-        System.out.println("===========================");
 
         try {
             if (client.getId() == null) {
@@ -149,7 +136,6 @@ public class ClienteControlador extends HttpServlet {
             }
             response.sendRedirect(request.getContextPath() + "/clients/");
         } catch (IllegalArgumentException e) {
-            System.out.println("ERRO DE VALIDAÇÃO: " + e.getMessage());
             request.getSession().setAttribute("error", e.getMessage());
             request.setAttribute("client", client);
             request.setAttribute("personTypes", TipoPessoa.values());

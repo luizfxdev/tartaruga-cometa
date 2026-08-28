@@ -20,20 +20,14 @@ public class Endereco {
     private Boolean isMain;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-    // NOVO: Campo para associação com Cliente
     private Cliente client;
-
-    // Campos formatados para exibição no JSP (RESTAURADOS)
     private String formattedAddress;
     private String formattedCreatedAt;
     private String formattedUpdatedAt;
 
-    // Construtor padrão
     public Endereco() {
     }
 
-    // Construtor completo (sem IDs e datas)
     public Endereco(Integer clientId, TipoEndereco addressType, String street, String number, String complement, String neighborhood,
                    String city, String state, String zipCode, String country, String reference, Boolean isMain) {
         this.clientId = clientId;
@@ -50,7 +44,6 @@ public class Endereco {
         this.isMain = isMain;
     }
 
-    // Construtor completo (com IDs e datas)
     public Endereco(Integer id, Integer clientId, TipoEndereco addressType, String street, String number, String complement, String neighborhood,
                    String city, String state, String zipCode, String country, String reference, Boolean isMain,
                    LocalDateTime createdAt, LocalDateTime updatedAt) {
@@ -71,7 +64,6 @@ public class Endereco {
         this.updatedAt = updatedAt;
     }
 
-    // Getters e Setters
     public Integer getId() {
         return id;
     }
