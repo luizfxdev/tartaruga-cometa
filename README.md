@@ -23,7 +23,7 @@ O projeto está em refatoração para nomenclatura e domínio em **português** 
 | 👥 Clientes (PF/PJ) | `/cliente/` | ✅ Completo |
 | 📍 Endereços (com endereço principal por cliente) | `/endereco/` | ✅ Completo |
 | 📦 Produtos | `/produto/` | ✅ Completo |
-| 🚚 Entregas + histórico de status | `/entrega/` | ⚠️ Ver [Limitações conhecidas](#-limitações-conhecidas) |
+| 🚚 Entregas + histórico de status | `/entrega/` | ✅ Completo |
 
 - Autenticação de sessão simples (tela de login)
 - Busca por nome/documento/código em todas as listagens
