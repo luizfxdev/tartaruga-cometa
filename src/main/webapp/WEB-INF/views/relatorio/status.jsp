@@ -291,7 +291,7 @@
     </div>
 
     <div class="form-actions" style="margin-top: 2rem;">
-        <a href="${pageContext.request.contextPath}/deliveries/" class="btn btn-secondary">Voltar</a>
+        <a href="${pageContext.request.contextPath}/entrega/" class="btn btn-secondary">Voltar</a>
     </div>
 </t:header>
 

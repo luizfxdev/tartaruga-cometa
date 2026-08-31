@@ -1,7 +1,8 @@
 .table-container {
   background: var(--surface);
   border-radius: 12px;
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   box-shadow: var(--shadow-md);
   margin: 2rem 0;
   border: 1px solid var(--border);
@@ -30,6 +31,16 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
+}
+
+.table--denso thead th,
+.table--denso tbody td {
+  padding: 0.6rem 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.table--denso thead th {
+  white-space: normal;
 }
 
 .table thead th:first-child {
@@ -70,6 +81,8 @@
 
 .table tbody td:last-child {
   padding-right: 1.5rem;
+  white-space: nowrap;
+  min-width: 180px;
 }
 
 .badge {

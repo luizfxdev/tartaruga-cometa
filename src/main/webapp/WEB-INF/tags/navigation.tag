@@ -4,13 +4,13 @@
 <nav class="breadcrumb-nav">
     <a href="${pageContext.request.contextPath}/" class="breadcrumb-link">Início</a>
     <span class="breadcrumb-separator">›</span>
-    <a href="${pageContext.request.contextPath}/clients/" class="breadcrumb-link">Clientes</a>
+    <a href="${pageContext.request.contextPath}/cliente/" class="breadcrumb-link">Clientes</a>
     <span class="breadcrumb-separator">›</span>
-    <a href="${pageContext.request.contextPath}/addresses/" class="breadcrumb-link">Endereços</a>
+    <a href="${pageContext.request.contextPath}/endereco/" class="breadcrumb-link">Endereços</a>
     <span class="breadcrumb-separator">›</span>
-    <a href="${pageContext.request.contextPath}/products/" class="breadcrumb-link">Produtos</a>
+    <a href="${pageContext.request.contextPath}/produto/" class="breadcrumb-link">Produtos</a>
     <span class="breadcrumb-separator">›</span>
-    <a href="${pageContext.request.contextPath}/deliveries/" class="breadcrumb-link">Entregas</a>
+    <a href="${pageContext.request.contextPath}/entrega/" class="breadcrumb-link">Entregas</a>
 </nav>
 
 <style>

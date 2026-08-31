@@ -77,10 +77,10 @@ function aplicarMascaraDocumento(documentInput, personTypeSelect) {
     const currentPersonType = personTypeSelect.value;
     documentInput.value = ''; // Limpa o campo ao mudar o tipo
 
-    if (currentPersonType === 'INDIVIDUAL') {
+    if (currentPersonType === 'FISICA') {
         documentInput.placeholder = '000.000.000-00';
         aplicarMascaraCPF(documentInput);
-    } else if (currentPersonType === 'LEGAL_ENTITY') {
+    } else if (currentPersonType === 'JURIDICA') {
         documentInput.placeholder = '00.000.000/0000-00';
         aplicarMascaraCNPJ(documentInput);
     } else {

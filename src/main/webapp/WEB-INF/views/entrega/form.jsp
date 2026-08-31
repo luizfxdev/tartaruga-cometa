@@ -14,7 +14,7 @@
         <c:remove var="error" scope="session"/>
     </c:if>
 
-    <form method="POST" action="${pageContext.request.contextPath}/deliveries/save" class="form" data-form="entrega"
+    <form method="POST" action="${pageContext.request.contextPath}/entrega/save" class="form" data-form="entrega"
           data-origin-address-id="${delivery != null && delivery.originAddressId != null ? delivery.originAddressId : ''}"
           data-destination-address-id="${delivery != null && delivery.destinationAddressId != null ? delivery.destinationAddressId : ''}">
         <c:if test="${delivery != null && delivery.id != null}">
@@ -118,7 +118,7 @@
                 <option value="">Selecione...</option>
                 <c:forEach var="deliveryStatus" items="${deliveryStatuses}">
                     <option value="${deliveryStatus.value}" ${delivery != null && delivery.status.value == deliveryStatus.value ? 'selected' : ''}>
-                        ${deliveryStatus.label}
+                        ${deliveryStatus.rotulo}
                     </option>
                 </c:forEach>
             </select>
@@ -131,7 +131,7 @@
 
         <div class="form-actions">
             <button type="submit" class="custom-btn btn-success">Salvar</button>
-            <a href="${pageContext.request.contextPath}/deliveries/" class="custom-btn btn-secondary">Cancelar</a>
+            <a href="${pageContext.request.contextPath}/entrega/" class="custom-btn btn-secondary">Cancelar</a>
         </div>
     </form>
 

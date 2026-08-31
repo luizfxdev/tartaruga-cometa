@@ -8,8 +8,8 @@
     <div class="page-header">
         <h2>Detalhes do Produto</h2>
         <div class="btn-group">
-            <a href="${pageContext.request.contextPath}/products/edit/${product.id}" class="custom-btn btn-warning">Editar</a>
-            <a href="${pageContext.request.contextPath}/products/" class="custom-btn btn-secondary">Voltar</a>
+            <a href="${pageContext.request.contextPath}/produto/edit/${product.id}" class="custom-btn btn-warning">Editar</a>
+            <a href="${pageContext.request.contextPath}/produto/" class="custom-btn btn-secondary">Voltar</a>
         </div>
     </div>
 
@@ -103,8 +103,8 @@
     </div>
 
     <div class="form-actions">
-        <a href="${pageContext.request.contextPath}/products/edit/${product.id}" class="custom-btn btn-warning">Editar</a>
-        <a href="${pageContext.request.contextPath}/products/" class="custom-btn btn-secondary">Voltar</a>
+        <a href="${pageContext.request.contextPath}/produto/edit/${product.id}" class="custom-btn btn-warning">Editar</a>
+        <a href="${pageContext.request.contextPath}/produto/" class="custom-btn btn-secondary">Voltar</a>
     </div>
 </t:header>
 

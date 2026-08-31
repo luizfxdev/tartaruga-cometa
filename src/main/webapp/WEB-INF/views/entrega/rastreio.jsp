@@ -58,7 +58,7 @@
                                 <fmt:formatDate value="${history.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
                             </div>
                             <div class="timeline-content">
-                                <h5>${history.status.label}</h5>
+                                <h5>${history.status.rotulo}</h5>
                                 <p>${history.observations}</p>
                                 <small>Por: ${history.user}</small>
                             </div>

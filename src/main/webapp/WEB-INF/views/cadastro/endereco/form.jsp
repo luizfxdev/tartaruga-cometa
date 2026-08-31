@@ -14,7 +14,7 @@
         <c:remove var="error" scope="session"/>
     </c:if>
 
-    <form method="POST" action="${pageContext.request.contextPath}/addresses/save" class="form">
+    <form method="POST" action="${pageContext.request.contextPath}/endereco/save" class="form">
         <c:if test="${address != null && address.id != null}">
             <input type="hidden" name="id" value="${address.id}">
         </c:if>
@@ -27,11 +27,9 @@
             <label for="addressType">Tipo de Endereço *</label>
             <select id="addressType" name="addressType" required>
                 <option value="">Selecione...</option>
-                <option value="RESIDENTIAL" ${address != null && address.addressType.name() == 'RESIDENTIAL' ? 'selected' : ''}>Residencial</option>
-                <option value="COMMERCIAL" ${address != null && address.addressType.name() == 'COMMERCIAL' ? 'selected' : ''}>Comercial</option>
-                <option value="INDUSTRIAL" ${address != null && address.addressType.name() == 'INDUSTRIAL' ? 'selected' : ''}>Industrial</option>
-                <option value="RURAL" ${address != null && address.addressType.name() == 'RURAL' ? 'selected' : ''}>Rural</option>
-                <option value="OTHER" ${address != null && address.addressType.name() == 'OTHER' ? 'selected' : ''}>Outro</option>
+                <option value="ORIGEM" ${address != null && address.addressType.name() == 'ORIGEM' ? 'selected' : ''}>Origem</option>
+                <option value="DESTINO" ${address != null && address.addressType.name() == 'DESTINO' ? 'selected' : ''}>Destino</option>
+                <option value="CADASTRO" ${address != null && address.addressType.name() == 'CADASTRO' ? 'selected' : ''}>Cadastral</option>
             </select>
         </div>
 
@@ -136,10 +134,10 @@
             <button type="submit" class="custom-btn btn-success">Salvar</button>
             <c:choose>
                 <c:when test="${clientId != null}">
-                    <a href="${pageContext.request.contextPath}/clients/view/${clientId}" class="custom-btn btn-secondary">Cancelar</a>
+                    <a href="${pageContext.request.contextPath}/cliente/view/${clientId}" class="custom-btn btn-secondary">Cancelar</a>
                 </c:when>
                 <c:otherwise>
-                    <a href="${pageContext.request.contextPath}/addresses/" class="custom-btn btn-secondary">Cancelar</a>
+                    <a href="${pageContext.request.contextPath}/endereco/" class="custom-btn btn-secondary">Cancelar</a>
                 </c:otherwise>
             </c:choose>
         </div>

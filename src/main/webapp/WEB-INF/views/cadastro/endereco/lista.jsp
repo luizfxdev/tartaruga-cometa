@@ -19,15 +19,15 @@
         <div class="btn-group">
             <c:choose>
                 <c:when test="${client != null}">
-                    <a href="${pageContext.request.contextPath}/addresses/new/${client.id}" class="custom-btn btn-primary">+ Novo Endereço</a>
-                    <a href="${pageContext.request.contextPath}/clients/view/${client.id}" class="custom-btn btn-secondary">Voltar ao Cliente</a>
+                    <a href="${pageContext.request.contextPath}/endereco/new/${client.id}" class="custom-btn btn-primary">+ Novo Endereço</a>
+                    <a href="${pageContext.request.contextPath}/cliente/view/${client.id}" class="custom-btn btn-secondary">Voltar ao Cliente</a>
                 </c:when>
                 <c:when test="${clientId != null}">
-                    <a href="${pageContext.request.contextPath}/addresses/new/${clientId}" class="custom-btn btn-primary">+ Novo Endereço</a>
-                    <a href="${pageContext.request.contextPath}/clients/view/${clientId}" class="custom-btn btn-secondary">Voltar ao Cliente</a>
+                    <a href="${pageContext.request.contextPath}/endereco/new/${clientId}" class="custom-btn btn-primary">+ Novo Endereço</a>
+                    <a href="${pageContext.request.contextPath}/cliente/view/${clientId}" class="custom-btn btn-secondary">Voltar ao Cliente</a>
                 </c:when>
                 <c:otherwise>
-                    <a href="${pageContext.request.contextPath}/addresses/new" class="custom-btn btn-primary">+ Novo Endereço</a>
+                    <a href="${pageContext.request.contextPath}/endereco/new" class="custom-btn btn-primary">+ Novo Endereço</a>
                 </c:otherwise>
             </c:choose>
         </div>
@@ -65,7 +65,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <c:forEach var="address" items="${enderecos}">
+                        <c:forEach var="address" items="${addresses}">
                             <tr>
                                 <td>${address.id}</td>
                                 <td>${address.addressType}</td>
@@ -86,13 +86,13 @@
                                 </td>
                                 <td>
                                     <div class="btn-group">
-                                        <a href="${pageContext.request.contextPath}/addresses/edit/${address.id}" class="custom-btn btn-warning btn-sm">Editar</a>
+                                        <a href="${pageContext.request.contextPath}/endereco/edit/${address.id}" class="custom-btn btn-warning btn-sm">Editar</a>
                                         <c:if test="${not address.isMain}">
-                                            <form method="POST" action="${pageContext.request.contextPath}/addresses/set-principal/${address.id}" style="display:inline;" data-confirmacao-exclusao>
+                                            <form method="POST" action="${pageContext.request.contextPath}/endereco/set-principal/${address.id}" style="display:inline;" data-confirmacao-exclusao>
                                                 <button type="submit" class="custom-btn btn-info btn-sm" data-acao="excluir" data-mensagem="Definir como endereço principal?">Principal</button>
                                             </form>
                                         </c:if>
-                                        <form method="POST" action="${pageContext.request.contextPath}/addresses/delete/${address.id}" style="display:inline;" data-confirmacao-exclusao>
+                                        <form method="POST" action="${pageContext.request.contextPath}/endereco/delete/${address.id}" style="display:inline;" data-confirmacao-exclusao>
                                             <button type="submit" class="custom-btn btn-danger btn-sm" data-acao="excluir" data-mensagem="Tem certeza que deseja deletar este endereço?">Deletar</button>
                                         </form>
                                     </div>
@@ -108,13 +108,13 @@
                 Nenhum endereço encontrado.
                 <c:choose>
                     <c:when test="${client != null}">
-                        <a href="${pageContext.request.contextPath}/addresses/new/${client.id}" style="color: var(--primary); font-weight: 600;">Criar novo endereço</a>
+                        <a href="${pageContext.request.contextPath}/endereco/new/${client.id}" style="color: var(--primary); font-weight: 600;">Criar novo endereço</a>
                     </c:when>
                     <c:when test="${clientId != null}">
-                        <a href="${pageContext.request.contextPath}/addresses/new/${clientId}" style="color: var(--primary); font-weight: 600;">Criar novo endereço</a>
+                        <a href="${pageContext.request.contextPath}/endereco/new/${clientId}" style="color: var(--primary); font-weight: 600;">Criar novo endereço</a>
                     </c:when>
                     <c:otherwise>
-                        <a href="${pageContext.request.contextPath}/addresses/new" style="color: var(--primary); font-weight: 600;">Criar novo endereço</a>
+                        <a href="${pageContext.request.contextPath}/endereco/new" style="color: var(--primary); font-weight: 600;">Criar novo endereço</a>
                     </c:otherwise>
                 </c:choose>
             </div>

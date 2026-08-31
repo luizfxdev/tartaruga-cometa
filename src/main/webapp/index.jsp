@@ -2,7 +2,7 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <t:header title="Bem-vindo">
-    <main class="site-wrapper">
+    <div class="site-wrapper">
         <div class="pt-table desktop-768">
             <div class="pt-tablecell page-home relative" style="background-image: url('${pageContext.request.contextPath}/assets/background.jpg'); background-position: center; background-size: cover;">
                 <div class="overlay"></div>
@@ -90,7 +90,7 @@
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 </t:header>
 <t:footer />
 

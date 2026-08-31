@@ -14,7 +14,7 @@
         <c:remove var="error" scope="session"/>
     </c:if>
 
-    <form method="POST" action="${pageContext.request.contextPath}/products/save" class="form">
+    <form method="POST" action="${pageContext.request.contextPath}/produto/save" class="form">
         <c:if test="${product != null && product.id != null}">
             <input type="hidden" name="id" value="${product.id}">
         </c:if>
@@ -89,7 +89,7 @@
 
         <div class="form-actions">
             <button type="submit" class="custom-btn btn-success">Salvar</button>
-            <a href="${pageContext.request.contextPath}/products/" class="custom-btn btn-secondary">Cancelar</a>
+            <a href="${pageContext.request.contextPath}/produto/" class="custom-btn btn-secondary">Cancelar</a>
         </div>
     </form>
 </t:header>

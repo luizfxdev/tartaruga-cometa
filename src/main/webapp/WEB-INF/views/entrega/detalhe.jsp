@@ -7,8 +7,8 @@
     <div class="page-header">
         <h2>Detalhes da Entrega</h2>
         <div class="btn-group">
-            <a href="${pageContext.request.contextPath}/deliveries/edit/${delivery.id}" class="custom-btn btn-warning">Editar</a>
-            <a href="${pageContext.request.contextPath}/deliveries/" class="custom-btn btn-secondary">Voltar</a>
+            <a href="${pageContext.request.contextPath}/entrega/edit/${delivery.id}" class="custom-btn btn-warning">Editar</a>
+            <a href="${pageContext.request.contextPath}/entrega/" class="custom-btn btn-secondary">Voltar</a>
         </div>
     </div>
 
@@ -46,7 +46,7 @@
                     <span>
                         <c:choose>
                             <c:when test="${delivery.sender != null}">
-                                <a href="${pageContext.request.contextPath}/clients/view/${delivery.sender.id}">${delivery.sender.name}</a>
+                                <a href="${pageContext.request.contextPath}/cliente/view/${delivery.sender.id}">${delivery.sender.name}</a>
                                 <br><small>${delivery.sender.document}</small>
                             </c:when>
                             <c:otherwise>N/A</c:otherwise>
@@ -59,7 +59,7 @@
                     <span>
                         <c:choose>
                             <c:when test="${delivery.recipient != null}">
-                                <a href="${pageContext.request.contextPath}/clients/view/${delivery.recipient.id}">${delivery.recipient.name}</a>
+                                <a href="${pageContext.request.contextPath}/cliente/view/${delivery.recipient.id}">${delivery.recipient.name}</a>
                                 <br><small>${delivery.recipient.document}</small>
                             </c:when>
                             <c:otherwise>N/A</c:otherwise>
@@ -129,23 +129,23 @@
                     <label>Status</label>
                     <span>
                         <c:choose>
-                            <c:when test="${delivery.status.name() == 'PENDING'}">
-                                <span class="badge badge-warning">${delivery.status.label}</span>
+                            <c:when test="${delivery.status.name() == 'PENDENTE'}">
+                                <span class="badge badge-warning">${delivery.status.rotulo}</span>
                             </c:when>
-                            <c:when test="${delivery.status.name() == 'IN_TRANSIT'}">
-                                <span class="badge badge-info">${delivery.status.label}</span>
+                            <c:when test="${delivery.status.name() == 'EM_TRANSITO'}">
+                                <span class="badge badge-info">${delivery.status.rotulo}</span>
                             </c:when>
-                            <c:when test="${delivery.status.name() == 'DELIVERED'}">
-                                <span class="badge badge-success">${delivery.status.label}</span>
+                            <c:when test="${delivery.status.name() == 'ENTREGUE'}">
+                                <span class="badge badge-success">${delivery.status.rotulo}</span>
                             </c:when>
-                            <c:when test="${delivery.status.name() == 'NOT_PERFORMED'}">
-                                <span class="badge badge-secondary">${delivery.status.label}</span>
+                            <c:when test="${delivery.status.name() == 'NAO_REALIZADA'}">
+                                <span class="badge badge-secondary">${delivery.status.rotulo}</span>
                             </c:when>
-                            <c:when test="${delivery.status.name() == 'CANCELED'}">
-                                <span class="badge badge-danger">${delivery.status.label}</span>
+                            <c:when test="${delivery.status.name() == 'CANCELADA'}">
+                                <span class="badge badge-danger">${delivery.status.rotulo}</span>
                             </c:when>
                             <c:otherwise>
-                                <span class="badge badge-light">${delivery.status.label}</span>
+                                <span class="badge badge-light">${delivery.status.rotulo}</span>
                             </c:otherwise>
                         </c:choose>
                     </span>
@@ -170,8 +170,8 @@
     </div>
 
     <div class="form-actions">
-        <a href="${pageContext.request.contextPath}/deliveries/edit/${delivery.id}" class="custom-btn btn-warning">Editar</a>
-        <a href="${pageContext.request.contextPath}/deliveries/" class="custom-btn btn-secondary">Voltar</a>
+        <a href="${pageContext.request.contextPath}/entrega/edit/${delivery.id}" class="custom-btn btn-warning">Editar</a>
+        <a href="${pageContext.request.contextPath}/entrega/" class="custom-btn btn-secondary">Voltar</a>
     </div>
 </t:header>
 

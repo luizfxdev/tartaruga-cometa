@@ -2,11 +2,11 @@
 <nav class="breadcrumb-nav">
     <a href="${pageContext.request.contextPath}/">Início</a>
     <span>›</span>
-    <a href="${pageContext.request.contextPath}/clients/">Clientes</a>
+    <a href="${pageContext.request.contextPath}/cliente/">Clientes</a>
     <span>›</span>
-    <a href="${pageContext.request.contextPath}/addresses/">Endereços</a>
+    <a href="${pageContext.request.contextPath}/endereco/">Endereços</a>
     <span>›</span>
-    <a href="${pageContext.request.contextPath}/products/">Produtos</a>
+    <a href="${pageContext.request.contextPath}/produto/">Produtos</a>
     <span>›</span>
-    <a href="${pageContext.request.contextPath}/deliveries/">Entregas</a>
+    <a href="${pageContext.request.contextPath}/entrega/">Entregas</a>
 </nav>

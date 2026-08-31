@@ -58,12 +58,6 @@ public class EnderecoControlador extends HttpServlet {
             } else if (pathInfo.matches("/edit/\\d+")) {
                 showEditForm(request, response, pathInfo);
 
-            } else if (pathInfo.matches("/delete/\\d+")) {
-                deleteAddress(request, response, pathInfo);
-
-            } else if (pathInfo.matches("/set-principal/\\d+")) {
-                setMainAddress(request, response, pathInfo);
-
             } else if (pathInfo.matches("/client/\\d+")) {
                 listAddressesByClient(request, response, pathInfo);
 
@@ -92,6 +86,10 @@ public class EnderecoControlador extends HttpServlet {
         try {
             if (pathInfo != null && pathInfo.equals("/save")) {
                 saveAddress(request, response);
+            } else if (pathInfo != null && pathInfo.matches("/delete/\\d+")) {
+                deleteAddress(request, response, pathInfo);
+            } else if (pathInfo != null && pathInfo.matches("/set-principal/\\d+")) {
+                setMainAddress(request, response, pathInfo);
             } else {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Rota POST inválida.");
             }

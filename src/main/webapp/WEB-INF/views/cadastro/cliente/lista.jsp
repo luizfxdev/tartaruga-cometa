@@ -7,7 +7,7 @@
 
     <div class="page-header">
         <h2>Clientes</h2>
-        <a href="${pageContext.request.contextPath}/clients/new" class="custom-btn btn-primary">+ Novo Cliente</a>
+        <a href="${pageContext.request.contextPath}/cliente/new" class="custom-btn btn-primary">+ Novo Cliente</a>
     </div>
 
     <c:if test="${not empty sessionScope.success}">
@@ -25,7 +25,7 @@
     </c:if>
 
     <div class="search-box">
-        <form method="GET" action="${pageContext.request.contextPath}/clients/search">
+        <form method="GET" action="${pageContext.request.contextPath}/cliente/search">
             <input type="text" name="q" placeholder="Buscar cliente por nome ou documento..." required>
             <button type="submit" class="custom-btn btn-info">Buscar</button>
         </form>
@@ -34,7 +34,7 @@
     <c:choose>
         <c:when test="${not empty clients}">
             <div class="table-container">
-                <table class="table">
+                <table class="table table--denso">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -49,7 +49,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <c:forEach var="client" items="${clientes}">
+                        <c:forEach var="client" items="${clients}">
                             <tr>
                                 <td>${client.id}</td>
                                 <td>
@@ -63,9 +63,9 @@
                                 <td>${client.formattedUpdatedAt != null ? client.formattedUpdatedAt : '-'}</td>
                                 <td>
                                     <div class="btn-group">
-                                        <a href="${pageContext.request.contextPath}/clients/view/${client.id}" class="custom-btn btn-info btn-sm">Ver</a>
-                                        <a href="${pageContext.request.contextPath}/clients/edit/${client.id}" class="custom-btn btn-warning btn-sm">Editar</a>
-                                        <form method="POST" action="${pageContext.request.contextPath}/clients/delete/${client.id}" style="display:inline;" data-confirmacao-exclusao>
+                                        <a href="${pageContext.request.contextPath}/cliente/view/${client.id}" class="custom-btn btn-info btn-sm">Ver</a>
+                                        <a href="${pageContext.request.contextPath}/cliente/edit/${client.id}" class="custom-btn btn-warning btn-sm">Editar</a>
+                                        <form method="POST" action="${pageContext.request.contextPath}/cliente/delete/${client.id}" style="display:inline;" data-confirmacao-exclusao>
                                             <button type="submit" class="custom-btn btn-danger btn-sm" data-acao="excluir" data-mensagem="Tem certeza que deseja deletar este cliente?">Deletar</button>
                                         </form>
                                     </div>
@@ -78,7 +78,7 @@
         </c:when>
         <c:otherwise>
             <div class="alert alert-info">
-                Nenhum cliente encontrado. <a href="${pageContext.request.contextPath}/clients/new" style="color: var(--primary); font-weight: 600;">Criar novo cliente</a>
+                Nenhum cliente encontrado. <a href="${pageContext.request.contextPath}/cliente/new" style="color: var(--primary); font-weight: 600;">Criar novo cliente</a>
             </div>
         </c:otherwise>
     </c:choose>

@@ -24,14 +24,16 @@
     <c:if test="${isHome}">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pages/home.css">
     </c:if>
+
+    <link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/assets/favicon.ico">
 </head>
-<body>
+<body class="wrapper-pagina">
     <nav class="navbar">
         <div class="navbar-container">
             <a href="${pageContext.request.contextPath}/" class="navbar-brand">
                 <img
                     id="navbar-logo-img"
-                    src="${pageContext.request.contextPath}/assets/logolight.png"
+                    src="${pageContext.request.contextPath}/assets/logo.png"
                     alt="Tartaruga Cometa Logo"
                     class="navbar-logo-img"
                 >
@@ -42,16 +44,10 @@
         </div>
     </nav>
 
-    <%-- 
-        CORREÇÃO AQUI: 
+    <%--
         Se for Home, usamos 'home-wrapper-full' para ocupar a tela toda.
         Se for outra página, usamos 'container' para manter o layout encaixotado do sistema.
     --%>
-    <div class="${isHome ? 'home-wrapper-full' : 'container'}">
+    <main class="conteudo-principal ${isHome ? 'home-wrapper-full' : 'container'}">
         <jsp:doBody/>
-    </div>
-
-    <script src="${pageContext.request.contextPath}/js/masks.js"></script>
-    <script src="${pageContext.request.contextPath}/js/validation.js"></script>
-</body>
-</html>
+    </main>

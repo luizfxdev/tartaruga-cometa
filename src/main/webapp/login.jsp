@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Tartaruga Cometa</title>
+    <link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/assets/favicon.ico">
     <style>
         * {
             margin: 0;
@@ -243,7 +244,7 @@
     <div class="animated-bg"></div>
     <div class="login-container">
         <div class="logo-container">
-            <img src="${pageContext.request.contextPath}/assets/logolight.png" alt="Tartaruga Cometa">
+            <img src="${pageContext.request.contextPath}/assets/logo.png" alt="Tartaruga Cometa" style="height: 40px; width: auto; object-fit: contain;">
         </div>
         <h2 class="title">Sistema de Entregas</h2>
         <div id="errorMessage" class="error-message"></div>

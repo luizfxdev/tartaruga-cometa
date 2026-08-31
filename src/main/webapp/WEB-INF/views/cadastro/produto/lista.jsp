@@ -9,7 +9,7 @@
 
     <div class="page-header">
         <h2>Produtos</h2>
-        <a href="${pageContext.request.contextPath}/products/new" class="custom-btn btn-primary">+ Novo Produto</a>
+        <a href="${pageContext.request.contextPath}/produto/new" class="custom-btn btn-primary">+ Novo Produto</a>
     </div>
 
     <c:if test="${not empty sessionScope.success}">
@@ -27,7 +27,7 @@
     </c:if>
 
     <div class="search-box">
-        <form action="${pageContext.request.contextPath}/products/search" method="GET">
+        <form action="${pageContext.request.contextPath}/produto/search" method="GET">
             <input type="text" name="query" placeholder="Buscar por nome, categoria..." value="${param.query}">
             <button type="submit" class="custom-btn btn-info">Buscar</button>
         </form>
@@ -36,7 +36,7 @@
     <c:choose>
         <c:when test="${not empty products}">
             <div class="table-container">
-                <table class="table">
+                <table class="table table--denso">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -54,7 +54,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <c:forEach var="product" items="${produtos}">
+                        <c:forEach var="product" items="${products}">
                             <tr>
                                 <td>${product.id}</td>
                                 <td><strong>${product.name}</strong></td>
@@ -78,9 +78,9 @@
                                 <td>${product.updatedAt != null ? DateFormatter.formatLocalDateTime(product.updatedAt) : '-'}</td>
                                 <td>
                                     <div class="btn-group">
-                                        <a href="${pageContext.request.contextPath}/products/view/${product.id}" class="custom-btn btn-info btn-sm">Ver</a>
-                                        <a href="${pageContext.request.contextPath}/products/edit/${product.id}" class="custom-btn btn-warning btn-sm">Editar</a>
-                                        <form action="${pageContext.request.contextPath}/products/delete/${product.id}" method="POST" style="display:inline;" data-confirmacao-exclusao>
+                                        <a href="${pageContext.request.contextPath}/produto/view/${product.id}" class="custom-btn btn-info btn-sm">Ver</a>
+                                        <a href="${pageContext.request.contextPath}/produto/edit/${product.id}" class="custom-btn btn-warning btn-sm">Editar</a>
+                                        <form action="${pageContext.request.contextPath}/produto/delete/${product.id}" method="POST" style="display:inline;" data-confirmacao-exclusao>
                                             <button type="submit" class="custom-btn btn-danger btn-sm" data-acao="excluir" data-mensagem="Tem certeza que deseja deletar este produto?">Deletar</button>
                                         </form>
                                     </div>
@@ -93,7 +93,7 @@
         </c:when>
         <c:otherwise>
             <div class="alert alert-info">
-                Nenhum produto encontrado. <a href="${pageContext.request.contextPath}/products/new" style="color: var(--primary); font-weight: 600;">Criar novo produto</a>
+                Nenhum produto encontrado. <a href="${pageContext.request.contextPath}/produto/new" style="color: var(--primary); font-weight: 600;">Criar novo produto</a>
             </div>
         </c:otherwise>
     </c:choose>

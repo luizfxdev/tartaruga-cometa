@@ -56,12 +56,6 @@ public class EntregaControlador extends HttpServlet {
                 viewDelivery(request, response, action);
             } else if (action.startsWith("/search")) {
                 searchDeliveries(request, response);
-            } else if (action.startsWith("/markDelivered/")) {
-                markAsDelivered(request, response, action);
-            } else if (action.startsWith("/markNotDelivered/")) {
-                markAsNotDelivered(request, response, action);
-            } else if (action.startsWith("/delete/")) {
-                deleteDelivery(request, response, action);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }

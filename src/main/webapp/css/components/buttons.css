@@ -54,11 +54,11 @@
 }
 
 .btn-warning {
-  background: linear-gradient(0deg, #D97706 0%, #F59E0B 100%);
+  background: #6c757d;
 }
 
 .btn-warning:hover {
-  background: linear-gradient(0deg, #F59E0B 0%, #FBBF24 100%);
+  background: #5a6268;
   transform: translateY(-2px);
 }
 
@@ -72,11 +72,11 @@
 }
 
 .btn-info {
-  background: linear-gradient(0deg, #2563EB 0%, #3B82F6 100%);
+  background: linear-gradient(0deg, #047857 0%, #059669 100%);
 }
 
 .btn-info:hover {
-  background: linear-gradient(0deg, #3B82F6 0%, #60A5FA 100%);
+  background: linear-gradient(0deg, #059669 0%, #10B981 100%);
   transform: translateY(-2px);
 }
 
@@ -94,10 +94,15 @@
 }
 
 .btn-sm {
-  height: 36px;
-  padding: 6px 18px;
-  font-size: 0.875rem;
-  min-width: 100px;
+  height: 34px;
+  padding: 6px 12px;
+  font-size: 0.8125rem;
+  min-width: 64px;
+}
+
+.table .btn-group {
+  gap: 0.35rem;
+  flex-wrap: nowrap;
 }
 
 .btn-lg {

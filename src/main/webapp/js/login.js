@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function redirectToClients() {
         const contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf('/', 1));
-        window.location.href = contextPath + '/clients/';
+        window.location.href = contextPath + '/cliente/';
     }
 
     usernameInput.addEventListener('input', function() {

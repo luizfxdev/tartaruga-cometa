@@ -48,8 +48,8 @@ function validarCNPJ(cnpj) {
 }
 
 function validarDocumento(personType, document) {
-    if (personType === 'INDIVIDUAL') return validarCPF(document);
-    if (personType === 'LEGAL_ENTITY') return validarCNPJ(document);
+    if (personType === 'FISICA') return validarCPF(document);
+    if (personType === 'JURIDICA') return validarCNPJ(document);
     return false;
 }
 
@@ -78,7 +78,7 @@ function mostrarErro(mensagem) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form[action*="/clients/save"]');
+    const form = document.querySelector('form[action*="/cliente/save"]');
     if (!form) return;
 
     form.addEventListener('submit', function(e) {

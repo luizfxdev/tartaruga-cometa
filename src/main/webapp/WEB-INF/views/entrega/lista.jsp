@@ -8,7 +8,7 @@
 
     <div class="page-header">
         <h2>Entregas</h2>
-        <a href="${pageContext.request.contextPath}/deliveries/new" class="custom-btn btn-primary">+ Nova Entrega</a>
+        <a href="${pageContext.request.contextPath}/entrega/new" class="custom-btn btn-primary">+ Nova Entrega</a>
     </div>
 
     <c:if test="${not empty sessionScope.success}">
@@ -26,7 +26,7 @@
     </c:if>
 
     <div class="search-box">
-        <form action="${pageContext.request.contextPath}/deliveries/search" method="GET">
+        <form action="${pageContext.request.contextPath}/entrega/search" method="GET">
             <input type="text" name="query" placeholder="Buscar por código, status..." value="${param.query}">
             <button type="submit" class="custom-btn btn-info">Buscar</button>
         </form>
@@ -48,7 +48,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <c:forEach var="delivery" items="${entregas}">
+                        <c:forEach var="delivery" items="${deliveries}">
                             <tr>
                                 <td>${delivery.id}</td>
                                 <td><strong>${delivery.trackingCode}</strong></td>
@@ -56,32 +56,32 @@
                                 <td>${delivery.recipient != null ? delivery.recipient.name : 'N/A'}</td>
                                 <td>
                                     <c:choose>
-                                        <c:when test="${delivery.status.name() == 'PENDING'}">
-                                            <span class="badge badge-warning">${delivery.status.label}</span>
+                                        <c:when test="${delivery.status.name() == 'PENDENTE'}">
+                                            <span class="badge badge-warning">${delivery.status.rotulo}</span>
                                         </c:when>
-                                        <c:when test="${delivery.status.name() == 'IN_TRANSIT'}">
-                                            <span class="badge badge-info">${delivery.status.label}</span>
+                                        <c:when test="${delivery.status.name() == 'EM_TRANSITO'}">
+                                            <span class="badge badge-info">${delivery.status.rotulo}</span>
                                         </c:when>
-                                        <c:when test="${delivery.status.name() == 'DELIVERED'}">
-                                            <span class="badge badge-success">${delivery.status.label}</span>
+                                        <c:when test="${delivery.status.name() == 'ENTREGUE'}">
+                                            <span class="badge badge-success">${delivery.status.rotulo}</span>
                                         </c:when>
-                                        <c:when test="${delivery.status.name() == 'NOT_PERFORMED'}">
-                                            <span class="badge badge-secondary">${delivery.status.label}</span>
+                                        <c:when test="${delivery.status.name() == 'NAO_REALIZADA'}">
+                                            <span class="badge badge-secondary">${delivery.status.rotulo}</span>
                                         </c:when>
-                                        <c:when test="${delivery.status.name() == 'CANCELED'}">
-                                            <span class="badge badge-danger">${delivery.status.label}</span>
+                                        <c:when test="${delivery.status.name() == 'CANCELADA'}">
+                                            <span class="badge badge-danger">${delivery.status.rotulo}</span>
                                         </c:when>
                                         <c:otherwise>
-                                            <span class="badge badge-light">${delivery.status.label}</span>
+                                            <span class="badge badge-light">${delivery.status.rotulo}</span>
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
                                 <td>${delivery.formattedCreationDate}</td>
                                 <td>
                                     <div class="btn-group">
-                                        <a href="${pageContext.request.contextPath}/deliveries/view/${delivery.id}" class="custom-btn btn-info btn-sm">Ver</a>
-                                        <a href="${pageContext.request.contextPath}/deliveries/edit/${delivery.id}" class="custom-btn btn-warning btn-sm">Editar</a>
-                                        <form method="POST" action="${pageContext.request.contextPath}/deliveries/delete/${delivery.id}" style="display:inline;" data-confirmacao-exclusao>
+                                        <a href="${pageContext.request.contextPath}/entrega/view/${delivery.id}" class="custom-btn btn-info btn-sm">Ver</a>
+                                        <a href="${pageContext.request.contextPath}/entrega/edit/${delivery.id}" class="custom-btn btn-warning btn-sm">Editar</a>
+                                        <form method="POST" action="${pageContext.request.contextPath}/entrega/delete/${delivery.id}" style="display:inline;" data-confirmacao-exclusao>
                                             <button type="submit" class="custom-btn btn-danger btn-sm" data-acao="excluir" data-mensagem="Tem certeza que deseja deletar esta entrega?">Deletar</button>
                                         </form>
                                     </div>
@@ -94,7 +94,7 @@
         </c:when>
         <c:otherwise>
             <div class="alert alert-info">
-                Nenhuma entrega encontrada. <a href="${pageContext.request.contextPath}/deliveries/new" style="color: var(--primary); font-weight: 600;">Criar nova entrega</a>
+                Nenhuma entrega encontrada. <a href="${pageContext.request.contextPath}/entrega/new" style="color: var(--primary); font-weight: 600;">Criar nova entrega</a>
             </div>
         </c:otherwise>
     </c:choose>

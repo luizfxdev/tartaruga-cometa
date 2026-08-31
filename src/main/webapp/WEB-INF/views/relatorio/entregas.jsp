@@ -106,7 +106,7 @@
                                 <td><fmt:formatDate value="${delivery.createdAt}" pattern="dd/MM/yyyy HH:mm"/></td>
                                 <td>
                                     <div class="actions">
-                                        <a href="${pageContext.request.contextPath}/deliveries/view/${delivery.id}" class="btn btn-info btn-sm">Ver</a>
+                                        <a href="${pageContext.request.contextPath}/entrega/view/${delivery.id}" class="btn btn-info btn-sm">Ver</a>
                                     </div>
                                 </td>
                             </tr>
@@ -123,7 +123,7 @@
     </c:choose>
 
     <div class="form-actions" style="margin-top: 2rem;">
-        <a href="${pageContext.request.contextPath}/deliveries/" class="btn btn-secondary">Voltar</a>
+        <a href="${pageContext.request.contextPath}/entrega/" class="btn btn-secondary">Voltar</a>
     </div>
 </t:header>
 
