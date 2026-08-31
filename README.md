@@ -1,218 +1,129 @@
 # 🐢 Tartaruga Cometa - Sistema de Gerenciamento de Entregas
 
-![Java](https://img.shields.io/badge/Java-11-orange?style=flat-square&logo=java)
-![Jakarta EE](https://img.shields.io/badge/Jakarta%20EE-9-blue?style=flat-square)
-![Tomcat](https://img.shields.io/badge/Tomcat-10-yellow?style=flat-square&logo=apache-tomcat)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-blue?style=flat-square&logo=postgresql)
-![Gradle](https://img.shields.io/badge/Gradle-8.0+-green?style=flat-square&logo=gradle)
-![Version](https://img.shields.io/badge/Version-2.0-success?style=flat-square)
-![Status](https://img.shields.io/badge/Status-Ativo-success?style=flat-square)
+![Java](https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=java)
+![Jakarta EE](https://img.shields.io/badge/Jakarta%20Servlet-6.0-blue?style=flat-square)
+![Tomcat](https://img.shields.io/badge/Tomcat-10.1-yellow?style=flat-square&logo=apache-tomcat)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue?style=flat-square&logo=postgresql)
+![Gradle](https://img.shields.io/badge/Gradle-8.5-green?style=flat-square&logo=gradle)
+![Docker](https://img.shields.io/badge/Docker-compose-2496ED?style=flat-square&logo=docker)
+![Status](https://img.shields.io/badge/Status-Em%20refatoração-yellow?style=flat-square)
 
 ## 📋 Descrição do Projeto
 
-Sistema web completo para gerenciamento e rastreamento de entregas de uma transportadora. Desenvolvido com Jakarta EE, Servlet API e PostgreSQL, com frontend moderno e responsivo utilizando arquitetura CSS modular e tema claro/escuro.
+Sistema web para gerenciamento e rastreamento de entregas de uma transportadora. Stack Java puro (sem framework de injeção de dependência ou ORM): `Servlet` + `JSP` + `JDBC` com `PreparedStatement`, build `Gradle`, servidor `Tomcat 10.1`, banco `PostgreSQL`.
 
-**Versão 2.0** - Focada em melhorias de UI/UX, padronização visual e experiência do usuário.
-
----
-
-## 🎯 Funcionalidades Principais
-
-### Gerenciamento Completo
-✅ **Clientes** - Cadastro de Pessoa Física e Jurídica  
-✅ **Endereços** - Múltiplos endereços por cliente com tipo e principal  
-✅ **Produtos** - Catálogo com peso, volume e valor declarado  
-✅ **Entregas** - Sistema completo de rastreamento  
-✅ **Histórico** - Tracking de status de cada entrega  
-
-### Interface e Usabilidade
-✅ **Design Moderno** - Interface limpa e profissional  
-✅ **Tema Claro/Escuro** - Alternância de temas (em desenvolvimento)  
-✅ **Responsivo** - Adaptável para desktop, tablet e mobile  
-✅ **Busca Avançada** - Filtros em todas as listagens  
-✅ **Feedback Visual** - Alerts, badges e estados de hover  
-
-### Segurança e Performance
-✅ **Autenticação de Sessão**  
-✅ **Encoding UTF-8** em toda aplicação  
-✅ **Connection Pool** - HikariCP para otimização  
-✅ **Validação de Dados** - Client-side e Server-side  
-
-
-## 📊 Diagrama de Entidade-Relacionamento (DER)
-
-```
-┌─────────────┐         ┌──────────────┐         ┌──────────────┐
-│   CLIENTS   │◄────────┤  ADDRESSES   │────────►│   PRODUCTS   │
-├─────────────┤         ├──────────────┤         ├──────────────┤
-│ id (PK)     │         │ id (PK)      │         │ id (PK)      │
-│ personType  │         │ clientId(FK) │         │ name         │
-│ document    │         │ addressType  │         │ description  │
-│ name        │         │ street       │         │ weightKg     │
-│ email       │         │ number       │         │ volumeM3     │
-│ phone       │         │ isPrincipal  │         │ declaredValue│
-│ createdAt   │         │ createdAt    │         │ category     │
-└─────────────┘         └──────────────┘         │ active       │
-      ▲                                           └──────────────┘
-      │                                                   ▲
-      │                                                   │
-      └───────────────────┬────────────────────────────┬─┘
-                          │                            │
-                    ┌─────▼────────────┐       ┌──────▼───────────┐
-                    │   DELIVERIES     │       │ DELIVERY_HISTORY │
-                    ├──────────────────┤       ├──────────────────┤
-                    │ id (PK)          │◄──────┤ id (PK)          │
-                    │ trackingCode     │       │ deliveryId (FK)  │
-                    │ shipperId (FK)   │       │ status           │
-                    │ recipientId (FK) │       │ observations     │
-                    │ originAddressId  │       │ user             │
-                    │ destAddressId    │       │ changedAt        │
-                    │ status           │       └──────────────────┘
-                    │ freightValue     │
-                    │ observations     │
-                    │ createdAt        │
-                    └──────────────────┘
-```
-
-## 🆕 Novidades da Versão 2.0
-
-### 🎨 Refinamento Visual Completo
-
-#### Tabelas Legíveis e Organizadas
-- Grid system moderno com breakpoints responsivos
-- Hierarquia visual clara com cores e espaçamentos otimizados
-- Hover states e feedback interativo
-- Badges coloridos para status e tipos
-
-#### Padronização de Componentes
-- Botões unificados (`.custom-btn`) em todo o sistema
-- Cards compactos para visualização de detalhes
-- Formulários consistentes com validação visual
-- Breadcrumb navigation em todas as páginas de listagem
-
-#### Arquitetura CSS Modular
-```
-css/
-├── base/          # Reset, variáveis, tipografia, alerts
-├── components/    # Botões, cards, forms, tables, modals
-├── layout/        # Header, footer, grid, breadcrumb
-├── pages/         # Home, login, dashboard, details
-├── themes/        # Light/Dark (em desenvolvimento)
-└── main.css       # Import central
-```
-
-### 📱 Melhorias de UX
-
-- **Navigation Menu** - Menu hexagonal na página inicial
-- **Stats Dashboard** - Métricas em tempo real (∞ Entregas, 100% Satisfação, 150+ Rotas)
-- **Details View** - Layout em grid compacto para informações
-- **Form Actions** - Botões de ação sempre visíveis
-- **Search Bars** - Busca em tempo real em todas as listagens
+O projeto está em refatoração para nomenclatura e domínio em **português** (`Cliente`, `Endereço`, `Produto`, `Entrega`), seguindo o fluxo em camadas `JSP → Controlador → BO → DAO → PostgreSQL`. Controlador não acessa DAO diretamente; DAO não contém regra de negócio.
 
 ---
 
-## 🚀 Instalação Rápida
+## 🎯 Funcionalidades
 
-### Pré-requisitos
+| Domínio | Rota | CRUD |
+|---|---|---|
+| 👥 Clientes (PF/PJ) | `/cliente/` | ✅ Completo |
+| 📍 Endereços (com endereço principal por cliente) | `/endereco/` | ✅ Completo |
+| 📦 Produtos | `/produto/` | ✅ Completo |
+| 🚚 Entregas + histórico de status | `/entrega/` | ⚠️ Ver [Limitações conhecidas](#-limitações-conhecidas) |
 
-- ✅ Java 11+ instalado
-- ✅ PostgreSQL 15+ instalado e rodando
-- ✅ Apache Tomcat 10+ instalado
-- ✅ Git instalado
+- Autenticação de sessão simples (tela de login)
+- Busca por nome/documento/código em todas as listagens
+- Histórico de mudança de status de entrega (tabela append-only, protegida por trigger)
+- Connection pool via **HikariCP**
+- Encoding UTF-8 ponta a ponta
 
-### Instalação Automática (Recomendado)
+---
+
+## 🗄️ Modelo de dados
+
+Tabelas em português, schema modular em `src/main/resources/db/`:
+
+```
+CLIENTE (1) ──< ENDERECO
+CLIENTE (1) ──< ENTREGA        (id_remetente | id_destinatario)
+ENDERECO (1) ──< ENTREGA        (id_endereco_origem | id_endereco_destino)
+ENTREGA (1) ──< ENTREGA_PRODUTO >── (1) PRODUTO
+ENTREGA (1) ──< HISTORICO_ENTREGA
+```
+
+| Tabela | Enum / observação |
+|---|---|
+| `cliente` | `tipo_pessoa`: `PF` \| `PJ` |
+| `endereco` | `tipo_endereco`: `ORIGEM` \| `DESTINO` \| `CADASTRO` |
+| `produto` | preço, peso, volume, valor declarado, estoque |
+| `entrega` | `status_entrega`: `PENDENTE` → `EM_TRANSITO` → `ENTREGUE` \| `CANCELADA` \| `NAO_REALIZADA` |
+| `entrega_produto` | itens da entrega, snapshot de peso/volume/valor unitário |
+| `historico_entrega` | append-only (trigger bloqueia `UPDATE`/`DELETE`) |
+
+
+
+---
+
+## 🏗️ Arquitetura de pacotes
+
+```
+br.com.tartarugacometa/
+├── cadastro/
+│   ├── cliente/    Cliente, ClienteDAO, ClienteBO, ClienteControlador
+│   ├── endereco/   Endereco, EnderecoDAO, EnderecoBO, EnderecoControlador
+│   └── produto/    Produto, ProdutoDAO, ProdutoBO, ProdutoControlador
+├── entrega/
+│   ├── Entrega, EntregaDAO, EntregaBO, EntregaControlador
+│   ├── item/       ItemEntrega, ItemEntregaDAO
+│   └── historico/  HistoricoEntrega, HistoricoEntregaDAO
+├── enums/          TipoPessoa, TipoEndereco, StatusEntrega
+├── exception/      NegocioException e subclasses
+├── config/         DatabaseConfig (HikariCP), ApplicationListener
+├── filter/         EncodingFilter
+└── util/           Mapper, Validator, geradores e validadores (CPF/CNPJ/CEP/UF)
+```
+
+---
+
+## 🚀 Como rodar
+
+### Opção recomendada — Docker
 
 ```bash
-# 1. Clonar o repositório
 git clone https://github.com/luizfxdev/tartaruga-cometa.git
 cd tartaruga-cometa
-
-# 2. Configurar variáveis (edite se necessário)
-nano src/main/java/com/tartarugacometasystem/util/ConnectionPool.java
-
-# 3. Executar script de inicialização
 chmod +x start.sh
 ./start.sh
 ```
 
-O script `start.sh` irá:
-1. ✅ Criar o banco de dados PostgreSQL
-2. ✅ Executar o schema SQL
-3. ✅ Compilar a aplicação com Gradle
-4. ✅ Gerar o arquivo WAR
-5. ✅ Fazer o deploy no Tomcat
-6. ✅ Iniciar o servidor
+O `start.sh`:
+1. Verifica e libera conflito de porta (8080 do app, 5433 do banco) automaticamente
+2. Sobe `docker compose` (Postgres 15 + WAR em Tomcat 10.1)
+3. Aguarda os healthchecks do banco e da aplicação
+4. Publica em `http://localhost:8080/tartaruga-cometa/`
+
+Na primeira subida, o Postgres do container roda os scripts de `src/main/resources/db/` automaticamente (schema + dados de exemplo). Para recriar o banco do zero: `docker compose down && docker volume rm tartaruga-cometa_pgdata && ./start.sh`.
+
+O Postgres do Docker também fica acessível para ferramentas externas (pgAdmin etc.) em `localhost:5433` (usuário/senha/banco definidos em `docker-compose.yml`).
+
+### Login
+
+Tela de login em `/login.jsp` (credenciais fixas de demonstração no `login.js`: `admin` / `admin123`) — **não é autenticação real**, apenas controla acesso visual à área interna para demonstração de login.
+
 
 ---
 
-## 🌐 Acesso à Aplicação
+## 🧪 Testes
 
-**URL Principal:** http://localhost:8080/tartaruga-cometa/
+```bash
+./gradlew test              # unitários (JUnit 5 + Mockito + AssertJ)
+./gradlew integrationTest   # integração (Testcontainers — sobe Postgres descartável)
+./gradlew check             # os dois acima + relatório Jacoco
+```
 
-### Páginas Principais
-
-| Módulo | URL | Descrição |
-|--------|-----|-----------|
-| 🏠 **Home** | `/` | Dashboard com menu hexagonal |
-| 👥 **Clientes** | `/clients/` | Gerenciamento de clientes |
-| 📍 **Endereços** | `/addresses/` | Cadastro de endereços |
-| 📦 **Produtos** | `/products/` | Catálogo de produtos |
-| 🚚 **Entregas** | `/deliveries/` | Rastreamento de entregas |
-
-### Funcionalidades em Desenvolvimento
-
-🔄 **Em andamento:**
-- ⏳ Theme Toggle (Claro/Escuro)
-- ⏳ Menu "Sobre"
-- ⏳ Menu "Rastrear"
-- ⏳ Menu "Serviços"
-- ⏳ Menu "Unidades"
-- ⏳ Menu "Cotação"
-- ⏳ Menu "Contato"
+`integrationTest` exige Docker disponível na máquina (Testcontainers) e não roda em `./gradlew build` padrão sem Docker ativo.
 
 ---
 
-## ✅ Changelog v2.0
 
-### 🎨 Melhorias de UI/UX
+## 🔐 Segurança
 
-#### Tabelas
-- ✅ Grid system responsivo
-- ✅ Hover states com feedback visual
-- ✅ Badges coloridos para status
-- ✅ Alinhamento otimizado
-
-#### Botões
-- ✅ Padronização `.custom-btn`
-- ✅ Estados hover/active/disabled
-- ✅ Ícones integrados
-
-#### Formulários
-- ✅ Layout em grid (.form-row)
-- ✅ Validação visual
-- ✅ Placeholders informativos
-- ✅ Labels consistentes
-
-#### Detalhes (View)
-- ✅ Cards compactos
-- ✅ Grid layout 2 colunas
-- ✅ Hierarquia visual clara
-- ✅ Links para entidades relacionadas
-
-### 📐 Arquitetura
-
-- ✅ CSS modular (8 categorias)
-- ✅ Breadcrumb componentizado
-- ✅ Header/Footer tags
-- ✅ Main.css centralizado
-
-### 🐛 Correções
-
-- ✅ EL expression errors
-- ✅ Theme toggle funcional
-- ✅ Logo switching
-- ✅ Posicionamento hexágonos (4 cima, 3 baixo)
-- ✅ Encoding UTF-8
+- `database.properties` versionado **não contém senha** — senha só via variável de ambiente `DB_PASSWORD`.
+- Pendências de rotação de credencial e limpeza de histórico do git documentadas em `docs/SEGURANCA-CREDENCIAIS.md`.
 
 ---
 
@@ -230,7 +141,6 @@ O script `start.sh` irá:
 
 > Projeto desenvolvido como parte da **Trilha de Aceleração** proposta pela **GW Sistemas**.
 
-
 ---
 
 <div align="center">
@@ -238,8 +148,6 @@ O script `start.sh` irá:
 ### 🐢 Tartaruga Cometa
 
 **Posso parecer lenta, mas entrego com precisão em cada rota.**
-
-[![Version](https://img.shields.io/badge/version-2.0-green)](https://github.com/luizfxdev/tartaruga-cometa/releases)
 
 [⬆ Voltar ao topo](#-tartaruga-cometa---sistema-de-gerenciamento-de-entregas)
 
