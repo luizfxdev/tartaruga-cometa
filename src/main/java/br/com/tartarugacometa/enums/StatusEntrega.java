@@ -41,13 +41,7 @@ public enum StatusEntrega {
     }
 
     public String paraColuna() {
-        return switch (this) {
-            case PENDENTE -> "PENDING";
-            case EM_TRANSITO -> "IN_TRANSIT";
-            case ENTREGUE -> "DELIVERED";
-            case CANCELADA -> "CANCELED";
-            case NAO_REALIZADA -> "NOT_PERFORMED";
-        };
+        return this.name();
     }
 
     public static StatusEntrega fromValue(String value) {

@@ -15,7 +15,7 @@ import br.com.tartarugacometa.enums.TipoPessoa;
 public class ClienteDAO {
 
     public void inserir(Connection conn, Cliente cliente) throws SQLException {
-        String sql = "INSERT INTO client (name, document, email, phone, person_type) VALUES (?, ?, ?, ?, ?::person_type_enum)";
+        String sql = "INSERT INTO cliente (nome, documento, email, telefone, tipo_pessoa) VALUES (?, ?, ?, ?, ?::tipo_pessoa)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, cliente.getName());
             pstmt.setString(2, cliente.getDocument());
@@ -33,7 +33,7 @@ public class ClienteDAO {
     }
 
     public Optional<Cliente> buscarPorId(Connection conn, Integer id) throws SQLException {
-        String sql = "SELECT id, name, document, email, phone, person_type, created_at, updated_at FROM client WHERE id = ?";
+        String sql = "SELECT id, nome, documento, email, telefone, tipo_pessoa, created_at, updated_at FROM cliente WHERE id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -46,7 +46,7 @@ public class ClienteDAO {
     }
 
     public void atualizar(Connection conn, Cliente cliente) throws SQLException {
-        String sql = "UPDATE client SET name = ?, document = ?, email = ?, phone = ?, person_type = ?::person_type_enum WHERE id = ?";
+        String sql = "UPDATE cliente SET nome = ?, documento = ?, email = ?, telefone = ?, tipo_pessoa = ?::tipo_pessoa WHERE id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, cliente.getName());
             pstmt.setString(2, cliente.getDocument());
@@ -59,7 +59,7 @@ public class ClienteDAO {
     }
 
     public void excluir(Connection conn, Integer id) throws SQLException {
-        String sql = "DELETE FROM client WHERE id = ?";
+        String sql = "DELETE FROM cliente WHERE id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
@@ -68,7 +68,7 @@ public class ClienteDAO {
 
     public List<Cliente> buscarTodos(Connection conn) throws SQLException {
         List<Cliente> clientes = new ArrayList<>();
-        String sql = "SELECT id, name, document, email, phone, person_type, created_at, updated_at FROM client";
+        String sql = "SELECT id, nome, documento, email, telefone, tipo_pessoa, created_at, updated_at FROM cliente";
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
@@ -80,8 +80,8 @@ public class ClienteDAO {
 
     public List<Cliente> pesquisar(Connection conn, String termo) throws SQLException {
         List<Cliente> clientes = new ArrayList<>();
-        String sql = "SELECT id, name, document, email, phone, person_type, created_at, updated_at FROM client " +
-                     "WHERE name ILIKE ? OR document ILIKE ? OR email ILIKE ?";
+        String sql = "SELECT id, nome, documento, email, telefone, tipo_pessoa, created_at, updated_at FROM cliente " +
+                     "WHERE nome ILIKE ? OR documento ILIKE ? OR email ILIKE ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             String padrao = "%" + termo + "%";
             pstmt.setString(1, padrao);
@@ -97,7 +97,7 @@ public class ClienteDAO {
     }
 
     public boolean existeDocumento(Connection conn, String documento, Integer idExcluido) throws SQLException {
-        String sql = "SELECT 1 FROM client WHERE document = ?";
+        String sql = "SELECT 1 FROM cliente WHERE documento = ?";
         if (idExcluido != null) {
             sql += " AND id != ?";
         }
@@ -116,11 +116,11 @@ public class ClienteDAO {
     private Cliente mapearClienteDoResultSet(ResultSet rs) throws SQLException {
         Cliente cliente = new Cliente();
         cliente.setId(rs.getInt("id"));
-        cliente.setName(rs.getString("name"));
-        cliente.setDocument(rs.getString("document"));
+        cliente.setName(rs.getString("nome"));
+        cliente.setDocument(rs.getString("documento"));
         cliente.setEmail(rs.getString("email"));
-        cliente.setPhone(rs.getString("phone"));
-        cliente.setPersonType(TipoPessoa.fromValue(rs.getString("person_type")));
+        cliente.setPhone(rs.getString("telefone"));
+        cliente.setPersonType(TipoPessoa.fromValue(rs.getString("tipo_pessoa")));
 
         Timestamp criadoEm = rs.getTimestamp("created_at");
         if (criadoEm != null) {

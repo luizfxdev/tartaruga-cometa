@@ -138,7 +138,7 @@ public class EnderecoControlador extends HttpServlet {
             addressService.createAddress(address);
         }
 
-        response.sendRedirect(request.getContextPath() + "/addresses/client/" + address.getClientId());
+        response.sendRedirect(request.getContextPath() + "/endereco/client/" + address.getClientId());
     }
 
     private void listAddresses(HttpServletRequest request, HttpServletResponse response)
@@ -268,9 +268,9 @@ public class EnderecoControlador extends HttpServlet {
         addressService.deleteAddress(id);
 
         if (clientId > 0) {
-            response.sendRedirect(request.getContextPath() + "/addresses/client/" + clientId);
+            response.sendRedirect(request.getContextPath() + "/endereco/client/" + clientId);
         } else {
-            response.sendRedirect(request.getContextPath() + "/addresses/");
+            response.sendRedirect(request.getContextPath() + "/endereco/");
         }
     }
 
@@ -298,6 +298,6 @@ public class EnderecoControlador extends HttpServlet {
 
         addressService.setMainAddress(clientId, addressId);
 
-        response.sendRedirect(request.getContextPath() + "/addresses/client/" + clientId);
+        response.sendRedirect(request.getContextPath() + "/endereco/client/" + clientId);
     }
 }

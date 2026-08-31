@@ -1,27 +1,27 @@
-CREATE TABLE address (
+CREATE TABLE endereco (
     id SERIAL,
-    client_id INTEGER NOT NULL,
-    address_type VARCHAR(20) NOT NULL,
-    street VARCHAR(200) NOT NULL,
-    number VARCHAR(10) NOT NULL,
-    complement VARCHAR(100),
-    neighborhood VARCHAR(100) NOT NULL,
-    city VARCHAR(100) NOT NULL,
-    state CHAR(2) NOT NULL,
-    zip_code VARCHAR(10) NOT NULL,
-    country VARCHAR(100) NOT NULL DEFAULT 'Brasil',
-    reference TEXT,
-    is_main BOOLEAN DEFAULT FALSE,
+    id_cliente INTEGER NOT NULL,
+    tipo_endereco VARCHAR(20) NOT NULL,
+    logradouro VARCHAR(200) NOT NULL,
+    numero VARCHAR(10) NOT NULL,
+    complemento VARCHAR(100),
+    bairro VARCHAR(100) NOT NULL,
+    cidade VARCHAR(100) NOT NULL,
+    estado CHAR(2) NOT NULL,
+    cep VARCHAR(10) NOT NULL,
+    referencia TEXT,
+    pais VARCHAR(100) NOT NULL DEFAULT 'Brasil',
+    is_principal BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT pk_address PRIMARY KEY (id),
-    CONSTRAINT fk_address_client FOREIGN KEY (client_id)
-        REFERENCES client(id) ON DELETE CASCADE,
-    CONSTRAINT chk_address_type CHECK (address_type IN ('ORIGIN', 'DESTINATION', 'REGISTRATION')),
-    CONSTRAINT chk_address_state_length CHECK (LENGTH(state) = 2),
-    CONSTRAINT chk_address_zip_code_format CHECK (zip_code ~ '^\d{5}-?\d{3}$')
+    CONSTRAINT endereco_pkey PRIMARY KEY (id),
+    CONSTRAINT fk_endereco_cliente FOREIGN KEY (id_cliente)
+        REFERENCES cliente(id) ON DELETE CASCADE,
+    CONSTRAINT chk_tipo_endereco CHECK (tipo_endereco IN ('ORIGEM', 'DESTINO', 'CADASTRO')),
+    CONSTRAINT chk_estado CHECK (LENGTH(estado) = 2),
+    CONSTRAINT chk_cep CHECK (cep ~ '^\d{5}-?\d{3}$')
 );
 
-CREATE INDEX idx_address_client ON address(client_id);
-CREATE INDEX idx_address_is_main ON address(client_id, is_main);
+CREATE INDEX idx_endereco_cliente ON endereco(id_cliente);
+CREATE INDEX idx_endereco_is_principal ON endereco(id_cliente, is_principal);

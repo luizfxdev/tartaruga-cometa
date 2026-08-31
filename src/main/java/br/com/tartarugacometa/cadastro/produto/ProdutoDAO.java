@@ -13,7 +13,7 @@ import java.util.Optional;
 public class ProdutoDAO {
 
     public void inserir(Connection conn, Produto produto) throws SQLException {
-        String sql = "INSERT INTO product (name, description, price, weight_kg, volume_m3, declared_value, category, is_active, stock_quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO produto (nome, descricao, preco, peso_kg, volume_m3, valor_declarado, categoria, ativo, estoque) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, produto.getName());
             pstmt.setString(2, produto.getDescription());
@@ -23,8 +23,7 @@ public class ProdutoDAO {
             pstmt.setBigDecimal(6, produto.getDeclaredValue());
             pstmt.setString(7, produto.getCategory());
             pstmt.setBoolean(8, produto.isActive());
-            Integer estoque = produto.getStockQuantity();
-            pstmt.setInt(9, estoque != null ? estoque : 0);
+            pstmt.setObject(9, produto.getStockQuantity());
             pstmt.executeUpdate();
 
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
@@ -36,7 +35,7 @@ public class ProdutoDAO {
     }
 
     public Optional<Produto> buscarPorId(Connection conn, Integer id) throws SQLException {
-        String sql = "SELECT id, name, description, price, weight_kg, volume_m3, declared_value, category, is_active, stock_quantity, created_at, updated_at FROM product WHERE id = ?";
+        String sql = "SELECT id, nome, descricao, preco, peso_kg, volume_m3, valor_declarado, categoria, ativo, estoque, created_at, updated_at FROM produto WHERE id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -49,7 +48,7 @@ public class ProdutoDAO {
     }
 
     public void atualizar(Connection conn, Produto produto) throws SQLException {
-        String sql = "UPDATE product SET name = ?, description = ?, price = ?, weight_kg = ?, volume_m3 = ?, declared_value = ?, category = ?, is_active = ?, stock_quantity = ? WHERE id = ?";
+        String sql = "UPDATE produto SET nome = ?, descricao = ?, preco = ?, peso_kg = ?, volume_m3 = ?, valor_declarado = ?, categoria = ?, ativo = ?, estoque = ? WHERE id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, produto.getName());
             pstmt.setString(2, produto.getDescription());
@@ -59,15 +58,14 @@ public class ProdutoDAO {
             pstmt.setBigDecimal(6, produto.getDeclaredValue());
             pstmt.setString(7, produto.getCategory());
             pstmt.setBoolean(8, produto.isActive());
-            Integer estoque = produto.getStockQuantity();
-            pstmt.setInt(9, estoque != null ? estoque : 0);
+            pstmt.setObject(9, produto.getStockQuantity());
             pstmt.setInt(10, produto.getId());
             pstmt.executeUpdate();
         }
     }
 
     public void excluir(Connection conn, Integer id) throws SQLException {
-        String sql = "DELETE FROM product WHERE id = ?";
+        String sql = "DELETE FROM produto WHERE id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
@@ -76,7 +74,7 @@ public class ProdutoDAO {
 
     public List<Produto> buscarTodos(Connection conn) throws SQLException {
         List<Produto> produtos = new ArrayList<>();
-        String sql = "SELECT id, name, description, price, weight_kg, volume_m3, declared_value, category, is_active, stock_quantity, created_at, updated_at FROM product";
+        String sql = "SELECT id, nome, descricao, preco, peso_kg, volume_m3, valor_declarado, categoria, ativo, estoque, created_at, updated_at FROM produto";
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
@@ -88,7 +86,7 @@ public class ProdutoDAO {
 
     public List<Produto> pesquisarPorNome(Connection conn, String nome) throws SQLException {
         List<Produto> produtos = new ArrayList<>();
-        String sql = "SELECT id, name, description, price, weight_kg, volume_m3, declared_value, category, is_active, stock_quantity, created_at, updated_at FROM product WHERE name ILIKE ?";
+        String sql = "SELECT id, nome, descricao, preco, peso_kg, volume_m3, valor_declarado, categoria, ativo, estoque, created_at, updated_at FROM produto WHERE nome ILIKE ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, "%" + nome + "%");
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -103,15 +101,16 @@ public class ProdutoDAO {
     private Produto mapearProdutoDoResultSet(ResultSet rs) throws SQLException {
         Produto produto = new Produto();
         produto.setId(rs.getInt("id"));
-        produto.setName(rs.getString("name"));
-        produto.setDescription(rs.getString("description"));
-        produto.setPrice(rs.getBigDecimal("price"));
-        produto.setWeightKg(rs.getBigDecimal("weight_kg"));
+        produto.setName(rs.getString("nome"));
+        produto.setDescription(rs.getString("descricao"));
+        produto.setWeightKg(rs.getBigDecimal("peso_kg"));
         produto.setVolumeM3(rs.getBigDecimal("volume_m3"));
-        produto.setDeclaredValue(rs.getBigDecimal("declared_value"));
-        produto.setCategory(rs.getString("category"));
-        produto.setActive(rs.getBoolean("is_active"));
-        produto.setStockQuantity(rs.getInt("stock_quantity"));
+        produto.setDeclaredValue(rs.getBigDecimal("valor_declarado"));
+        produto.setCategory(rs.getString("categoria"));
+        produto.setActive(rs.getBoolean("ativo"));
+        produto.setPrice(rs.getBigDecimal("preco"));
+        Object estoque = rs.getObject("estoque");
+        produto.setStockQuantity(estoque != null ? ((Number) estoque).intValue() : null);
 
         Timestamp criadoEm = rs.getTimestamp("created_at");
         if (criadoEm != null) {
@@ -125,7 +124,7 @@ public class ProdutoDAO {
     }
 
     public boolean contemEntregasVinculadas(Connection conn, Integer produtoId) throws SQLException {
-        String sql = "SELECT 1 FROM delivery_product WHERE product_id = ? LIMIT 1";
+        String sql = "SELECT 1 FROM entrega_produto WHERE id_produto = ? LIMIT 1";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, produtoId);
             try (ResultSet rs = pstmt.executeQuery()) {

@@ -1,18 +1,18 @@
-CREATE TABLE delivery_history (
+CREATE TABLE historico_entrega (
     id SERIAL,
-    delivery_id INTEGER NOT NULL,
-    previous_status delivery_status_enum,
-    new_status delivery_status_enum NOT NULL,
-    change_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "user" VARCHAR(100),
-    observations TEXT,
-    location VARCHAR(200),
+    id_entrega INTEGER NOT NULL,
+    status_anterior status_entrega,
+    status_novo status_entrega NOT NULL,
+    data_mudanca TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100),
+    observacoes TEXT,
+    localizacao VARCHAR(200),
 
-    CONSTRAINT pk_delivery_history PRIMARY KEY (id),
-    CONSTRAINT fk_delivery_history_delivery FOREIGN KEY (delivery_id)
-        REFERENCES delivery(id) ON DELETE CASCADE
+    CONSTRAINT historico_entrega_pkey PRIMARY KEY (id),
+    CONSTRAINT fk_historico_entrega FOREIGN KEY (id_entrega)
+        REFERENCES entrega(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_delivery_history_delivery ON delivery_history(delivery_id);
-CREATE INDEX idx_delivery_history_change_date ON delivery_history(change_date);
-CREATE INDEX idx_delivery_history_new_status ON delivery_history(new_status);
+CREATE INDEX idx_historico_entrega_entrega ON historico_entrega(id_entrega);
+CREATE INDEX idx_historico_entrega_data_mudanca ON historico_entrega(data_mudanca);
+CREATE INDEX idx_historico_entrega_status_novo ON historico_entrega(status_novo);

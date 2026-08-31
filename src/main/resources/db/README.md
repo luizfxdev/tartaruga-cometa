@@ -39,15 +39,15 @@ psql -U tartaruga_user -d tartaruga_cometa_db -v ON_ERROR_STOP=1 \
 
 ## Estrutura dos Scripts
 
-- **00-banco-e-tipos.sql** — Tipos ENUM (person_type_enum, delivery_status_enum)
+- **00-banco-e-tipos.sql** — Tipos ENUM (tipo_pessoa, status_entrega)
 - **01-cliente.sql** — Tabela cliente com constraints e índices
 - **02-endereco.sql** — Tabela endereco com FK para cliente
 - **03-produto.sql** — Tabela produto
 - **04-entrega.sql** — Tabela entrega com múltiplas FKs e CHECKs de cronologia
-- **05-entrega-produto.sql** — Tabela de associação entrega-produto (itemEntrega)
+- **05-entrega-produto.sql** — Tabela de associação entrega-produto (ItemEntrega)
 - **06-historico-entrega.sql** — Tabela de histórico de entrega (append-only)
-- **07-views.sql** — Views vw_complete_deliveries, vw_delivery_statistics
-- **08-funcoes-triggers.sql** — Triggers de updated_at, histórico e prevent-delete
+- **07-views.sql** — Views vw_entregas_completas, vw_estatisticas_entregas
+- **08-funcoes-triggers.sql** — Triggers de updated_at e bloqueio de alteração do histórico. O trigger `trigger_mudanca_status` já existe manualmente no banco de produção e não está recriado aqui.
 - **09-indices.sql** — Índices críticos para busca e listagem
 
 ## Convenção de Nomes

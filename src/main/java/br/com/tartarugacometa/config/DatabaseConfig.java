@@ -3,7 +3,6 @@ package br.com.tartarugacometa.config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,10 +11,14 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 public class DatabaseConfig {
     private static final Logger LOG = Logger.getLogger(DatabaseConfig.class.getName());
     private static final String PROPERTIES_FILE = "database.properties";
     private static final Properties properties = new Properties();
+    private static final HikariDataSource dataSource;
 
     static {
         try (InputStream input = DatabaseConfig.class.getClassLoader()
@@ -40,24 +43,33 @@ public class DatabaseConfig {
                 properties.setProperty("db.url", dbUrl);
             }
 
-            Class.forName(properties.getProperty("db.driver"));
+            HikariConfig hikariConfig = new HikariConfig();
+            hikariConfig.setDriverClassName(properties.getProperty("db.driver"));
+            hikariConfig.setJdbcUrl(properties.getProperty("db.url"));
+            hikariConfig.setUsername(properties.getProperty("db.username"));
+            hikariConfig.setPassword(properties.getProperty("db.password"));
+            hikariConfig.setMinimumIdle(
+                    Integer.parseInt(properties.getProperty("db.pool.minSize", "5")));
+            hikariConfig.setMaximumPoolSize(
+                    Integer.parseInt(properties.getProperty("db.pool.maxSize", "20")));
+            hikariConfig.setConnectionTimeout(
+                    Long.parseLong(properties.getProperty("db.pool.timeout", "30000")));
+            hikariConfig.setPoolName("tartaruga-cometa-pool");
+
+            dataSource = new HikariDataSource(hikariConfig);
 
             LOG.info("Configuração do banco de dados carregada. URL: " + properties.getProperty("db.url")
                     + ", Usuário: " + properties.getProperty("db.username"));
 
-        } catch (IOException | ClassNotFoundException e) {
-            LOG.log(Level.SEVERE, "Falha ao carregar configuração ou driver do banco de dados", e);
-            throw new RuntimeException("Falha ao carregar configuração ou driver do banco de dados", e);
+        } catch (IOException e) {
+            LOG.log(Level.SEVERE, "Falha ao carregar configuração do banco de dados", e);
+            throw new RuntimeException("Falha ao carregar configuração do banco de dados", e);
         }
     }
 
     public static Connection getConnection() throws SQLException {
         try {
-            return DriverManager.getConnection(
-                properties.getProperty("db.url"),
-                properties.getProperty("db.username"),
-                properties.getProperty("db.password")
-            );
+            return dataSource.getConnection();
         } catch (SQLException e) {
             LOG.log(Level.SEVERE, "Falha ao conectar ao banco de dados. URL: "
                     + properties.getProperty("db.url"), e);
@@ -108,5 +120,12 @@ public class DatabaseConfig {
 
     public static String getProperty(String key) {
         return properties.getProperty(key);
+    }
+
+    public static void shutdown() {
+        if (dataSource != null && !dataSource.isClosed()) {
+            dataSource.close();
+            LOG.info("Pool de conexões encerrado");
+        }
     }
 }

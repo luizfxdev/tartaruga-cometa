@@ -1,24 +1,24 @@
-CREATE TABLE product (
+CREATE TABLE produto (
     id SERIAL,
-    name VARCHAR(200) NOT NULL,
-    description TEXT,
-    price DECIMAL(12,2) NOT NULL,
-    weight_kg DECIMAL(10,3) NOT NULL,
+    nome VARCHAR(200) NOT NULL,
+    descricao TEXT,
+    preco DECIMAL(12,2),
+    peso_kg DECIMAL(10,3) NOT NULL,
     volume_m3 DECIMAL(10,4) NOT NULL,
-    declared_value DECIMAL(12,2) NOT NULL,
-    category VARCHAR(50),
-    is_active BOOLEAN DEFAULT TRUE,
-    stock_quantity INTEGER NOT NULL DEFAULT 0,
+    valor_declarado DECIMAL(12,2) NOT NULL,
+    categoria VARCHAR(50),
+    ativo BOOLEAN DEFAULT TRUE,
+    estoque INTEGER DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT pk_product PRIMARY KEY (id),
-    CONSTRAINT chk_product_weight_positive CHECK (weight_kg > 0),
-    CONSTRAINT chk_product_volume_positive CHECK (volume_m3 > 0),
-    CONSTRAINT chk_product_declared_value_positive CHECK (declared_value > 0),
-    CONSTRAINT chk_product_price_positive CHECK (price > 0),
-    CONSTRAINT chk_product_stock_quantity_positive CHECK (stock_quantity >= 0)
+    CONSTRAINT produto_pkey PRIMARY KEY (id),
+    CONSTRAINT chk_peso_positivo CHECK (peso_kg > 0),
+    CONSTRAINT chk_volume_positivo CHECK (volume_m3 > 0),
+    CONSTRAINT chk_valor_positivo CHECK (valor_declarado > 0),
+    CONSTRAINT chk_preco_positivo CHECK (preco IS NULL OR preco > 0),
+    CONSTRAINT chk_estoque_positivo CHECK (estoque IS NULL OR estoque >= 0)
 );
 
-CREATE INDEX idx_product_is_active ON product(is_active);
-CREATE INDEX idx_product_category ON product(category);
+CREATE INDEX idx_produto_ativo ON produto(ativo);
+CREATE INDEX idx_produto_categoria ON produto(categoria);

@@ -12,7 +12,7 @@ import java.util.Optional;
 public class ItemEntregaDAO {
 
     public void inserir(Connection conn, ItemEntrega item) throws SQLException {
-        String sql = "INSERT INTO delivery_product (delivery_id, product_id, quantity, unit_weight_kg, unit_volume_m3, unit_value, subtotal, observations) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO entrega_produto (id_entrega, id_produto, quantidade, peso_unitario_kg, volume_unitario_m3, valor_unitario, subtotal, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setInt(1, item.getDeliveryId());
             stmt.setInt(2, item.getProductId());
@@ -33,7 +33,7 @@ public class ItemEntregaDAO {
     }
 
     public void atualizar(Connection conn, ItemEntrega item) throws SQLException {
-        String sql = "UPDATE delivery_product SET quantity = ?, unit_weight_kg = ?, unit_volume_m3 = ?, unit_value = ?, subtotal = ?, observations = ? WHERE id = ?";
+        String sql = "UPDATE entrega_produto SET quantidade = ?, peso_unitario_kg = ?, volume_unitario_m3 = ?, valor_unitario = ?, subtotal = ?, observacoes = ? WHERE id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, item.getQuantity());
             stmt.setBigDecimal(2, item.getUnitWeightKg());
@@ -47,21 +47,21 @@ public class ItemEntregaDAO {
     }
 
     public void excluir(Connection conn, Integer id) throws SQLException {
-        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM delivery_product WHERE id = ?")) {
+        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM entrega_produto WHERE id = ?")) {
             stmt.setInt(1, id);
             stmt.executeUpdate();
         }
     }
 
     public void excluirPorEntregaId(Connection conn, Integer deliveryId) throws SQLException {
-        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM delivery_product WHERE delivery_id = ?")) {
+        try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM entrega_produto WHERE id_entrega = ?")) {
             stmt.setInt(1, deliveryId);
             stmt.executeUpdate();
         }
     }
 
     public Optional<ItemEntrega> buscarPorId(Connection conn, Integer id) throws SQLException {
-        String sql = "SELECT id, delivery_id, product_id, quantity, unit_weight_kg, unit_volume_m3, unit_value, subtotal, observations FROM delivery_product WHERE id = ?";
+        String sql = "SELECT id, id_entrega, id_produto, quantidade, peso_unitario_kg, volume_unitario_m3, valor_unitario, subtotal, observacoes FROM entrega_produto WHERE id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -75,7 +75,7 @@ public class ItemEntregaDAO {
 
     public List<ItemEntrega> buscarPorEntregaId(Connection conn, Integer deliveryId) throws SQLException {
         List<ItemEntrega> itens = new ArrayList<>();
-        String sql = "SELECT id, delivery_id, product_id, quantity, unit_weight_kg, unit_volume_m3, unit_value, subtotal, observations FROM delivery_product WHERE delivery_id = ?";
+        String sql = "SELECT id, id_entrega, id_produto, quantidade, peso_unitario_kg, volume_unitario_m3, valor_unitario, subtotal, observacoes FROM entrega_produto WHERE id_entrega = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, deliveryId);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -90,14 +90,14 @@ public class ItemEntregaDAO {
     private ItemEntrega mapear(ResultSet rs) throws SQLException {
         ItemEntrega item = new ItemEntrega();
         item.setId(rs.getInt("id"));
-        item.setDeliveryId(rs.getInt("delivery_id"));
-        item.setProductId(rs.getInt("product_id"));
-        item.setQuantity(rs.getInt("quantity"));
-        item.setUnitWeightKg(rs.getBigDecimal("unit_weight_kg"));
-        item.setUnitVolumeM3(rs.getBigDecimal("unit_volume_m3"));
-        item.setUnitValue(rs.getBigDecimal("unit_value"));
+        item.setDeliveryId(rs.getInt("id_entrega"));
+        item.setProductId(rs.getInt("id_produto"));
+        item.setQuantity(rs.getInt("quantidade"));
+        item.setUnitWeightKg(rs.getBigDecimal("peso_unitario_kg"));
+        item.setUnitVolumeM3(rs.getBigDecimal("volume_unitario_m3"));
+        item.setUnitValue(rs.getBigDecimal("valor_unitario"));
         item.setSubtotal(rs.getBigDecimal("subtotal"));
-        item.setObservations(rs.getString("observations"));
+        item.setObservations(rs.getString("observacoes"));
         return item;
     }
 }

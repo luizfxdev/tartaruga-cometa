@@ -193,7 +193,7 @@ public class EntregaControlador extends HttpServlet {
             deliveryService.updateDelivery(delivery);
             request.getSession().setAttribute("message", "Entrega atualizada com sucesso!");
         }
-        response.sendRedirect(request.getContextPath() + "/deliveries/");
+        response.sendRedirect(request.getContextPath() + "/entrega/");
     }
 
     private void deleteDelivery(HttpServletRequest request, HttpServletResponse response, String pathInfo)
@@ -205,7 +205,7 @@ public class EntregaControlador extends HttpServlet {
         } else {
             request.getSession().setAttribute("error", "ID da entrega inválido para exclusão.");
         }
-        response.sendRedirect(request.getContextPath() + "/deliveries/");
+        response.sendRedirect(request.getContextPath() + "/entrega/");
     }
 
     private void markAsDelivered(HttpServletRequest request, HttpServletResponse response, String pathInfo)
@@ -219,7 +219,7 @@ public class EntregaControlador extends HttpServlet {
         try {
             deliveryService.updateDeliveryStatus(id, StatusEntrega.ENTREGUE, null, "Sistema");
             request.getSession().setAttribute("message", "Entrega marcada como entregue com sucesso!");
-            response.sendRedirect(request.getContextPath() + "/deliveries/view/" + id);
+            response.sendRedirect(request.getContextPath() + "/entrega/view/" + id);
         } catch (IllegalArgumentException e) {
             request.setAttribute("error", e.getMessage());
             viewDelivery(request, response, pathInfo);
@@ -238,7 +238,7 @@ public class EntregaControlador extends HttpServlet {
         try {
             deliveryService.updateDeliveryStatus(id, StatusEntrega.NAO_REALIZADA, reason, "Sistema");
             request.getSession().setAttribute("message", "Entrega marcada como não entregue com sucesso!");
-            response.sendRedirect(request.getContextPath() + "/deliveries/view/" + id);
+            response.sendRedirect(request.getContextPath() + "/entrega/view/" + id);
         } catch (IllegalArgumentException e) {
             request.setAttribute("error", e.getMessage());
             viewDelivery(request, response, pathInfo);

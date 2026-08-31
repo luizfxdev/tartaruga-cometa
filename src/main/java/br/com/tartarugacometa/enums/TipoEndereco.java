@@ -16,11 +16,7 @@ public enum TipoEndereco {
     }
 
     public String paraColuna() {
-        return switch (this) {
-            case ORIGEM -> "ORIGIN";
-            case DESTINO -> "DESTINATION";
-            case CADASTRO -> "REGISTRATION";
-        };
+        return this.name();
     }
 
     public static TipoEndereco fromValue(String value) {

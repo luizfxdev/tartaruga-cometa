@@ -19,7 +19,7 @@ public enum TipoPessoa {
     }
 
     public String paraColuna() {
-        return this == FISICA ? "INDIVIDUAL" : "LEGAL_ENTITY";
+        return this == FISICA ? "PF" : "PJ";
     }
 
     public static TipoPessoa fromValue(String value) {
@@ -28,10 +28,10 @@ public enum TipoPessoa {
         }
         String normalizedValue = value.trim().toUpperCase();
 
-        if ("INDIVIDUAL".equals(normalizedValue)) {
+        if ("PF".equals(normalizedValue) || "INDIVIDUAL".equals(normalizedValue)) {
             return FISICA;
         }
-        if ("LEGAL_ENTITY".equals(normalizedValue)) {
+        if ("PJ".equals(normalizedValue) || "LEGAL_ENTITY".equals(normalizedValue)) {
             return JURIDICA;
         }
 

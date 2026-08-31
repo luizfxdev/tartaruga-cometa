@@ -122,7 +122,7 @@ public class ProdutoControlador extends HttpServlet {
                 productService.updateProduct(product);
                 request.getSession().setAttribute("success", "Produto atualizado com sucesso!");
             }
-            response.sendRedirect(request.getContextPath() + "/products/");
+            response.sendRedirect(request.getContextPath() + "/produto/");
         } catch (IllegalArgumentException e) {
             request.getSession().setAttribute("error", e.getMessage());
             request.setAttribute("product", product); // Mantém os dados preenchidos
@@ -135,7 +135,7 @@ public class ProdutoControlador extends HttpServlet {
         Integer id = extractId(pathInfo);
         productService.deleteProduct(id);
         request.getSession().setAttribute("success", "Produto deletado com sucesso!");
-        response.sendRedirect(request.getContextPath() + "/products/");
+        response.sendRedirect(request.getContextPath() + "/produto/");
     }
 
     private void searchProducts(HttpServletRequest request, HttpServletResponse response)

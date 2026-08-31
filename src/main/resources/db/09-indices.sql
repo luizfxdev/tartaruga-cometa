@@ -1,8 +1,8 @@
 -- Índice para busca por código de rastreamento (busca crítica)
-CREATE INDEX idx_delivery_tracking_code_search ON delivery(tracking_code);
+CREATE INDEX idx_entrega_codigo_rastreio_busca ON entrega(codigo_rastreio);
 
 -- Índice para filtros por status (listagem crítica)
-CREATE INDEX idx_delivery_status_filter ON delivery(status);
+CREATE INDEX idx_entrega_status_filtro ON entrega(status);
 
 -- Índice composto para filtro por status e ordenação por data (listagem com ordenação)
-CREATE INDEX idx_delivery_status_date ON delivery(status, creation_date);
+CREATE INDEX idx_entrega_status_data ON entrega(status, data_criacao);

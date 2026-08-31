@@ -18,6 +18,7 @@ public class ApplicationListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
+        DatabaseConfig.shutdown();
         LOG.info("Tartaruga Cometa - Aplicação finalizada");
     }
 }

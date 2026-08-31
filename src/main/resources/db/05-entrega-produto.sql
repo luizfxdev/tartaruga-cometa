@@ -1,26 +1,26 @@
-CREATE TABLE delivery_product (
+CREATE TABLE entrega_produto (
     id SERIAL,
-    delivery_id INTEGER NOT NULL,
-    product_id INTEGER NOT NULL,
-    quantity INTEGER NOT NULL DEFAULT 1,
-    unit_weight_kg DECIMAL(10,3) NOT NULL,
-    unit_volume_m3 DECIMAL(10,4) NOT NULL,
-    unit_value DECIMAL(12,2) NOT NULL,
+    id_entrega INTEGER NOT NULL,
+    id_produto INTEGER NOT NULL,
+    quantidade INTEGER NOT NULL DEFAULT 1,
+    peso_unitario_kg DECIMAL(10,3) NOT NULL,
+    volume_unitario_m3 DECIMAL(10,4) NOT NULL,
+    valor_unitario DECIMAL(12,2) NOT NULL,
     subtotal DECIMAL(12,2) NOT NULL,
-    observations TEXT,
+    observacoes TEXT,
 
-    CONSTRAINT pk_delivery_product PRIMARY KEY (id),
-    CONSTRAINT fk_delivery_product_delivery FOREIGN KEY (delivery_id)
-        REFERENCES delivery(id) ON DELETE CASCADE,
-    CONSTRAINT fk_delivery_product_product FOREIGN KEY (product_id)
-        REFERENCES product(id) ON DELETE RESTRICT,
-    CONSTRAINT uq_delivery_product UNIQUE (delivery_id, product_id),
-    CONSTRAINT chk_delivery_product_quantity_positive CHECK (quantity > 0),
-    CONSTRAINT chk_delivery_product_unit_weight_positive CHECK (unit_weight_kg > 0),
-    CONSTRAINT chk_delivery_product_unit_volume_positive CHECK (unit_volume_m3 > 0),
-    CONSTRAINT chk_delivery_product_unit_value_positive CHECK (unit_value > 0),
-    CONSTRAINT chk_delivery_product_subtotal_calculation CHECK (subtotal = quantity * unit_value)
+    CONSTRAINT entrega_produto_pkey PRIMARY KEY (id),
+    CONSTRAINT fk_entrega_produto_entrega FOREIGN KEY (id_entrega)
+        REFERENCES entrega(id) ON DELETE CASCADE,
+    CONSTRAINT fk_entrega_produto_produto FOREIGN KEY (id_produto)
+        REFERENCES produto(id) ON DELETE RESTRICT,
+    CONSTRAINT uk_entrega_produto UNIQUE (id_entrega, id_produto),
+    CONSTRAINT chk_quantidade_positiva CHECK (quantidade > 0),
+    CONSTRAINT chk_peso_unitario_positivo CHECK (peso_unitario_kg > 0),
+    CONSTRAINT chk_volume_unitario_positivo CHECK (volume_unitario_m3 > 0),
+    CONSTRAINT chk_valor_unitario_positivo CHECK (valor_unitario > 0),
+    CONSTRAINT chk_subtotal CHECK (subtotal = quantidade * valor_unitario)
 );
 
-CREATE INDEX idx_delivery_product_delivery ON delivery_product(delivery_id);
-CREATE INDEX idx_delivery_product_product ON delivery_product(product_id);
+CREATE INDEX idx_entrega_produto_entrega ON entrega_produto(id_entrega);
+CREATE INDEX idx_entrega_produto_produto ON entrega_produto(id_produto);

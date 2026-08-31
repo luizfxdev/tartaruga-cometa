@@ -1,37 +1,37 @@
-DROP VIEW IF EXISTS vw_complete_deliveries CASCADE;
-DROP VIEW IF EXISTS vw_delivery_statistics CASCADE;
+DROP VIEW IF EXISTS vw_entregas_completas CASCADE;
+DROP VIEW IF EXISTS vw_estatisticas_entregas CASCADE;
 
-CREATE VIEW vw_complete_deliveries AS
+CREATE VIEW vw_entregas_completas AS
 SELECT
-    d.id,
-    d.tracking_code,
-    d.status,
-    d.creation_date,
-    d.delivery_date,
-    cr.name AS sender_name,
-    cr.document AS sender_document,
-    cd.name AS recipient_name,
-    cd.document AS recipient_document,
-    ao.city AS origin_city,
-    ao.state AS origin_state,
-    ad.city AS destination_city,
-    ad.state AS destination_state,
-    d.total_value,
-    d.freight_value,
-    d.total_weight_kg,
-    d.total_volume_m3
-FROM delivery d
-INNER JOIN client cr ON d.sender_id = cr.id
-INNER JOIN client cd ON d.recipient_id = cd.id
-INNER JOIN address ao ON d.origin_address_id = ao.id
-INNER JOIN address ad ON d.destination_address_id = ad.id;
+    e.id,
+    e.codigo_rastreio,
+    e.status,
+    e.data_criacao,
+    e.data_entrega,
+    cr.nome AS nome_remetente,
+    cr.documento AS documento_remetente,
+    cd.nome AS nome_destinatario,
+    cd.documento AS documento_destinatario,
+    ao.cidade AS cidade_origem,
+    ao.estado AS estado_origem,
+    ad.cidade AS cidade_destino,
+    ad.estado AS estado_destino,
+    e.valor_total,
+    e.valor_frete,
+    e.peso_total_kg,
+    e.volume_total_m3
+FROM entrega e
+INNER JOIN cliente cr ON e.id_remetente = cr.id
+INNER JOIN cliente cd ON e.id_destinatario = cd.id
+INNER JOIN endereco ao ON e.id_endereco_origem = ao.id
+INNER JOIN endereco ad ON e.id_endereco_destino = ad.id;
 
-CREATE VIEW vw_delivery_statistics AS
+CREATE VIEW vw_estatisticas_entregas AS
 SELECT
     status,
-    COUNT(*) AS quantity,
-    SUM(total_value) AS total_value,
-    SUM(total_weight_kg) AS total_weight,
-    AVG(freight_value) AS average_freight_value
-FROM delivery
+    COUNT(*) AS quantidade,
+    SUM(valor_total) AS valor_total,
+    SUM(peso_total_kg) AS peso_total,
+    AVG(valor_frete) AS valor_frete_medio
+FROM entrega
 GROUP BY status;

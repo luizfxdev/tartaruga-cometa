@@ -15,7 +15,7 @@ import br.com.tartarugacometa.enums.TipoEndereco;
 public class EnderecoDAO {
 
     public void inserir(Connection conn, Endereco endereco) throws SQLException {
-        String sql = "INSERT INTO address (client_id, street, number, complement, neighborhood, city, state, zip_code, country, is_main, address_type, reference) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO endereco (id_cliente, logradouro, numero, complemento, bairro, cidade, estado, cep, is_principal, tipo_endereco, referencia, pais) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setInt(1, endereco.getClientId());
             pstmt.setString(2, endereco.getStreet());
@@ -25,10 +25,10 @@ public class EnderecoDAO {
             pstmt.setString(6, endereco.getCity());
             pstmt.setString(7, endereco.getState());
             pstmt.setString(8, endereco.getZipCode());
-            pstmt.setString(9, endereco.getCountry());
-            pstmt.setBoolean(10, endereco.getIsMain());
-            pstmt.setString(11, endereco.getAddressType().paraColuna());
-            pstmt.setString(12, endereco.getReference());
+            pstmt.setBoolean(9, endereco.getIsMain());
+            pstmt.setString(10, endereco.getAddressType().paraColuna());
+            pstmt.setString(11, endereco.getReference());
+            pstmt.setString(12, endereco.getCountry());
             pstmt.executeUpdate();
 
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
@@ -40,7 +40,7 @@ public class EnderecoDAO {
     }
 
     public Optional<Endereco> buscarPorId(Connection conn, Integer id) throws SQLException {
-        String sql = "SELECT id, client_id, street, number, complement, neighborhood, city, state, zip_code, country, is_main, address_type, reference, created_at, updated_at FROM address WHERE id = ?";
+        String sql = "SELECT id, id_cliente, logradouro, numero, complemento, bairro, cidade, estado, cep, is_principal, tipo_endereco, referencia, pais, created_at, updated_at FROM endereco WHERE id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -53,7 +53,7 @@ public class EnderecoDAO {
     }
 
     public void atualizar(Connection conn, Endereco endereco) throws SQLException {
-        String sql = "UPDATE address SET client_id = ?, street = ?, number = ?, complement = ?, neighborhood = ?, city = ?, state = ?, zip_code = ?, country = ?, is_main = ?, address_type = ?, reference = ? WHERE id = ?";
+        String sql = "UPDATE endereco SET id_cliente = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, cep = ?, is_principal = ?, tipo_endereco = ?, referencia = ?, pais = ? WHERE id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, endereco.getClientId());
             pstmt.setString(2, endereco.getStreet());
@@ -63,17 +63,17 @@ public class EnderecoDAO {
             pstmt.setString(6, endereco.getCity());
             pstmt.setString(7, endereco.getState());
             pstmt.setString(8, endereco.getZipCode());
-            pstmt.setString(9, endereco.getCountry());
-            pstmt.setBoolean(10, endereco.getIsMain());
-            pstmt.setString(11, endereco.getAddressType().paraColuna());
-            pstmt.setString(12, endereco.getReference());
+            pstmt.setBoolean(9, endereco.getIsMain());
+            pstmt.setString(10, endereco.getAddressType().paraColuna());
+            pstmt.setString(11, endereco.getReference());
+            pstmt.setString(12, endereco.getCountry());
             pstmt.setInt(13, endereco.getId());
             pstmt.executeUpdate();
         }
     }
 
     public void excluir(Connection conn, Integer id) throws SQLException {
-        try (PreparedStatement pstmt = conn.prepareStatement("DELETE FROM address WHERE id = ?")) {
+        try (PreparedStatement pstmt = conn.prepareStatement("DELETE FROM endereco WHERE id = ?")) {
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
         }
@@ -81,7 +81,7 @@ public class EnderecoDAO {
 
     public List<Endereco> buscarTodos(Connection conn) throws SQLException {
         List<Endereco> enderecos = new ArrayList<>();
-        String sql = "SELECT id, client_id, street, number, complement, neighborhood, city, state, zip_code, country, is_main, address_type, reference, created_at, updated_at FROM address";
+        String sql = "SELECT id, id_cliente, logradouro, numero, complemento, bairro, cidade, estado, cep, is_principal, tipo_endereco, referencia, pais, created_at, updated_at FROM endereco";
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
@@ -93,7 +93,7 @@ public class EnderecoDAO {
 
     public List<Endereco> buscarPorClienteId(Connection conn, Integer clienteId) throws SQLException {
         List<Endereco> enderecos = new ArrayList<>();
-        String sql = "SELECT id, client_id, street, number, complement, neighborhood, city, state, zip_code, country, is_main, address_type, reference, created_at, updated_at FROM address WHERE client_id = ?";
+        String sql = "SELECT id, id_cliente, logradouro, numero, complemento, bairro, cidade, estado, cep, is_principal, tipo_endereco, referencia, pais, created_at, updated_at FROM endereco WHERE id_cliente = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, clienteId);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -106,12 +106,12 @@ public class EnderecoDAO {
     }
 
     public void definirEnderecoPrincipal(Connection conn, Integer clienteId, Integer enderecoId) throws SQLException {
-        try (PreparedStatement pstmt = conn.prepareStatement("UPDATE address SET is_main = FALSE WHERE client_id = ?")) {
+        try (PreparedStatement pstmt = conn.prepareStatement("UPDATE endereco SET is_principal = FALSE WHERE id_cliente = ?")) {
             pstmt.setInt(1, clienteId);
             pstmt.executeUpdate();
         }
 
-        try (PreparedStatement pstmt = conn.prepareStatement("UPDATE address SET is_main = TRUE WHERE id = ? AND client_id = ?")) {
+        try (PreparedStatement pstmt = conn.prepareStatement("UPDATE endereco SET is_principal = TRUE WHERE id = ? AND id_cliente = ?")) {
             pstmt.setInt(1, enderecoId);
             pstmt.setInt(2, clienteId);
             if (pstmt.executeUpdate() == 0) {
@@ -123,18 +123,18 @@ public class EnderecoDAO {
     private Endereco mapearEnderecoDoResultSet(ResultSet rs) throws SQLException {
         Endereco endereco = new Endereco();
         endereco.setId(rs.getInt("id"));
-        endereco.setClientId(rs.getInt("client_id"));
-        endereco.setStreet(rs.getString("street"));
-        endereco.setNumber(rs.getString("number"));
-        endereco.setComplement(rs.getString("complement"));
-        endereco.setNeighborhood(rs.getString("neighborhood"));
-        endereco.setCity(rs.getString("city"));
-        endereco.setState(rs.getString("state"));
-        endereco.setZipCode(rs.getString("zip_code"));
-        endereco.setCountry(rs.getString("country"));
-        endereco.setIsMain(rs.getBoolean("is_main"));
-        endereco.setAddressType(TipoEndereco.fromValue(rs.getString("address_type")));
-        endereco.setReference(rs.getString("reference"));
+        endereco.setClientId(rs.getInt("id_cliente"));
+        endereco.setStreet(rs.getString("logradouro"));
+        endereco.setNumber(rs.getString("numero"));
+        endereco.setComplement(rs.getString("complemento"));
+        endereco.setNeighborhood(rs.getString("bairro"));
+        endereco.setCity(rs.getString("cidade"));
+        endereco.setState(rs.getString("estado"));
+        endereco.setZipCode(rs.getString("cep"));
+        endereco.setIsMain(rs.getBoolean("is_principal"));
+        endereco.setAddressType(TipoEndereco.fromValue(rs.getString("tipo_endereco")));
+        endereco.setReference(rs.getString("referencia"));
+        endereco.setCountry(rs.getString("pais"));
 
         Timestamp criadoEm = rs.getTimestamp("created_at");
         if (criadoEm != null) {
@@ -148,7 +148,7 @@ public class EnderecoDAO {
     }
 
     public boolean contemEntregasVinculadas(Connection conn, Integer enderecoId) throws SQLException {
-        String sql = "SELECT 1 FROM delivery WHERE origin_address_id = ? OR destination_address_id = ? LIMIT 1";
+        String sql = "SELECT 1 FROM entrega WHERE id_endereco_origem = ? OR id_endereco_destino = ? LIMIT 1";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, enderecoId);
             pstmt.setInt(2, enderecoId);

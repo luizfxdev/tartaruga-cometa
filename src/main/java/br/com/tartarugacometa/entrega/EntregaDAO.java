@@ -15,7 +15,7 @@ import br.com.tartarugacometa.enums.StatusEntrega;
 public class EntregaDAO {
 
     public void inserir(Connection conn, Entrega entrega) throws SQLException {
-        String sql = "INSERT INTO delivery (tracking_code, sender_id, recipient_id, origin_address_id, destination_address_id, total_value, freight_value, total_weight_kg, total_volume_m3, status, observations, delivery_date, reason_not_delivered) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? AS delivery_status_enum), ?, ?, ?)";
+        String sql = "INSERT INTO entrega (codigo_rastreio, id_remetente, id_destinatario, id_endereco_origem, id_endereco_destino, valor_total, valor_frete, peso_total_kg, volume_total_m3, status, observacoes, data_entrega, motivo_cancelamento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? AS status_entrega), ?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, entrega.getTrackingCode());
             pstmt.setObject(2, entrega.getSenderId());
@@ -41,7 +41,7 @@ public class EntregaDAO {
     }
 
     public Optional<Entrega> buscarPorId(Connection conn, Integer id) throws SQLException {
-        String sql = "SELECT id, tracking_code, sender_id, recipient_id, origin_address_id, destination_address_id, total_value, freight_value, total_weight_kg, total_volume_m3, status, observations, creation_date, updated_at, delivery_date, reason_not_delivered FROM delivery WHERE id = ?";
+        String sql = "SELECT id, codigo_rastreio, id_remetente, id_destinatario, id_endereco_origem, id_endereco_destino, valor_total, valor_frete, peso_total_kg, volume_total_m3, status, observacoes, data_criacao, updated_at, data_entrega, motivo_cancelamento FROM entrega WHERE id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -54,7 +54,7 @@ public class EntregaDAO {
     }
 
     public void atualizar(Connection conn, Entrega entrega) throws SQLException {
-        String sql = "UPDATE delivery SET tracking_code = ?, sender_id = ?, recipient_id = ?, origin_address_id = ?, destination_address_id = ?, total_value = ?, freight_value = ?, total_weight_kg = ?, total_volume_m3 = ?, status = CAST(? AS delivery_status_enum), observations = ?, delivery_date = ?, reason_not_delivered = ? WHERE id = ?";
+        String sql = "UPDATE entrega SET codigo_rastreio = ?, id_remetente = ?, id_destinatario = ?, id_endereco_origem = ?, id_endereco_destino = ?, valor_total = ?, valor_frete = ?, peso_total_kg = ?, volume_total_m3 = ?, status = CAST(? AS status_entrega), observacoes = ?, data_entrega = ?, motivo_cancelamento = ? WHERE id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, entrega.getTrackingCode());
             pstmt.setObject(2, entrega.getSenderId());
@@ -75,7 +75,7 @@ public class EntregaDAO {
     }
 
     public void excluir(Connection conn, Integer id) throws SQLException {
-        try (PreparedStatement pstmt = conn.prepareStatement("DELETE FROM delivery WHERE id = ?")) {
+        try (PreparedStatement pstmt = conn.prepareStatement("DELETE FROM entrega WHERE id = ?")) {
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
         }
@@ -83,7 +83,7 @@ public class EntregaDAO {
 
     public List<Entrega> buscarTodos(Connection conn) throws SQLException {
         List<Entrega> entregas = new ArrayList<>();
-        String sql = "SELECT id, tracking_code, sender_id, recipient_id, origin_address_id, destination_address_id, total_value, freight_value, total_weight_kg, total_volume_m3, status, observations, creation_date, updated_at, delivery_date, reason_not_delivered FROM delivery";
+        String sql = "SELECT id, codigo_rastreio, id_remetente, id_destinatario, id_endereco_origem, id_endereco_destino, valor_total, valor_frete, peso_total_kg, volume_total_m3, status, observacoes, data_criacao, updated_at, data_entrega, motivo_cancelamento FROM entrega";
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
@@ -95,7 +95,7 @@ public class EntregaDAO {
 
     public List<Entrega> buscarPorStatus(Connection conn, StatusEntrega status) throws SQLException {
         List<Entrega> entregas = new ArrayList<>();
-        String sql = "SELECT id, tracking_code, sender_id, recipient_id, origin_address_id, destination_address_id, total_value, freight_value, total_weight_kg, total_volume_m3, status, observations, creation_date, updated_at, delivery_date, reason_not_delivered FROM delivery WHERE status = CAST(? AS delivery_status_enum)";
+        String sql = "SELECT id, codigo_rastreio, id_remetente, id_destinatario, id_endereco_origem, id_endereco_destino, valor_total, valor_frete, peso_total_kg, volume_total_m3, status, observacoes, data_criacao, updated_at, data_entrega, motivo_cancelamento FROM entrega WHERE status = CAST(? AS status_entrega)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, status.paraColuna());
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -108,7 +108,7 @@ public class EntregaDAO {
     }
 
     public Optional<Entrega> buscarPorCodigoRastreamento(Connection conn, String codigoRastreamento) throws SQLException {
-        String sql = "SELECT id, tracking_code, sender_id, recipient_id, origin_address_id, destination_address_id, total_value, freight_value, total_weight_kg, total_volume_m3, status, observations, creation_date, updated_at, delivery_date, reason_not_delivered FROM delivery WHERE tracking_code = ?";
+        String sql = "SELECT id, codigo_rastreio, id_remetente, id_destinatario, id_endereco_origem, id_endereco_destino, valor_total, valor_frete, peso_total_kg, volume_total_m3, status, observacoes, data_criacao, updated_at, data_entrega, motivo_cancelamento FROM entrega WHERE codigo_rastreio = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, codigoRastreamento);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -122,7 +122,7 @@ public class EntregaDAO {
 
     public List<Entrega> pesquisar(Connection conn, String termo) throws SQLException {
         List<Entrega> entregas = new ArrayList<>();
-        String sql = "SELECT id, tracking_code, sender_id, recipient_id, origin_address_id, destination_address_id, total_value, freight_value, total_weight_kg, total_volume_m3, status, observations, creation_date, updated_at, delivery_date, reason_not_delivered FROM delivery WHERE tracking_code ILIKE ? OR observations ILIKE ?";
+        String sql = "SELECT id, codigo_rastreio, id_remetente, id_destinatario, id_endereco_origem, id_endereco_destino, valor_total, valor_frete, peso_total_kg, volume_total_m3, status, observacoes, data_criacao, updated_at, data_entrega, motivo_cancelamento FROM entrega WHERE codigo_rastreio ILIKE ? OR observacoes ILIKE ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             String padrao = "%" + termo + "%";
             pstmt.setString(1, padrao);
@@ -139,19 +139,19 @@ public class EntregaDAO {
     private Entrega mapear(ResultSet rs) throws SQLException {
         Entrega entrega = new Entrega();
         entrega.setId(rs.getInt("id"));
-        entrega.setTrackingCode(rs.getString("tracking_code"));
-        entrega.setSenderId(rs.getObject("sender_id") != null ? rs.getInt("sender_id") : null);
-        entrega.setRecipientId(rs.getObject("recipient_id") != null ? rs.getInt("recipient_id") : null);
-        entrega.setOriginAddressId(rs.getObject("origin_address_id") != null ? rs.getInt("origin_address_id") : null);
-        entrega.setDestinationAddressId(rs.getObject("destination_address_id") != null ? rs.getInt("destination_address_id") : null);
-        entrega.setTotalValue(rs.getBigDecimal("total_value"));
-        entrega.setFreightValue(rs.getBigDecimal("freight_value"));
-        entrega.setTotalWeightKg(rs.getBigDecimal("total_weight_kg"));
-        entrega.setTotalVolumeM3(rs.getBigDecimal("total_volume_m3"));
+        entrega.setTrackingCode(rs.getString("codigo_rastreio"));
+        entrega.setSenderId(rs.getObject("id_remetente") != null ? rs.getInt("id_remetente") : null);
+        entrega.setRecipientId(rs.getObject("id_destinatario") != null ? rs.getInt("id_destinatario") : null);
+        entrega.setOriginAddressId(rs.getObject("id_endereco_origem") != null ? rs.getInt("id_endereco_origem") : null);
+        entrega.setDestinationAddressId(rs.getObject("id_endereco_destino") != null ? rs.getInt("id_endereco_destino") : null);
+        entrega.setTotalValue(rs.getBigDecimal("valor_total"));
+        entrega.setFreightValue(rs.getBigDecimal("valor_frete"));
+        entrega.setTotalWeightKg(rs.getBigDecimal("peso_total_kg"));
+        entrega.setTotalVolumeM3(rs.getBigDecimal("volume_total_m3"));
         entrega.setStatus(StatusEntrega.fromValue(rs.getString("status")));
-        entrega.setObservations(rs.getString("observations"));
+        entrega.setObservations(rs.getString("observacoes"));
 
-        Timestamp criacaoDt = rs.getTimestamp("creation_date");
+        Timestamp criacaoDt = rs.getTimestamp("data_criacao");
         if (criacaoDt != null) {
             entrega.setCreationDate(criacaoDt.toLocalDateTime());
         }
@@ -161,17 +161,17 @@ public class EntregaDAO {
             entrega.setUpdatedAt(atualizacaoDt.toLocalDateTime());
         }
 
-        Timestamp entregaDt = rs.getTimestamp("delivery_date");
+        Timestamp entregaDt = rs.getTimestamp("data_entrega");
         if (entregaDt != null) {
             entrega.setDeliveryDate(entregaDt.toLocalDateTime());
         }
 
-        entrega.setReasonNotDelivered(rs.getString("reason_not_delivered"));
+        entrega.setReasonNotDelivered(rs.getString("motivo_cancelamento"));
         return entrega;
     }
 
     public boolean existeCodigoRastreio(Connection conn, String trackingCode) throws SQLException {
-        String sql = "SELECT 1 FROM delivery WHERE tracking_code = ? LIMIT 1";
+        String sql = "SELECT 1 FROM entrega WHERE codigo_rastreio = ? LIMIT 1";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, trackingCode);
             try (ResultSet rs = pstmt.executeQuery()) {

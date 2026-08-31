@@ -152,7 +152,6 @@ public class EntregaBO {
             conexao.setAutoCommit(false);
             try {
                 itemEntregaDAO.excluirPorEntregaId(conexao, id);
-                historicoDAO.excluirPorEntregaId(conexao, id);
                 entregaDAO.excluir(conexao, id);
                 conexao.commit();
             } catch (SQLException e) {

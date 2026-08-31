@@ -134,7 +134,7 @@ public class ClienteControlador extends HttpServlet {
                 clientService.updateClient(client);
                 request.getSession().setAttribute("success", "Cliente atualizado com sucesso!");
             }
-            response.sendRedirect(request.getContextPath() + "/clients/");
+            response.sendRedirect(request.getContextPath() + "/cliente/");
         } catch (IllegalArgumentException e) {
             request.getSession().setAttribute("error", e.getMessage());
             request.setAttribute("client", client);
@@ -148,7 +148,7 @@ public class ClienteControlador extends HttpServlet {
         Integer id = extractId(pathInfo);
         clientService.deleteClient(id);
         request.getSession().setAttribute("success", "Cliente deletado com sucesso!");
-        response.sendRedirect(request.getContextPath() + "/clients/");
+        response.sendRedirect(request.getContextPath() + "/cliente/");
     }
 
     private Integer extractId(String pathInfo) {
