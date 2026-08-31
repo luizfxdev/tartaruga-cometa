@@ -1,0 +1,89 @@
+/* ============================================
+   HEADER / NAVBAR - Tartaruga Cometa
+   ============================================ */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.navbar-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.navbar-brand:hover {
+  opacity: 0.9;
+}
+
+.navbar-logo-img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  transition: var(--transition);
+}
+
+.navbar-brand:hover .navbar-logo-img {
+  transform: scale(1.05);
+}
+
+.navbar-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text);
+  transition: var(--transition);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 768px) {
+  .navbar-container {
+    padding: 1rem;
+  }
+  
+  .navbar-logo-img {
+    width: auto;
+    height: 32px;
+  }
+  
+  .navbar-title {
+    font-size: 1.25rem;
+  }
+  
+}
+
+@media (max-width: 480px) {
+  .navbar-logo-img {
+    width: auto;
+    height: 28px;
+  }
+  
+  .navbar-title {
+    font-size: 1.1rem;
+  }
+  
+}

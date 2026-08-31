@@ -3,7 +3,7 @@
 
 <t:header title="Erro">
     <div class="error-container">
-        <h2>❌ Erro ao processar requisição</h2>
+        <h2>Erro ao processar requisição</h2>
         <p>${requestScope.error != null ? requestScope.error : 'Ocorreu um erro inesperado. Por favor, tente novamente.'}</p>
         <div class="error-actions">
             <a href="${pageContext.request.contextPath}/" class="btn btn-primary">Voltar à Home</a>

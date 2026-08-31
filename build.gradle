@@ -2,14 +2,16 @@ plugins {
     id 'java'
     id 'war'
     id 'org.gretty' version '4.1.2'
+    id 'jacoco'
 }
 
 group = 'com.tartarugacometasystem'
 version = '1.0.0'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 repositories {
@@ -17,22 +19,21 @@ repositories {
 }
 
 dependencies {
-    // Jakarta Servlet API 6.0 (Tomcat 10+)
     providedCompile 'jakarta.servlet:jakarta.servlet-api:6.0.0'
     providedCompile 'jakarta.servlet.jsp:jakarta.servlet.jsp-api:3.1.1'
 
-    // JSTL para Jakarta (CORRIGIDO - adicionado API também)
-    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1'
     implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.0'
+    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1'
 
-    // PostgreSQL Driver (CORRETO - já estava aqui)
-    implementation 'org.postgresql:postgresql:42.7.1'
+    implementation 'org.postgresql:postgresql:42.7.3'
+    implementation 'com.zaxxer:HikariCP:5.1.0'
 
-    // >>> REMOVIDO: A dependência do MySQL não é necessária, pois você usa PostgreSQL <<<
-    // runtimeOnly 'mysql:mysql-connector-java:8.0.33' 
-
-    // JUnit para testes
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testImplementation 'org.mockito:mockito-core:5.11.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.11.0'
+    testImplementation 'org.assertj:assertj-core:3.25.3'
+    testImplementation 'org.testcontainers:postgresql:1.19.7'
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.7'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
@@ -42,14 +43,47 @@ gretty {
     contextPath = '/tartaruga-cometa'
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+    options.compilerArgs << '-Xlint:deprecation' << '-Xlint:unchecked'
+}
+
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Test).configureEach {
+    systemProperty 'file.encoding', 'UTF-8'
 }
 
 test {
     useJUnitPlatform()
+    exclude '**/*IT.class'
     testLogging {
         events "passed", "skipped", "failed"
         showStandardStreams = true
     }
+    finalizedBy jacocoTestReport
 }
+
+tasks.register('integrationTest', Test) {
+    useJUnitPlatform()
+    include '**/*IT.class'
+    shouldRunAfter test
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test, integrationTest
+    executionData fileTree(layout.buildDirectory.dir('jacoco')).include('*.exec')
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.10"
+}
+
+check.dependsOn integrationTest
